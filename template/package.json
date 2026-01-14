@@ -1,0 +1,20 @@
+{
+  "name": "@hytale/typescript-template",
+  "version": "1.0.0",
+  "description": "TypeScript template for Hytale plugins",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch"
+  },
+  "keywords": [
+    "hytale",
+    "typescript",
+    "plugin"
+  ],
+  "author": "Hytale Community",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}

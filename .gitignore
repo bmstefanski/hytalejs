@@ -1,0 +1,12 @@
+target/
+dist/
+node_modules/
+*.jar
+!loader/target/hytale-typescript-loader.jar
+*.class
+*.log
+.DS_Store
+lib/
+.idea/
+.vscode/
+*.iml

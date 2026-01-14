@@ -1,0 +1,36 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+group = 'com.hytale.typescript'
+version = '1.0.0'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly files('../lib/HytaleServer.jar')
+
+    implementation 'org.mozilla:rhino:1.7.15'
+}
+
+shadowJar {
+    archiveFileName = 'hytale-typescript-loader.jar'
+
+    dependencies {
+        exclude(dependency(files('../lib/HytaleServer.jar')))
+    }
+
+    mergeServiceFiles()
+}
+
+build {
+    dependsOn shadowJar
+}

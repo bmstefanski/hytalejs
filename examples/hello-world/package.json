@@ -1,0 +1,21 @@
+{
+  "name": "hello-world-plugin",
+  "version": "1.0.0",
+  "description": "Demo Hytale plugin that logs player joins",
+  "main": "dist/demo.js",
+  "scripts": {
+    "build": "bun build.mjs"
+  },
+  "keywords": [
+    "hytale",
+    "plugin",
+    "demo"
+  ],
+  "author": "Hytale Community",
+  "license": "MIT",
+  "devDependencies": {
+    "@swc/core": "^1.15.8",
+    "esbuild": "^0.27.2",
+    "typescript": "^5.7.2"
+  }
+}

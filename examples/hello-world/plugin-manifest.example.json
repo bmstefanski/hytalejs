@@ -1,0 +1,7 @@
+{
+  "name": "HelloWorld",
+  "version": "1.0.0",
+  "description": "Demo TypeScript plugin that logs player joins",
+  "author": "Your Name",
+  "main": "demo.js"
+}
