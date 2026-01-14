@@ -18,7 +18,8 @@ repositories {
 dependencies {
     compileOnly files('../lib/HytaleServer.jar')
 
-    implementation 'org.mozilla:rhino:1.7.15'
+    implementation 'org.graalvm.polyglot:polyglot:24.1.1'
+    implementation 'org.graalvm.polyglot:js-community:24.1.1'
 }
 
 shadowJar {

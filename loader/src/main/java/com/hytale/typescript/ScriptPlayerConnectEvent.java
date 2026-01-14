@@ -6,9 +6,15 @@ import com.hypixel.hytale.server.core.universe.world.World;
 
 public class ScriptPlayerConnectEvent {
     private final PlayerConnectEvent event;
+    private final ScriptPlayer player;
 
     public ScriptPlayerConnectEvent(PlayerConnectEvent event) {
         this.event = event;
+        this.player = new ScriptPlayer(event.getPlayer());
+    }
+
+    public ScriptPlayer getPlayer() {
+        return player;
     }
 
     public String getPlayerName() {

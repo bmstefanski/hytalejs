@@ -1,4 +1,16 @@
+export interface ScriptPlayer {
+  sendMessage(message: string): void;
+  getName(): string;
+  getGameMode(): string;
+  hasPermission(permission: string): boolean;
+  runCommand(command: string): void;
+  getX(): number;
+  getY(): number;
+  getZ(): number;
+}
+
 export interface PlayerConnectEvent {
+  getPlayer(): ScriptPlayer;
   getPlayerName(): string;
   getPlayerUUID(): string;
   getWorldName(): string;
