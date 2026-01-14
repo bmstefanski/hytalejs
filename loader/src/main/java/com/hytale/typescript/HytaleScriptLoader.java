@@ -2,7 +2,6 @@ package com.hytale.typescript;
 
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
-import com.hypixel.hytale.server.core.event.events.player.PlayerConnectEvent;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Value;
@@ -11,14 +10,12 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.stream.Stream;
 
 public class HytaleScriptLoader extends JavaPlugin {
     private Context jsContext;
-    private final List<ScriptEventHandler> eventHandlers = new ArrayList<>();
+    private ScriptEventRegistry eventRegistry;
     private Path scriptsDir;
 
     public HytaleScriptLoader(@Nonnull JavaPluginInit init) {
@@ -43,8 +40,13 @@ public class HytaleScriptLoader extends JavaPlugin {
             .option("engine.WarnInterpreterOnly", "false")
             .build();
 
+        eventRegistry = new ScriptEventRegistry(this);
+
         jsContext.getBindings("js").putMember("plugin", this);
         jsContext.getBindings("js").putMember("logger", new ScriptLogger(getLogger()));
+        jsContext.getBindings("js").putMember("commands", new ScriptCommandRegistry(this));
+        jsContext.getBindings("js").putMember("server", new ScriptServer());
+        jsContext.getBindings("js").putMember("Message", new ScriptMessage());
 
         loadScripts();
     }
@@ -67,21 +69,7 @@ public class HytaleScriptLoader extends JavaPlugin {
             jsContext.eval("js", scriptContent);
 
             Value handlersValue = jsContext.getBindings("js").getMember("handlers");
-            if (handlersValue != null && handlersValue.hasArrayElements()) {
-                long length = handlersValue.getArraySize();
-                for (int i = 0; i < length; i++) {
-                    Value handler = handlersValue.getArrayElement(i);
-                    if (handler.hasMember("eventType") && handler.hasMember("callback")) {
-                        String eventType = handler.getMember("eventType").asString();
-                        Value callback = handler.getMember("callback");
-
-                        if (callback.canExecute()) {
-                            eventHandlers.add(new ScriptEventHandler(eventType, callback));
-                            getLogger().at(Level.INFO).log("Registered handler for event: %s", eventType);
-                        }
-                    }
-                }
-            }
+            eventRegistry.registerFromHandlersArray(handlersValue);
 
             getLogger().at(Level.INFO).log("Successfully loaded script: %s", scriptPath.getFileName());
         } catch (Exception e) {
@@ -92,34 +80,15 @@ public class HytaleScriptLoader extends JavaPlugin {
     @Override
     protected void start() {
         super.start();
-
-        getEventRegistry().register(PlayerConnectEvent.class, this::onPlayerConnect);
-
-        getLogger().at(Level.INFO).log("TypeScript Loader started with %d event handlers", eventHandlers.size());
-    }
-
-    private void onPlayerConnect(PlayerConnectEvent event) {
-        for (ScriptEventHandler handler : eventHandlers) {
-            if ("PlayerConnectEvent".equals(handler.eventType())) {
-                try {
-                    ScriptPlayerConnectEvent scriptEvent = new ScriptPlayerConnectEvent(event);
-                    handler.callback().execute(scriptEvent);
-                } catch (Exception e) {
-                    getLogger().at(Level.SEVERE).withCause(e).log("Error executing event handler");
-                }
-            }
-        }
+        getLogger().at(Level.INFO).log("TypeScript Loader started with %d event handlers", eventRegistry.getHandlerCount());
     }
 
     @Override
     protected void shutdown() {
         super.shutdown();
-        eventHandlers.clear();
         if (jsContext != null) {
             jsContext.close();
         }
         getLogger().at(Level.INFO).log("TypeScript Loader shutdown");
     }
-
-    private record ScriptEventHandler(String eventType, Value callback) {}
 }
