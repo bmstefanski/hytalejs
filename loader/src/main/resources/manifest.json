@@ -1,13 +1,13 @@
 {
-  "Group": "com.hytale.typescript",
-  "Name": "TypeScriptLoader",
+  "Group": "com.bstefanski.hytalejs",
+  "Name": "HytaleJS",
   "Version": "1.0.0",
-  "Main": "com.hytale.typescript.HytaleScriptLoader",
-  "Description": "Loads and executes TypeScript plugins compiled to JavaScript",
+  "Main": "com.bstefanski.hytalejs.HytaleJS",
+  "Description": "TypeScript/JavaScript scripting for Hytale servers",
   "Authors": [
     {
-      "Name": "Hytale Community"
+      "Name": "bmstefanski"
     }
   ],
-  "Website": "https://github.com/hytale-community/typescript-plugins"
+  "Website": "https://github.com/bmstefanski/HytaleJS"
 }

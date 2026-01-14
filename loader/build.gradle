@@ -3,7 +3,7 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
-group = 'com.hytale.typescript'
+group = 'com.bstefanski.hytalejs'
 version = '1.0.0'
 
 java {
@@ -23,7 +23,8 @@ dependencies {
 }
 
 shadowJar {
-    archiveFileName = 'hytale-typescript-loader.jar'
+    archiveFileName = 'HytaleJS.jar'
+    destinationDirectory = file('../hytale-server/mods')
 
     dependencies {
         exclude(dependency(files('../lib/HytaleServer.jar')))

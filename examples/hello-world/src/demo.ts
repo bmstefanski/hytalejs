@@ -78,3 +78,101 @@ commands.register("serverinfo", "Display server name, player count, and default 
   ctx.sendMessage("Players: " + server.getPlayerCount());
   ctx.sendMessage("Default world: " + server.getDefaultWorld().getName());
 });
+
+commands.register("hand", "Show info about the item in your hand", (ctx) => {
+  const senderName = ctx.getSenderName();
+  const world = server.getDefaultWorld();
+  const players = world.getPlayers();
+
+  let foundPlayer = null;
+  for (let i = 0; i < players.length; i++) {
+    if (players[i].getDisplayName() === senderName) {
+      foundPlayer = players[i];
+      break;
+    }
+  }
+
+  if (!foundPlayer) {
+    ctx.sendMessage("Could not find player entity");
+    return;
+  }
+
+  const inventory = foundPlayer.getInventory();
+  const heldItem = inventory.getActiveHotbarItem();
+
+  if (!heldItem || heldItem.isEmpty()) {
+    ctx.sendMessage("You are not holding anything");
+    return;
+  }
+
+  const item = heldItem.getItem();
+  ctx.sendMessage("Item: " + item.getId());
+  ctx.sendMessage("Quantity: " + heldItem.getQuantity());
+  ctx.sendMessage("Durability: " + heldItem.getDurability() + "/" + heldItem.getMaxDurability());
+});
+
+commands.register("giveitem", "Give an item to yourself", (ctx) => {
+  const input = ctx.getInput();
+  const parts = input.split(" ");
+
+  if (parts.length < 2) {
+    ctx.sendMessage("Usage: /give <item_id> [quantity]");
+    return;
+  }
+
+  const itemId = parts[1];
+  const quantity = parts.length >= 3 ? parseInt(parts[2], 10) : 1;
+
+  if (isNaN(quantity) || quantity < 1) {
+    ctx.sendMessage("Invalid quantity");
+    return;
+  }
+
+  const senderName = ctx.getSenderName();
+  const world = server.getDefaultWorld();
+  const players = world.getPlayers();
+
+  let foundPlayer = null;
+  for (let i = 0; i < players.length; i++) {
+    if (players[i].getDisplayName() === senderName) {
+      foundPlayer = players[i];
+      break;
+    }
+  }
+
+  if (!foundPlayer) {
+    ctx.sendMessage("Could not find player entity");
+    return;
+  }
+
+  const stack = new ItemStack(itemId, quantity);
+  const inventory = foundPlayer.getInventory();
+  inventory.getHotbar().addItemStack(stack);
+
+  ctx.sendMessage("Gave " + quantity + "x " + itemId);
+});
+
+commands.register("items", "List all available item IDs", (ctx) => {
+  const input = ctx.getInput();
+  const parts = input.split(" ");
+  const filter = parts.length >= 2 ? parts[1].toLowerCase() : "";
+
+  const store = Item.getAssetStore().getAssetMap();
+  const map = store.getAssetMap();
+  const keys = map.keySet();
+  const iterator = keys.iterator();
+
+  let count = 0;
+  const maxResults = 20;
+
+  while (iterator.hasNext() && count < maxResults) {
+    const key = iterator.next() as string;
+    if (!filter || key.toLowerCase().includes(filter)) {
+      ctx.sendMessage(key);
+      count++;
+    }
+  }
+
+  const total = store.getAssetCount();
+  ctx.sendMessage("Showing " + count + " of " + total + " items" + (filter ? " (filter: " + filter + ")" : ""));
+});
