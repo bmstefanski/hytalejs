@@ -1,0 +1,57 @@
+---
+title: HytaleJS
+description: TypeScript/JavaScript scripting for Hytale servers
+---
+
+HytaleJS lets you write Hytale server plugins in TypeScript. Get full type safety, autocomplete, and a familiar development experience.
+
+## Features
+
+<Cards>
+  <Card title="TypeScript Support" href="/docs/getting-started">
+    Write plugins with full type safety and IDE autocomplete
+  </Card>
+  <Card title="Event System" href="/docs/guides/events">
+    Listen to player joins, chat, block breaks, and 30+ events
+  </Card>
+  <Card title="Commands" href="/docs/guides/commands">
+    Register custom commands with permissions
+  </Card>
+  <Card title="Scheduler" href="/docs/guides/scheduler">
+    Run delayed and repeating tasks
+  </Card>
+</Cards>
+
+## Quick Example
+
+```typescript
+import { EventListener, Colors } from "@hytalejs.com/core";
+
+class MyPlugin {
+  @EventListener("PlayerConnectEvent")
+  onJoin(event: PlayerConnectEvent) {
+    const player = event.getPlayer();
+    player.sendMessage(
+      Message.raw("Welcome!").color(Colors.GREEN).bold(true)
+    );
+  }
+}
+
+commands.register("hello", "Say hello", (ctx) => {
+  ctx.sendMessage("Hello, " + ctx.getSenderName() + "!");
+});
+```
+
+## Getting Started
+
+<Cards>
+  <Card title="Installation" href="/docs/getting-started">
+    Set up your development environment
+  </Card>
+  <Card title="Your First Plugin" href="/docs/getting-started/first-plugin">
+    Build a complete plugin step by step
+  </Card>
+  <Card title="API Reference" href="/docs/api">
+    Explore all available types and methods
+  </Card>
+</Cards>

@@ -1,0 +1,102 @@
+---
+title: Scheduler
+description: Run delayed and repeating tasks
+---
+
+Execute code after a delay or on a repeating schedule.
+
+## Run After Delay
+
+Execute code once after a delay:
+
+```typescript
+scheduler.runLater(() => {
+  logger.info("This runs after 5 seconds");
+}, 5000);
+```
+
+## Repeating Task
+
+Run code repeatedly at a fixed interval:
+
+```typescript
+scheduler.runRepeating(() => {
+  logger.info("This runs every 10 seconds");
+}, 10000, 10000);
+```
+
+Parameters: `callback`, `initialDelay`, `period` (all in milliseconds)
+
+## Repeating with Initial Delay
+
+```typescript
+scheduler.runRepeatingWithDelay(() => {
+  logger.info("Starts after 5s, then every 10s");
+}, 5000, 10000);
+```
+
+## Cancelling Tasks
+
+Store the task reference to cancel it later:
+
+```typescript
+const task = scheduler.runRepeating(() => {
+  logger.info("Running...");
+}, 1000, 1000);
+
+scheduler.runLater(() => {
+  task.cancel();
+  logger.info("Task cancelled");
+}, 10000);
+```
+
+## Task Methods
+
+| Method | Description |
+|--------|-------------|
+| `cancel()` | Stop the task |
+| `isCancelled()` | Check if cancelled |
+| `isDone()` | Check if completed |
+
+## Full Example: Auto Broadcast
+
+```typescript
+const messages = [
+  "Remember to stay hydrated!",
+  "Join our Discord for updates!",
+  "Try the /items command!",
+  "Found a bug? Report it!",
+];
+
+scheduler.runRepeating(() => {
+  if (Universe.get().getPlayerCount() > 0) {
+    const index = Math.floor(Math.random() * messages.length);
+    const msg = Message.raw("[Auto] " + messages[index])
+      .color(Colors.CYAN)
+      .italic(true);
+    Universe.get().sendMessage(msg);
+  }
+}, 15000, 15000);
+```
+
+## Full Example: Countdown
+
+```typescript
+commands.register("countdown", "Start a countdown", (ctx) => {
+  let count = 5;
+
+  const task = scheduler.runRepeating(() => {
+    if (count > 0) {
+      Universe.get().sendMessage(
+        Message.raw(count + "...").color(Colors.YELLOW)
+      );
+      count--;
+    } else {
+      Universe.get().sendMessage(
+        Message.raw("Go!").color(Colors.GREEN).bold(true)
+      );
+      task.cancel();
+    }
+  }, 0, 1000);
+});
+```

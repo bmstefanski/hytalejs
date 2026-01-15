@@ -1,0 +1,110 @@
+---
+title: Commands
+description: Register custom server commands
+---
+
+Create custom commands that players can run in-game.
+
+## Basic Command
+
+```typescript
+commands.register("hello", "Say hello", (ctx) => {
+  ctx.sendMessage("Hello, " + ctx.getSenderName() + "!");
+});
+```
+
+## With Permission
+
+```typescript
+commands.register("heal", "Heal yourself", "admin.heal", (ctx) => {
+  ctx.sendMessage("You have been healed!");
+});
+```
+
+Players need the `admin.heal` permission to use this command.
+
+## Parsing Arguments
+
+Access the full command input and parse arguments:
+
+```typescript
+commands.register("give", "Give items", (ctx) => {
+  const input = ctx.getInput();
+  const parts = input.split(" ");
+
+  if (parts.length < 2) {
+    ctx.sendMessage("Usage: /give <item_id> [quantity]");
+    return;
+  }
+
+  const itemId = parts[1];
+  const quantity = parts.length >= 3 ? parseInt(parts[2], 10) : 1;
+
+  if (isNaN(quantity) || quantity < 1) {
+    ctx.sendMessage("Invalid quantity");
+    return;
+  }
+
+  ctx.sendMessage("Giving " + quantity + "x " + itemId);
+});
+```
+
+## Finding the Player
+
+Get the player entity from the command sender:
+
+```typescript
+commands.register("pos", "Show your position", (ctx) => {
+  const senderName = ctx.getSenderName();
+  const world = Universe.get().getDefaultWorld();
+  const players = world.getPlayers();
+
+  let player = null;
+  for (let i = 0; i < players.length; i++) {
+    if (players[i].getDisplayName() === senderName) {
+      player = players[i];
+      break;
+    }
+  }
+
+  if (!player) {
+    ctx.sendMessage("Could not find player");
+    return;
+  }
+
+  const ref = player.getPlayerRef();
+  const transform = ref.getTransform();
+  const pos = transform.getPosition();
+
+  ctx.sendMessage("Position: " + pos.getX() + ", " + pos.getY() + ", " + pos.getZ());
+});
+```
+
+## Full Example
+
+```typescript
+commands.register("serverinfo", "Show server info", (ctx) => {
+  ctx.sendMessage("Server: " + HytaleServer.get().getServerName());
+  ctx.sendMessage("Players: " + Universe.get().getPlayerCount());
+  ctx.sendMessage("World: " + Universe.get().getDefaultWorld().getName());
+});
+
+commands.register("items", "List items", (ctx) => {
+  const input = ctx.getInput();
+  const parts = input.split(" ");
+  const filter = parts.length >= 2 ? parts[1].toLowerCase() : "";
+
+  const map = Item.getAssetStore().getAssetMap().getAssetMap();
+  const keys = map.keySet();
+  const iterator = keys.iterator();
+
+  let count = 0;
+  while (iterator.hasNext() && count < 20) {
+    const key = iterator.next() as string;
+    if (!filter || key.toLowerCase().includes(filter)) {
+      ctx.sendMessage(key);
+      count++;
+    }
+  }
+});
+```

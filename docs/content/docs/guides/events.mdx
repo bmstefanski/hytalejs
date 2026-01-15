@@ -1,0 +1,106 @@
+---
+title: Events
+description: Listen and respond to game events
+---
+
+HytaleJS provides 30+ events for player actions, world changes, and server lifecycle.
+
+## Basic Usage
+
+Use the `@EventListener` decorator to handle events:
+
+```typescript
+import { type PlayerConnectEvent, EventListener } from "@hytalejs.com/core";
+
+class MyPlugin {
+  @EventListener("PlayerConnectEvent")
+  onJoin(event: PlayerConnectEvent) {
+    const player = event.getPlayer();
+    player.sendMessage(Message.raw("Welcome!"));
+  }
+}
+```
+
+## Cancelling Events
+
+Some events can be cancelled to prevent the default action:
+
+```typescript
+@EventListener("PlayerChatEvent")
+onChat(event: PlayerChatEvent) {
+  if (event.getContent().includes("badword")) {
+    event.setCancelled(true);
+    event.getSender().sendMessage(Message.raw("Watch your language!"));
+  }
+}
+```
+
+## Common Events
+
+### Player Events
+
+| Event | Description |
+|-------|-------------|
+| `PlayerConnectEvent` | Player joins the server |
+| `PlayerDisconnectEvent` | Player leaves the server |
+| `PlayerChatEvent` | Player sends a chat message |
+| `PlayerReadyEvent` | Player finished loading |
+| `PlayerInteractEvent` | Player interacts with something |
+
+### Block Events
+
+| Event | Description |
+|-------|-------------|
+| `BreakBlockEvent` | Block is broken |
+| `PlaceBlockEvent` | Block is placed |
+| `DamageBlockEvent` | Block takes damage |
+| `UseBlockEvent` | Block is used/activated |
+
+### Entity Events
+
+| Event | Description |
+|-------|-------------|
+| `EntityEvent` | Entity spawns |
+| `EntityRemoveEvent` | Entity is removed |
+
+### Server Events
+
+| Event | Description |
+|-------|-------------|
+| `BootEvent` | Server starts |
+| `ShutdownEvent` | Server stops |
+| `PrepareUniverseEvent` | Universe is being prepared |
+
+## Full Example
+
+```typescript
+import {
+  type PlayerConnectEvent,
+  type PlayerDisconnectEvent,
+  type BreakBlockEvent,
+  EventListener,
+  Colors
+} from "@hytalejs.com/core";
+
+class EventsPlugin {
+  @EventListener("PlayerConnectEvent")
+  onJoin(event: PlayerConnectEvent) {
+    logger.info("Player joined: " + event.getPlayerRef().getUsername());
+  }
+
+  @EventListener("PlayerDisconnectEvent")
+  onLeave(event: PlayerDisconnectEvent) {
+    logger.info("Player left: " + event.getPlayerRef().getUsername());
+  }
+
+  @EventListener("BreakBlockEvent")
+  onBreak(event: BreakBlockEvent) {
+    const block = event.getTargetBlock();
+    logger.info("Block broken at: " + block.getX() + ", " + block.getY() + ", " + block.getZ());
+  }
+}
+```
+
+<Callout>
+See the [Events API Reference](/docs/api/events) for all event types and their properties.
+</Callout>

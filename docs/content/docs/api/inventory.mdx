@@ -1,0 +1,81 @@
+---
+title: Inventory
+description: Item, ItemStack, and Inventory types
+---
+
+## Item
+
+An item definition from the registry.
+
+<AutoTypeTable path="./types/index.d.ts" name="Item" />
+
+## ItemStack
+
+A stack of items with quantity and durability.
+
+<AutoTypeTable path="./types/index.d.ts" name="ItemStack" />
+
+### Creating ItemStacks
+
+```typescript
+const stack = new ItemStack("item_id", 64);
+const singleItem = new ItemStack("item_id");
+```
+
+## Inventory
+
+A player's inventory containing multiple containers.
+
+<AutoTypeTable path="./types/index.d.ts" name="Inventory" />
+
+## ItemContainer
+
+A container for item stacks (hotbar, storage, etc).
+
+<AutoTypeTable path="./types/index.d.ts" name="ItemContainer" />
+
+## CraftingRecipe
+
+<AutoTypeTable path="./types/index.d.ts" name="CraftingRecipe" />
+
+## Static Classes
+
+### ItemStackConstructor
+
+<AutoTypeTable path="./types/index.d.ts" name="ItemStackConstructor" />
+
+### ItemClass
+
+Access item registry via `Item.getAssetStore()`.
+
+<AutoTypeTable path="./types/index.d.ts" name="ItemClass" />
+
+## Asset Types
+
+### AssetStore
+
+<AutoTypeTable path="./types/index.d.ts" name="AssetStore" />
+
+### DefaultAssetMap
+
+<AutoTypeTable path="./types/index.d.ts" name="DefaultAssetMap" />
+
+### IndexedAssetMap
+
+Used for sound events and other indexed assets.
+
+<AutoTypeTable path="./types/index.d.ts" name="IndexedAssetMap" />
+
+## Java Interop
+
+### JavaMap
+
+<AutoTypeTable path="./types/index.d.ts" name="JavaMap" />
+
+### JavaSet
+
+<AutoTypeTable path="./types/index.d.ts" name="JavaSet" />
+
+### JavaIterator
+
+<AutoTypeTable path="./types/index.d.ts" name="JavaIterator" />

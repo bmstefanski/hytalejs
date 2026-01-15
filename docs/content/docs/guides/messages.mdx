@@ -1,0 +1,124 @@
+---
+title: Messages
+description: Format and send styled messages
+---
+
+Create rich, formatted messages with colors and styling.
+
+## Basic Message
+
+```typescript
+const msg = Message.raw("Hello, world!");
+player.sendMessage(msg);
+```
+
+## Colors
+
+Use the `Colors` constant or hex codes:
+
+```typescript
+import { Colors } from "@hytalejs.com/core";
+
+Message.raw("Success!").color(Colors.GREEN)
+Message.raw("Warning!").color(Colors.YELLOW)
+Message.raw("Error!").color(Colors.RED)
+Message.raw("Custom").color("#FF5733")
+```
+
+### Available Colors
+
+| Color | Hex |
+|-------|-----|
+| `Colors.RED` | #FF0000 |
+| `Colors.GREEN` | #00FF00 |
+| `Colors.BLUE` | #0000FF |
+| `Colors.YELLOW` | #FFFF00 |
+| `Colors.CYAN` | #00FFFF |
+| `Colors.MAGENTA` | #FF00FF |
+| `Colors.WHITE` | #FFFFFF |
+| `Colors.BLACK` | #000000 |
+| `Colors.ORANGE` | #FFA500 |
+| `Colors.PINK` | #FFC0CB |
+| `Colors.PURPLE` | #800080 |
+| `Colors.GOLD` | #FFD700 |
+| `Colors.GRAY` | #808080 |
+
+## Styling
+
+```typescript
+Message.raw("Bold text").bold(true)
+Message.raw("Italic text").italic(true)
+Message.raw("Bold and italic").bold(true).italic(true)
+```
+
+## Chaining
+
+Build complex messages by chaining methods:
+
+```typescript
+const welcome = Message.raw("Welcome!")
+  .color(Colors.GREEN)
+  .bold(true);
+```
+
+## Combining Messages
+
+Use `Message.empty()` and `insert()` to combine multiple styled parts:
+
+```typescript
+const formatted = Message.empty()
+  .insert(Message.raw("Player").color(Colors.GOLD).bold(true))
+  .insert(Message.raw(": ").color(Colors.GRAY))
+  .insert(Message.raw("Hello everyone!").color(Colors.WHITE));
+```
+
+## Sending Messages
+
+### To a specific player
+
+```typescript
+player.sendMessage(Message.raw("Private message"));
+```
+
+### To all players in a world
+
+```typescript
+const world = Universe.get().getDefaultWorld();
+world.sendMessage(Message.raw("World announcement"));
+```
+
+### To all players on the server
+
+```typescript
+Universe.get().sendMessage(Message.raw("Server announcement"));
+```
+
+## Full Example
+
+```typescript
+@EventListener("PlayerChatEvent")
+onChat(event: PlayerChatEvent) {
+  const sender = event.getSender();
+  const content = event.getContent();
+
+  const playerName = Message.raw(sender.getUsername())
+    .color(Colors.GOLD)
+    .bold(true);
+
+  const separator = Message.raw(": ").color(Colors.GRAY);
+
+  const text = Message.raw(content).color(Colors.WHITE);
+
+  const formatted = Message.empty()
+    .insert(playerName)
+    .insert(separator)
+    .insert(text);
+
+  event.setCancelled(true);
+
+  const targets = event.getTargets();
+  for (let i = 0; i < targets.length; i++) {
+    targets[i].sendMessage(formatted);
+  }
+}
+```

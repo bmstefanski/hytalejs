@@ -1,0 +1,155 @@
+---
+title: Utilities
+description: Logger, Scheduler, Commands, and Messages
+---
+
+## Logger
+
+Log messages to the server console via the global `logger`.
+
+<AutoTypeTable path="./types/index.d.ts" name="ScriptLogger" />
+
+### Usage
+
+```typescript
+logger.info("Information message");
+logger.warning("Warning message");
+logger.severe("Error message");
+logger.fine("Debug message");
+```
+
+## Scheduler
+
+Run delayed and repeating tasks via the global `scheduler`.
+
+<AutoTypeTable path="./types/index.d.ts" name="ScriptScheduler" />
+
+### ScriptTask
+
+Returned by scheduler methods to control the task.
+
+<AutoTypeTable path="./types/index.d.ts" name="ScriptTask" />
+
+### Usage
+
+```typescript
+scheduler.runLater(() => {
+  logger.info("Runs once after 5 seconds");
+}, 5000);
+
+const task = scheduler.runRepeating(() => {
+  logger.info("Runs every 10 seconds");
+}, 10000, 10000);
+
+task.cancel();
+```
+
+## Commands
+
+Register custom commands via the global `commands`.
+
+<AutoTypeTable path="./types/index.d.ts" name="ScriptCommandRegistry" />
+
+### CommandContext
+
+Provided to command callbacks.
+
+<AutoTypeTable path="./types/index.d.ts" name="CommandContext" />
+
+### Usage
+
+```typescript
+commands.register("hello", "Say hello", (ctx) => {
+  ctx.sendMessage("Hello, " + ctx.getSenderName() + "!");
+});
+
+commands.register("admin", "Admin only", "admin.use", (ctx) => {
+  ctx.sendMessage("You have admin access!");
+});
+```
+
+## Messages
+
+Create styled messages via the global `Message`.
+
+<AutoTypeTable path="./types/index.d.ts" name="Message" />
+
+### MessageStatic
+
+<AutoTypeTable path="./types/index.d.ts" name="MessageStatic" />
+
+### Usage
+
+```typescript
+const msg = Message.raw("Hello!")
+  .color(Colors.GREEN)
+  .bold(true);
+
+player.sendMessage(msg);
+```
+
+## Sound
+
+### SoundEvent
+
+<AutoTypeTable path="./types/index.d.ts" name="SoundEvent" />
+
+### SoundEventClass
+
+Access sound registry via `SoundEvent.getAssetMap()`.
+
+<AutoTypeTable path="./types/index.d.ts" name="SoundEventClass" />
+
+### SoundCategory
+
+<AutoTypeTable path="./types/index.d.ts" name="SoundCategory" />
+
+### SoundCategoryEnum
+
+<AutoTypeTable path="./types/index.d.ts" name="SoundCategoryEnum" />
+
+### PlaySoundEvent2D
+
+Packet to play a 2D sound to a player.
+
+<AutoTypeTable path="./types/index.d.ts" name="PlaySoundEvent2D" />
+
+### PlaySoundEvent2DConstructor
+
+<AutoTypeTable path="./types/index.d.ts" name="PlaySoundEvent2DConstructor" />
+
+### PacketHandler
+
+Used to send packets to players.
+
+<AutoTypeTable path="./types/index.d.ts" name="PacketHandler" />
+
+### Usage
+
+```typescript
+const soundIndex = SoundEvent.getAssetMap().getIndex("sound_id");
+const packet = new PlaySoundEvent2D(soundIndex, SoundCategory.SFX, 1.0, 1.0);
+playerRef.getPacketHandler().write(packet);
+```
+
+## Event Handler
+
+### EventHandler
+
+Internal type used by the event system.
+
+<AutoTypeTable path="./types/index.d.ts" name="EventHandler" />
+
+### EventType
+
+Union of all valid event type names.
+
+```typescript
+type EventType =
+  | "BootEvent"
+  | "ShutdownEvent"
+  | "PlayerConnectEvent"
+  | "PlayerDisconnectEvent"
+  | "PlayerChatEvent"
+  // ... and 25+ more
+```

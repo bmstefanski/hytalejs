@@ -1,0 +1,160 @@
+---
+title: Installation
+description: Set up your HytaleJS development environment
+---
+
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+## Server Setup
+
+<Steps>
+<Step>
+
+### Download HytaleJS
+
+Download the latest `HytaleJS.jar` from the [releases page](https://github.com/bmstefanski/HytaleJS/releases).
+
+</Step>
+<Step>
+
+### Install the plugin
+
+Copy `HytaleJS.jar` to your Hytale server's mods folder:
+
+```
+hytale-server/mods/HytaleJS.jar
+```
+
+</Step>
+<Step>
+
+### Start your server
+
+The plugin will create a scripts folder at:
+
+```
+hytale-server/mods/bmstefanski_HytaleJS/scripts/
+```
+
+</Step>
+</Steps>
+
+<Callout>
+All `.js` files in the scripts folder are automatically loaded when the server starts.
+</Callout>
+
+## Development Setup
+
+To write plugins in TypeScript with type checking and autocompletion:
+
+### Prerequisites
+
+- Node.js 18+
+
+### Setup
+
+<Steps>
+<Step>
+
+### Create a new project
+
+```bash
+mkdir my-plugin && cd my-plugin
+npm init -y
+```
+
+</Step>
+<Step>
+
+### Install dependencies
+
+<Tabs items={['pnpm', 'npm', 'bun']}>
+<Tab value="pnpm">
+```bash
+pnpm add @hytalejs.com/core
+pnpm add -D typescript esbuild
+```
+</Tab>
+<Tab value="npm">
+```bash
+npm install @hytalejs.com/core
+npm install -D typescript esbuild
+```
+</Tab>
+<Tab value="bun">
+```bash
+bun add @hytalejs.com/core
+bun add -D typescript esbuild
+```
+</Tab>
+</Tabs>
+
+</Step>
+<Step>
+
+### Create tsconfig.json
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "experimentalDecorators": true,
+    "types": ["@hytalejs.com/core"]
+  },
+  "include": ["src"]
+}
+```
+
+</Step>
+<Step>
+
+### Add build script to package.json
+
+```json
+{
+  "scripts": {
+    "build": "esbuild src/main.ts --bundle --format=esm --target=es2022 --outfile=dist/plugin.js"
+  }
+}
+```
+
+</Step>
+</Steps>
+
+## Project Structure
+
+```
+my-plugin/
+├── src/
+│   └── main.ts      # Your plugin code
+├── dist/
+│   └── plugin.js    # Built output (deploy this)
+├── package.json
+└── tsconfig.json
+```
+
+## Deploying
+
+Copy your built `dist/plugin.js` to the HytaleJS scripts folder:
+
+```
+hytale-server/mods/bmstefanski_HytaleJS/scripts/plugin.js
+```
+
+Restart your server to load the plugin.
+
+## Next Steps
+
+<Cards>
+  <Card title="Your First Plugin" href="/docs/getting-started/first-plugin">
+    Build a complete plugin with events and commands
+  </Card>
+</Cards>

@@ -8,7 +8,7 @@
     "skipLibCheck": true,
     "noEmit": true,
     "experimentalDecorators": true,
-    "types": ["@hytalejs/core"]
+    "types": ["@hytalejs.com/core"]
   },
   "include": [
     "src"

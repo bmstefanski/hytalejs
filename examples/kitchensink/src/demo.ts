@@ -1,4 +1,4 @@
-import { type PlayerConnectEvent, type PlayerDisconnectEvent, type PlayerChatEvent, EventListener, Colors } from "@hytalejs/core";
+import { type PlayerConnectEvent, type PlayerDisconnectEvent, type PlayerChatEvent, EventListener, Colors } from "@hytalejs.com/core";
 
 class HelloWorldPlugin {
   @EventListener("PlayerConnectEvent")

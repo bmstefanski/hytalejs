@@ -1,5 +1,5 @@
 {
-  "name": "hytalejs",
+  "name": "hytalejs.com",
   "private": true,
   "workspaces": [
     "packages/*",

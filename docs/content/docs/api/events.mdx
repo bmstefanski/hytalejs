@@ -1,0 +1,230 @@
+---
+title: Events
+description: All available event types
+---
+
+## Player Connection Events
+
+### PlayerConnectEvent
+
+Fired when a player connects to the server.
+
+<AutoTypeTable path="./types/index.d.ts" name="PlayerConnectEvent" />
+
+### PlayerDisconnectEvent
+
+Fired when a player disconnects from the server.
+
+<AutoTypeTable path="./types/index.d.ts" name="PlayerDisconnectEvent" />
+
+### PlayerSetupConnectEvent
+
+Fired during player connection setup (before full connection).
+
+<AutoTypeTable path="./types/index.d.ts" name="PlayerSetupConnectEvent" />
+
+### PlayerSetupDisconnectEvent
+
+Fired when player disconnects during setup phase.
+
+<AutoTypeTable path="./types/index.d.ts" name="PlayerSetupDisconnectEvent" />
+
+## Player Action Events
+
+### PlayerChatEvent
+
+Fired when a player sends a chat message. Can be cancelled.
+
+<AutoTypeTable path="./types/index.d.ts" name="PlayerChatEvent" />
+
+### PlayerReadyEvent
+
+Fired when a player has finished loading.
+
+<AutoTypeTable path="./types/index.d.ts" name="PlayerReadyEvent" />
+
+### PlayerInteractEvent
+
+Fired when a player interacts with something.
+
+<AutoTypeTable path="./types/index.d.ts" name="PlayerInteractEvent" />
+
+### PlayerCraftEvent
+
+Fired when a player crafts an item.
+
+<AutoTypeTable path="./types/index.d.ts" name="PlayerCraftEvent" />
+
+### PlayerMouseButtonEvent
+
+Fired on mouse button input.
+
+<AutoTypeTable path="./types/index.d.ts" name="PlayerMouseButtonEvent" />
+
+### PlayerMouseMotionEvent
+
+Fired on mouse motion.
+
+<AutoTypeTable path="./types/index.d.ts" name="PlayerMouseMotionEvent" />
+
+## World Events
+
+### AddPlayerToWorldEvent
+
+Fired when a player is added to a world.
+
+<AutoTypeTable path="./types/index.d.ts" name="AddPlayerToWorldEvent" />
+
+### DrainPlayerFromWorldEvent
+
+Fired when a player is removed from a world.
+
+<AutoTypeTable path="./types/index.d.ts" name="DrainPlayerFromWorldEvent" />
+
+### PrepareUniverseEvent
+
+Fired when the universe is being prepared.
+
+<AutoTypeTable path="./types/index.d.ts" name="PrepareUniverseEvent" />
+
+## Block Events
+
+### BreakBlockEvent
+
+Fired when a block is broken. Can be cancelled.
+
+<AutoTypeTable path="./types/index.d.ts" name="BreakBlockEvent" />
+
+### PlaceBlockEvent
+
+Fired when a block is placed. Can be cancelled.
+
+<AutoTypeTable path="./types/index.d.ts" name="PlaceBlockEvent" />
+
+### DamageBlockEvent
+
+Fired when a block takes damage. Can be cancelled.
+
+<AutoTypeTable path="./types/index.d.ts" name="DamageBlockEvent" />
+
+### UseBlockEvent
+
+Fired when a block is used/activated.
+
+<AutoTypeTable path="./types/index.d.ts" name="UseBlockEvent" />
+
+## Item Events
+
+### DropItemEvent
+
+Fired when an item is dropped. Can be cancelled.
+
+<AutoTypeTable path="./types/index.d.ts" name="DropItemEvent" />
+
+### InteractivelyPickupItemEvent
+
+Fired when an item is picked up. Can be cancelled.
+
+<AutoTypeTable path="./types/index.d.ts" name="InteractivelyPickupItemEvent" />
+
+### SwitchActiveSlotEvent
+
+Fired when the active hotbar slot changes.
+
+<AutoTypeTable path="./types/index.d.ts" name="SwitchActiveSlotEvent" />
+
+## Entity Events
+
+### EntityEvent
+
+Fired when an entity spawns.
+
+<AutoTypeTable path="./types/index.d.ts" name="EntityEvent" />
+
+### EntityRemoveEvent
+
+Fired when an entity is removed.
+
+<AutoTypeTable path="./types/index.d.ts" name="EntityRemoveEvent" />
+
+### LivingEntityInventoryChangeEvent
+
+Fired when a living entity's inventory changes.
+
+<AutoTypeTable path="./types/index.d.ts" name="LivingEntityInventoryChangeEvent" />
+
+### LivingEntityUseBlockEvent
+
+Fired when a living entity uses a block.
+
+<AutoTypeTable path="./types/index.d.ts" name="LivingEntityUseBlockEvent" />
+
+## Game Mode Events
+
+### ChangeGameModeEvent
+
+Fired when a player's game mode changes. Can be cancelled.
+
+<AutoTypeTable path="./types/index.d.ts" name="ChangeGameModeEvent" />
+
+## Crafting Events
+
+### CraftRecipeEvent
+
+Fired when a recipe is crafted. Can be cancelled.
+
+<AutoTypeTable path="./types/index.d.ts" name="CraftRecipeEvent" />
+
+## Permission Events
+
+### PlayerPermissionChangeEvent
+
+Fired when a player's permissions change.
+
+<AutoTypeTable path="./types/index.d.ts" name="PlayerPermissionChangeEvent" />
+
+### GroupPermissionChangeEvent
+
+Fired when a group's permissions change.
+
+<AutoTypeTable path="./types/index.d.ts" name="GroupPermissionChangeEvent" />
+
+### PlayerGroupEvent
+
+Fired when a player's group changes.
+
+<AutoTypeTable path="./types/index.d.ts" name="PlayerGroupEvent" />
+
+## Server Events
+
+### BootEvent
+
+Fired when the server starts.
+
+<AutoTypeTable path="./types/index.d.ts" name="BootEvent" />
+
+### ShutdownEvent
+
+Fired when the server shuts down.
+
+<AutoTypeTable path="./types/index.d.ts" name="ShutdownEvent" />
+
+## Other Events
+
+### DiscoverZoneEvent
+
+Fired when a zone is discovered.
+
+<AutoTypeTable path="./types/index.d.ts" name="DiscoverZoneEvent" />
+
+### PlayerRefEvent
+
+Base event with PlayerRef.
+
+<AutoTypeTable path="./types/index.d.ts" name="PlayerRefEvent" />
+
+### PlayerEvent
+
+Base event with Player.
+
+<AutoTypeTable path="./types/index.d.ts" name="PlayerEvent" />

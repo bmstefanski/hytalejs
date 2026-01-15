@@ -1,0 +1,4 @@
+{
+  "title": "API Reference",
+  "pages": ["events", "entities", "inventory", "math", "utilities"]
+}

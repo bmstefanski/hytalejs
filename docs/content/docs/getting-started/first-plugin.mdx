@@ -1,0 +1,156 @@
+---
+title: Your First Plugin
+description: Build a complete HytaleJS plugin step by step
+---
+
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+
+Let's build a plugin that welcomes players, formats chat, and adds a `/players` command.
+
+<Steps>
+<Step>
+
+### Create src/main.ts
+
+```typescript
+import { type PlayerConnectEvent, type PlayerChatEvent, EventListener, Colors } from "@hytalejs.com/core";
+```
+
+</Step>
+<Step>
+
+### Add a welcome message on join
+
+```typescript
+class MyPlugin {
+  @EventListener("PlayerConnectEvent")
+  onJoin(event: PlayerConnectEvent) {
+    const player = event.getPlayer();
+    const name = event.getPlayerRef().getUsername();
+
+    player.sendMessage(
+      Message.raw("Welcome, " + name + "!").color(Colors.GREEN).bold(true)
+    );
+
+    Universe.get().sendMessage(
+      Message.raw(name + " joined the server!")
+    );
+  }
+}
+```
+
+</Step>
+<Step>
+
+### Format chat messages
+
+```typescript
+  @EventListener("PlayerChatEvent")
+  onChat(event: PlayerChatEvent) {
+    const sender = event.getSender();
+    const content = event.getContent();
+
+    const formatted = Message.empty()
+      .insert(Message.raw(sender.getUsername()).color(Colors.GOLD).bold(true))
+      .insert(Message.raw(": ").color(Colors.GRAY))
+      .insert(Message.raw(content).color(Colors.WHITE));
+
+    event.setCancelled(true);
+
+    const targets = event.getTargets();
+    for (let i = 0; i < targets.length; i++) {
+      targets[i].sendMessage(formatted);
+    }
+  }
+```
+
+</Step>
+<Step>
+
+### Register a command
+
+```typescript
+commands.register("players", "List online players", (ctx) => {
+  const universe = Universe.get();
+  ctx.sendMessage("Online: " + universe.getPlayerCount());
+
+  const players = universe.getPlayers();
+  for (let i = 0; i < players.length; i++) {
+    ctx.sendMessage("- " + players[i].getUsername());
+  }
+});
+```
+
+</Step>
+<Step>
+
+### Build and deploy
+
+```bash
+npm run build
+cp dist/plugin.js /path/to/hytale-server/mods/bmstefanski_HytaleJS/scripts/
+```
+
+Restart your server to load the plugin.
+
+</Step>
+</Steps>
+
+## Complete Code
+
+```typescript
+import { type PlayerConnectEvent, type PlayerChatEvent, EventListener, Colors } from "@hytalejs.com/core";
+
+class MyPlugin {
+  @EventListener("PlayerConnectEvent")
+  onJoin(event: PlayerConnectEvent) {
+    const player = event.getPlayer();
+    const name = event.getPlayerRef().getUsername();
+
+    player.sendMessage(
+      Message.raw("Welcome, " + name + "!").color(Colors.GREEN).bold(true)
+    );
+
+    Universe.get().sendMessage(Message.raw(name + " joined the server!"));
+  }
+
+  @EventListener("PlayerChatEvent")
+  onChat(event: PlayerChatEvent) {
+    const sender = event.getSender();
+    const content = event.getContent();
+
+    const formatted = Message.empty()
+      .insert(Message.raw(sender.getUsername()).color(Colors.GOLD).bold(true))
+      .insert(Message.raw(": ").color(Colors.GRAY))
+      .insert(Message.raw(content).color(Colors.WHITE));
+
+    event.setCancelled(true);
+
+    const targets = event.getTargets();
+    for (let i = 0; i < targets.length; i++) {
+      targets[i].sendMessage(formatted);
+    }
+  }
+}
+
+commands.register("players", "List online players", (ctx) => {
+  const universe = Universe.get();
+  ctx.sendMessage("Online: " + universe.getPlayerCount());
+
+  const players = universe.getPlayers();
+  for (let i = 0; i < players.length; i++) {
+    ctx.sendMessage("- " + players[i].getUsername());
+  }
+});
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="Events Guide" href="/docs/guides/events">
+    Learn about all available events
+  </Card>
+  <Card title="Commands Guide" href="/docs/guides/commands">
+    Add permissions and parse arguments
+  </Card>
+</Cards>

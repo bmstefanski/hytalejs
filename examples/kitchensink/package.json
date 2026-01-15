@@ -14,7 +14,7 @@
   "author": "Hytale Community",
   "license": "MIT",
   "dependencies": {
-    "@hytalejs/core": "workspace:*"
+    "@hytalejs.com/core": "workspace:*"
   },
   "devDependencies": {
     "@swc/core": "^1.15.8",

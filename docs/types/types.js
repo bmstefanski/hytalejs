@@ -1,0 +1,17 @@
+export const Colors = {
+    RED: "#FF0000",
+    GREEN: "#00FF00",
+    BLUE: "#0000FF",
+    YELLOW: "#FFFF00",
+    CYAN: "#00FFFF",
+    MAGENTA: "#FF00FF",
+    WHITE: "#FFFFFF",
+    BLACK: "#000000",
+    ORANGE: "#FFA500",
+    PINK: "#FFC0CB",
+    PURPLE: "#800080",
+    GOLD: "#FFD700",
+    GRAY: "#808080",
+    LIGHT_GRAY: "#D3D3D3",
+    DARK_GRAY: "#404040",
+};
