@@ -11,4 +11,4 @@ node_modules/
 
 hytale-server/*
 !hytale-server/config.json
-lib/HytaleServer.jar
+loader/bin/
