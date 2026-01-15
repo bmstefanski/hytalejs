@@ -1,70 +1,76 @@
 # HytaleJS
 
-TypeScript/JavaScript scripting for Hytale servers. Write plugins in TypeScript, compile to JavaScript, and run them on your Hytale server.
+TypeScript/JavaScript scripting for Hytale servers. Write plugins with full type safety, autocomplete, and a familiar development experience.
+
+> [!WARNING]
+> This project is experimental. APIs may change as we work towards stability.
+
+> [!NOTE]
+> Full documentation available at [hytalejs.com](https://hytalejs.com)
 
 ## Features
 
-- Event listeners with decorators
-- Command registration with permissions
-- Full access to Hytale server API
-- TypeScript type definitions for autocomplete
+- 🎯 **TypeScript Support** - Full type safety and IDE autocomplete
+- 🎮 **Event System** - 30+ events for player actions, world changes, and server lifecycle
+- 💬 **Commands** - Custom commands with permissions and integration with native /help command
+- ⏰ **Scheduler** - Delayed and repeating tasks
+- 🔊 **Sound API** - Play sounds to players
+- 📦 **Direct Java Bindings** - Access the full Hytale server API
 
-## Quick Start
-
-1. Build the loader:
-
-```bash
-cd loader
-./gradlew shadowJar
-```
-
-2. Build the example plugin:
-
-```bash
-cd examples/hello-world
-npm install
-npm run build
-```
-
-3. Deploy:
-
-```bash
-./deploy.sh
-```
-
-4. Start your Hytale server
-
-## Project Structure
-
-```
-HytaleJS/
-├── loader/                 # Java plugin that loads JS scripts
-├── examples/hello-world/   # Example TypeScript plugin
-├── hytale-server/          # Hytale server (for development)
-└── lib/                    # HytaleServer.jar for compilation
-```
-
-## Writing Plugins
-
-See `examples/hello-world/src/demo.ts` for a complete example.
+## Quick Example
 
 ```typescript
-import { EventListener, handlers } from './types';
+import { EventListener, Colors } from "@hytalejs.com/core";
 
 class MyPlugin {
   @EventListener("PlayerConnectEvent")
-  onPlayerJoin(event: PlayerConnectEvent): void {
-    const player = event.getPlayer();
-    player.sendMessage(Message.create("Welcome!").color(Colors.GREEN));
+  onJoin(event: PlayerConnectEvent) {
+    event.getPlayer().sendMessage(Message.raw("Welcome!").color(Colors.GREEN).bold(true));
   }
 }
 
-new MyPlugin();
-
-commands.register("hello", "Say hello", (ctx) => {
-  ctx.sendMessage("Hello, " + ctx.getSenderName() + "!");
+commands.register("countdown", "Start a countdown", (ctx) => {
+  let count = 3;
+  const task = scheduler.runRepeating(
+    () => {
+      if (count > 0) Universe.get().sendMessage(Message.raw(count-- + "..."));
+      else {
+        Universe.get().sendMessage(Message.raw("Go!").color(Colors.GREEN));
+        task.cancel();
+      }
+    },
+    0,
+    1000,
+  );
 });
 ```
+
+## Setup
+
+### Server
+
+1. Download `HytaleJS.jar` from [releases](https://github.com/bmstefanski/HytaleJS/releases)
+2. Copy to `hytale-server/mods/`
+3. Start your server - scripts folder will be created at `mods/bmstefanski_HytaleJS/scripts/`
+
+### Development
+
+```bash
+mkdir my-plugin && cd my-plugin
+npm init -y
+npm install @hytalejs.com/core
+npm install -D typescript esbuild
+```
+
+Build your TypeScript to JavaScript and copy to the scripts folder.
+
+See [`examples/kitchensink`](examples/kitchensink) for a complete working setup with esbuild bundling and all features demonstrated.
+
+## Tech Stack
+
+- **GraalJS** - JavaScript runtime for JVM
+- **TypeScript** - Type definitions & utilities for Hytale API
+- **esbuild** - Fast bundling for plugins
 
 ## License
 
