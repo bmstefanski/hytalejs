@@ -16,3 +16,6 @@ hytale-server/mods
 hytale-server/auth.env
 hytale-server/permissions.json
 hytale-server/config.json.bak
+hytale-server/Assets.zip
+hytale-server/HytaleServer.jar
+lib/HytaleServer.jar
