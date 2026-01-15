@@ -4,7 +4,7 @@
   "description": "Demo Hytale plugin that logs player joins",
   "main": "dist/demo.js",
   "scripts": {
-    "build": "bun build.mjs"
+    "build": "esbuild src/demo.ts --bundle --format=esm --target=es2022 --outfile=dist/demo.js"
   },
   "keywords": [
     "hytale",
@@ -13,6 +13,9 @@
   ],
   "author": "Hytale Community",
   "license": "MIT",
+  "dependencies": {
+    "@hytalejs/core": "workspace:*"
+  },
   "devDependencies": {
     "@swc/core": "^1.15.8",
     "esbuild": "^0.27.2",

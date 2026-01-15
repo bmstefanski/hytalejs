@@ -1,38 +1,38 @@
 plugins {
-    id 'java'
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
+  id 'java'
+  id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
-group = 'com.bstefanski.hytalejs'
+group = 'com.bmstefanski.hytalejs'
 version = '1.0.0'
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+  sourceCompatibility = JavaVersion.VERSION_21
+  targetCompatibility = JavaVersion.VERSION_21
 }
 
 repositories {
-    mavenCentral()
+  mavenCentral()
 }
 
 dependencies {
-    compileOnly files('../lib/HytaleServer.jar')
+  compileOnly files('../lib/HytaleServer.jar')
 
-    implementation 'org.graalvm.polyglot:polyglot:24.1.1'
-    implementation 'org.graalvm.polyglot:js-community:24.1.1'
+  implementation 'org.graalvm.polyglot:polyglot:24.1.1'
+  implementation 'org.graalvm.polyglot:js-community:24.1.1'
 }
 
 shadowJar {
-    archiveFileName = 'HytaleJS.jar'
-    destinationDirectory = file('../hytale-server/mods')
+  archiveFileName = 'HytaleJS.jar'
+  destinationDirectory = file('../hytale-server/mods')
 
-    dependencies {
-        exclude(dependency(files('../lib/HytaleServer.jar')))
-    }
+  dependencies {
+    exclude(dependency(files('../lib/HytaleServer.jar')))
+  }
 
-    mergeServiceFiles()
+  mergeServiceFiles()
 }
 
 build {
-    dependsOn shadowJar
+  dependsOn shadowJar
 }

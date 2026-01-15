@@ -1,0 +1,11 @@
+{
+  "name": "hytalejs",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "examples/*"
+  ],
+  "devDependencies": {
+    "prettier": "3.3.3"
+  }
+}

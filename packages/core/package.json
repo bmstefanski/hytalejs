@@ -1,0 +1,37 @@
+{
+  "name": "@hytalejs/core",
+  "version": "1.0.0",
+  "description": "TypeScript types and utilities for HytaleJS plugins",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "hytale",
+    "hytalejs",
+    "typescript",
+    "types"
+  ],
+  "author": "bmstefanski",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bmstefanski/HytaleJS.git",
+    "directory": "packages/core"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}

@@ -1,5 +1,3 @@
-// Auto-generated TypeScript types from Hytale JAR
-// Generated: Wed Jan 14 21:09:28 CET 2026
 
 export interface BootEvent {
   toString(): string;
@@ -285,17 +283,6 @@ export interface Player {
   getInventory(): Inventory;
   getWorld(): World;
   getUuid(): { toString(): string };
-}
-
-export interface PlayerRef {
-  getLanguage(): string;
-  isValid(): boolean;
-  setLanguage(arg0: string): void;
-  getUsername(): string;
-  getUuid(): { toString(): string };
-  referToServer(arg0: string, arg1: number, arg2: unknown[]): void;
-  referToServer(arg0: string, arg1: number): void;
-  sendMessage(arg0: Message): void;
 }
 
 export interface World {
@@ -601,19 +588,28 @@ export const Colors = {
   DARK_GRAY: "#404040" as HexColor,
 } as const;
 
-export interface MessageInstance {
-  color(color: HexColor): MessageInstance;
-  bold(bold: boolean): MessageInstance;
-  italic(italic: boolean): MessageInstance;
-  monospace(mono: boolean): MessageInstance;
-  link(url: string): MessageInstance;
-  insert(message: MessageInstance): MessageInstance;
-  param(key: string, value: string | number | boolean): MessageInstance;
-  getRawText(): string;
+export interface MessageStatic {
+  raw(text: string): Message;
+  empty(): Message;
+  translation(key: string): Message;
+  parse(text: string): Message;
+  join(...messages: Message[]): Message;
 }
 
-export interface MessageFactory {
-  create(text: string): MessageInstance;
+export interface UniverseStatic {
+  get(): Universe;
+}
+
+export interface HytaleServerStatic {
+  get(): HytaleServerInstance;
+}
+
+export interface HytaleServerInstance {
+  getServerName(): string;
+  isBooting(): boolean;
+  isBooted(): boolean;
+  isShuttingDown(): boolean;
+  shutdownServer(): void;
 }
 
 export interface ScriptLogger {
@@ -634,44 +630,21 @@ export interface ScriptCommandRegistry {
   register(name: string, description: string, permission: string, callback: (ctx: CommandContext) => void): void;
 }
 
-export interface ScriptServer {
-  getPlayers(): PlayerRef[];
-  getPlayer(name: string): PlayerRef | null;
-  getPlayerByUUID(uuid: string): PlayerRef | null;
-  getPlayerCount(): number;
-  getWorlds(): Map<string, World>;
-  getWorld(name: string): World | null;
-  getDefaultWorld(): World;
-  broadcast(message: string): void;
-  broadcastMessage(message: MessageInstance): void;
-  getName(): string;
-  isBooting(): boolean;
-  isBooted(): boolean;
-  shutdown(): void;
+export interface ScriptTask {
+  cancel(): void;
+  isCancelled(): boolean;
+  isDone(): boolean;
+}
+
+export interface ScriptScheduler {
+  runLater(callback: () => void, delayMs: number): ScriptTask;
+  runRepeating(callback: () => void, delayMs: number, periodMs: number): ScriptTask;
+  runRepeatingWithDelay(callback: () => void, delayMs: number, periodMs: number): ScriptTask;
 }
 
 export interface EventHandler {
   eventType: EventType;
   callback: (event: unknown) => void;
-}
-
-export const handlers: EventHandler[] = [];
-
-export function EventListener(eventType: EventType) {
-  return function (
-    target: unknown,
-    propertyKey: string,
-    descriptor: PropertyDescriptor
-  ) {
-    const originalMethod = descriptor.value;
-
-    handlers.push({
-      eventType: eventType,
-      callback: originalMethod
-    });
-
-    return descriptor;
-  };
 }
 
 export interface JavaIterator<T> {
@@ -817,12 +790,98 @@ export interface CylinderConstructor {
   new(radiusX: number, radiusZ: number, height: number): Cylinder;
 }
 
+export interface SoundEvent {
+  getId(): string;
+  getVolume(): number;
+  getPitch(): number;
+  getMusicDuckingVolume(): number;
+  getAmbientDuckingVolume(): number;
+  getStartAttenuationDistance(): number;
+  getMaxDistance(): number;
+  getMaxInstance(): number;
+  getPreventSoundInterruption(): boolean;
+  getAudioCategoryId(): string;
+  getAudioCategoryIndex(): number;
+  getHighestNumberOfChannels(): number;
+}
+
+export interface IndexedAssetMap<K, T> {
+  getIndex(key: K): number;
+  getIndexOrDefault(key: K, defaultValue: number): number;
+  getNextIndex(): number;
+  getAsset(index: number): T;
+  getAssetOrDefault(index: number, defaultValue: T): T;
+  getAssetMap(): JavaMap<K, T>;
+  getAssetCount(): number;
+}
+
+export interface SoundEventClass {
+  getAssetStore(): AssetStore;
+  getAssetMap(): IndexedAssetMap<string, SoundEvent>;
+}
+
+export interface SoundCategory {
+  name(): string;
+  ordinal(): number;
+  getValue(): number;
+}
+
+export interface SoundCategoryEnum {
+  Music: SoundCategory;
+  Ambient: SoundCategory;
+  SFX: SoundCategory;
+  UI: SoundCategory;
+  VALUES: SoundCategory[];
+  valueOf(name: string): SoundCategory;
+  values(): SoundCategory[];
+  fromValue(value: number): SoundCategory;
+}
+
+export interface PlaySoundEvent2D {
+  soundEventIndex: number;
+  category: SoundCategory;
+  volumeModifier: number;
+  pitchModifier: number;
+  getId(): number;
+}
+
+export interface PlaySoundEvent2DConstructor {
+  new(): PlaySoundEvent2D;
+  new(soundEventIndex: number, category: SoundCategory, volumeModifier: number, pitchModifier: number): PlaySoundEvent2D;
+}
+
+export interface PacketHandler {
+  write(packet: unknown): void;
+  write(packets: unknown[]): void;
+  writeNoCache(packet: unknown): void;
+  disconnect(reason: string): void;
+  isLocalConnection(): boolean;
+  isLANConnection(): boolean;
+}
+
+export interface PlayerRef {
+  isValid(): boolean;
+  getUuid(): { toString(): string };
+  getUsername(): string;
+  getLanguage(): string;
+  setLanguage(language: string): void;
+  getTransform(): Transform;
+  getWorldUuid(): { toString(): string };
+  getHeadRotation(): Vector3f;
+  getPacketHandler(): PacketHandler;
+  referToServer(host: string, port: number): void;
+  referToServer(host: string, port: number, data: unknown[]): void;
+  sendMessage(message: Message): void;
+}
+
 declare global {
   const logger: ScriptLogger;
   const plugin: unknown;
   const commands: ScriptCommandRegistry;
-  const server: ScriptServer;
-  const Message: MessageFactory;
+  const scheduler: ScriptScheduler;
+  const Universe: UniverseStatic;
+  const HytaleServer: HytaleServerStatic;
+  const Message: MessageStatic;
   const ItemStack: ItemStackConstructor;
   const Item: ItemClass;
   const Vector3i: Vector3iConstructor;
@@ -836,4 +895,7 @@ declare global {
   const ColorLight: ColorLightConstructor;
   const Box: BoxConstructor;
   const Cylinder: CylinderConstructor;
+  const SoundEvent: SoundEventClass;
+  const SoundCategory: SoundCategoryEnum;
+  const PlaySoundEvent2D: PlaySoundEvent2DConstructor;
 }

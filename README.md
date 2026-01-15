@@ -12,12 +12,14 @@ TypeScript/JavaScript scripting for Hytale servers. Write plugins in TypeScript,
 ## Quick Start
 
 1. Build the loader:
+
 ```bash
 cd loader
 ./gradlew shadowJar
 ```
 
 2. Build the example plugin:
+
 ```bash
 cd examples/hello-world
 npm install
@@ -25,6 +27,7 @@ npm run build
 ```
 
 3. Deploy:
+
 ```bash
 ./deploy.sh
 ```

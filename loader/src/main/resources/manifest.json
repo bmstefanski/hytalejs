@@ -1,8 +1,8 @@
 {
-  "Group": "com.bstefanski.hytalejs",
+  "Group": "bmstefanski",
   "Name": "HytaleJS",
   "Version": "1.0.0",
-  "Main": "com.bstefanski.hytalejs.HytaleJS",
+  "Main": "com.bmstefanski.hytalejs.HytaleJS",
   "Description": "TypeScript/JavaScript scripting for Hytale servers",
   "Authors": [
     {
