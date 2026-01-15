@@ -9,13 +9,6 @@ node_modules/
 *.iml
 .gradle/
 
-hytale-server/.cache
-hytale-server/logs
-hytale-server/universe
-hytale-server/mods
-hytale-server/auth.env
-hytale-server/permissions.json
-hytale-server/config.json.bak
-hytale-server/Assets.zip
-hytale-server/HytaleServer.jar
+hytale-server/*
+!hytale-server/config.json
 lib/HytaleServer.jar
