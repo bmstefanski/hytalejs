@@ -6,7 +6,6 @@ class HelloWorldPlugin {
     const player = event.getPlayer();
     const playerRef = event.getPlayerRef();
     const worldName = event.getWorld().getName();
-    const holder = event.getHolder();
 
     logger.info("Player " + playerRef.getUsername() + " joined world: " + worldName);
 
@@ -18,17 +17,6 @@ class HelloWorldPlugin {
     player.sendMessage(Message.raw("Players online: " + Universe.get().getPlayerCount()).color(Colors.GOLD));
 
     Universe.get().sendMessage(Message.raw(playerRef.getUsername() + " has joined the server!"));
-
-    const ColorLightClass = Java.type("com.hypixel.hytale.protocol.ColorLight");
-    const playerLight = new ColorLightClass(15, 100, 80, 60);
-
-    const DynamicLightClass = Java.type("com.hypixel.hytale.server.core.modules.entity.component.DynamicLight");
-    const dynamicLight = new DynamicLightClass(playerLight);
-    const componentType = DynamicLightClass.getComponentType();
-
-    holder.putComponent(componentType, dynamicLight);
-
-    player.sendMessage(Message.raw("You now emit a warm orange glow!").color(Colors.GOLD));
   }
 
   @EventListener("PlayerDisconnectEvent")
@@ -286,37 +274,3 @@ commands.register("playsound", "Play a sound to yourself", (ctx) => {
   ctx.sendMessage("Playing sound: " + soundId);
 });
 
-commands.register("glow", "Make yourself glow with a custom color", (ctx) => {
-  const input = ctx.getInput();
-  const parts = input.split(" ");
-
-  if (parts.length < 4) {
-    ctx.sendMessage("Usage: /glow <red> <green> <blue> [radius]");
-    ctx.sendMessage("Example: /glow 100 50 80 15");
-    ctx.sendMessage("Values: -128 to 127 (Java byte range)");
-    ctx.sendMessage("Higher positive values = brighter colors");
-    ctx.sendMessage("Radius: light reach distance (default: 15)");
-    return;
-  }
-
-  const r = parseInt(parts[1], 10);
-  const g = parseInt(parts[2], 10);
-  const b = parseInt(parts[3], 10);
-  const radius = parts.length >= 5 ? parseInt(parts[4], 10) : 15;
-
-  if (isNaN(r) || isNaN(g) || isNaN(b) || isNaN(radius)) {
-    ctx.sendMessage("Invalid values. Use integers -128 to 127");
-    return;
-  }
-
-  if (r < -128 || r > 127 || g < -128 || g > 127 || b < -128 || b > 127 || radius < -128 || radius > 127) {
-    ctx.sendMessage("Values must be between -128 and 127");
-    return;
-  }
-
-  ctx.sendMessage("Note: Attach lights via PlayerConnectEvent");
-  ctx.sendMessage("The /glow command requires entity access which isn't");
-  ctx.sendMessage("available in command context. Join/rejoin to get a light!");
-  ctx.sendMessage("");
-  ctx.sendMessage("Your requested color: R=" + r + " G=" + g + " B=" + b + " Radius=" + radius);
-});
