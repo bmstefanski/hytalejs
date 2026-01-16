@@ -17,6 +17,10 @@ TypeScript/JavaScript scripting for Hytale servers. Write plugins with full type
 - 🔊 **Sound API** - Play sounds to players
 - 📦 **Direct Java Bindings** - Access the full Hytale server API
 
+## Documentation
+
+📚 **[Complete API Documentation](docs/API.md)** - Detailed reference for all APIs with examples
+
 ## Supported APIs
 
 ### Core APIs
