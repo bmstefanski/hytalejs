@@ -716,15 +716,15 @@ export interface ColorConstructor {
 }
 
 export interface ColorLight {
-  getRed(): number;
-  getGreen(): number;
-  getBlue(): number;
-  getAlpha(): number;
+  radius: number;
+  red: number;
+  green: number;
+  blue: number;
 }
 
 export interface ColorLightConstructor {
   new(): ColorLight;
-  new(r: number, g: number, b: number, a: number): ColorLight;
+  new(radius: number, red: number, green: number, blue: number): ColorLight;
   new(other: ColorLight): ColorLight;
 }
 
