@@ -24,7 +24,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build TypeScript
+      - name: Build core package
+        run: pnpm --filter @hytalejs.com/core build
+
+      - name: Build plugin
         run: pnpm --filter hello-world-plugin build
 
       - name: Setup Java

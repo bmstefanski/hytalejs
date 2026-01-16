@@ -6,7 +6,7 @@ TypeScript/JavaScript scripting for Hytale servers. Write plugins with full type
 > This project is experimental. APIs may change as we work towards stability.
 
 > [!NOTE]
-> Full documentation available at [hytalejs.com](https://hytalejs.com)
+> Full documentation at [hytalejs.com](https://hytalejs.com) · Demo server: `play.hytalejs.com`
 
 ## Features
 
