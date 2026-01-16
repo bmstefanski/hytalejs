@@ -380,7 +380,9 @@ commands.register("particle", "Spawn a particle system at your position", (ctx) 
 
   const position = new Position(pos.getX(), pos.getY() + 2.0, pos.getZ());
   const direction = new Direction(rot.getX(), rot.getY(), rot.getZ());
-  const color = new Color(r, g, b);
+
+  const ByteClass = Java.type("java.lang.Byte");
+  const color = new Color(ByteClass.valueOf(r), ByteClass.valueOf(g), ByteClass.valueOf(b));
 
   const packet = new SpawnParticleSystem(particleId, position, direction, scale, color);
   foundPlayerRef.getPacketHandler().write(packet);
