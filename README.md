@@ -34,6 +34,8 @@ TypeScript/JavaScript scripting for Hytale servers. Write plugins with full type
 - [x] **Vector3i**, **Vector3f**, **Vector3d** - 3D vectors
 - [x] **Vector2i**, **Vector2d**, **Vector2f** - 2D vectors
 - [x] **Transform** - Position and rotation transforms
+- [x] **Position** - 3D world positions for packets
+- [x] **Direction** - Rotation angles (yaw, pitch, roll)
 - [x] **Box** - Axis-aligned bounding boxes
 - [x] **Cylinder** - Cylindrical shapes
 
@@ -49,6 +51,11 @@ TypeScript/JavaScript scripting for Hytale servers. Write plugins with full type
 - [x] **SoundEvent** - Sound event definitions
 - [x] **SoundCategory** - Sound categories (Music, Ambient, SFX, UI)
 - [x] **PlaySoundEvent2D** - 2D sound playback packets
+- [x] **PlaySoundEvent3D** - 3D positional sound playback packets
+- [x] **PlaySoundEventEntity** - Entity-attached sound playback packets
+
+### Particles
+- [x] **SpawnParticleSystem** - Spawn particle systems in the world
 
 ### Utilities
 - [x] **logger** - Server logging

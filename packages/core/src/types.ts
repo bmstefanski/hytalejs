@@ -898,6 +898,79 @@ export interface PersistentDynamicLightConstructor {
   getComponentType(): ComponentType;
 }
 
+export interface Position {
+  x: number;
+  y: number;
+  z: number;
+  clone(): Position;
+}
+
+export interface PositionConstructor {
+  new(): Position;
+  new(x: number, y: number, z: number): Position;
+  new(other: Position): Position;
+}
+
+export interface Direction {
+  yaw: number;
+  pitch: number;
+  roll: number;
+  clone(): Direction;
+}
+
+export interface DirectionConstructor {
+  new(): Direction;
+  new(yaw: number, pitch: number, roll: number): Direction;
+  new(other: Direction): Direction;
+}
+
+export interface PlaySoundEvent3D {
+  soundEventIndex: number;
+  category: SoundCategory;
+  position: Position;
+  volumeModifier: number;
+  pitchModifier: number;
+  getId(): number;
+  clone(): PlaySoundEvent3D;
+}
+
+export interface PlaySoundEvent3DConstructor {
+  new(): PlaySoundEvent3D;
+  new(soundEventIndex: number, category: SoundCategory, position: Position, volumeModifier: number, pitchModifier: number): PlaySoundEvent3D;
+  new(other: PlaySoundEvent3D): PlaySoundEvent3D;
+}
+
+export interface PlaySoundEventEntity {
+  soundEventIndex: number;
+  networkId: number;
+  volumeModifier: number;
+  pitchModifier: number;
+  getId(): number;
+  clone(): PlaySoundEventEntity;
+}
+
+export interface PlaySoundEventEntityConstructor {
+  new(): PlaySoundEventEntity;
+  new(soundEventIndex: number, networkId: number, volumeModifier: number, pitchModifier: number): PlaySoundEventEntity;
+  new(other: PlaySoundEventEntity): PlaySoundEventEntity;
+}
+
+export interface SpawnParticleSystem {
+  particleSystemId: string;
+  position: Position;
+  rotation: Direction;
+  scale: number;
+  color: Color;
+  getId(): number;
+  clone(): SpawnParticleSystem;
+}
+
+export interface SpawnParticleSystemConstructor {
+  new(): SpawnParticleSystem;
+  new(particleSystemId: string, position: Position, rotation: Direction, scale: number, color: Color): SpawnParticleSystem;
+  new(other: SpawnParticleSystem): SpawnParticleSystem;
+}
+
 export interface JavaClass<T> {
   new(...args: unknown[]): T;
   class: unknown;
@@ -939,4 +1012,9 @@ declare global {
   const PlaySoundEvent2D: PlaySoundEvent2DConstructor;
   const DynamicLight: DynamicLightConstructor;
   const PersistentDynamicLight: PersistentDynamicLightConstructor;
+  const Position: PositionConstructor;
+  const Direction: DirectionConstructor;
+  const PlaySoundEvent3D: PlaySoundEvent3DConstructor;
+  const PlaySoundEventEntity: PlaySoundEventEntityConstructor;
+  const SpawnParticleSystem: SpawnParticleSystemConstructor;
 }

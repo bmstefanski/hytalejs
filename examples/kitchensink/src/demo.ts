@@ -274,3 +274,117 @@ commands.register("playsound", "Play a sound to yourself", (ctx) => {
   ctx.sendMessage("Playing sound: " + soundId);
 });
 
+commands.register("playsound3d", "Play a sound at your position in 3D space", (ctx) => {
+  const input = ctx.getInput();
+  const parts = input.split(" ");
+
+  if (parts.length < 2) {
+    ctx.sendMessage("Usage: /playsound3d <sound_id> [volume] [pitch]");
+    return;
+  }
+
+  const soundId = parts[1];
+  const volume = parts.length >= 3 ? parseFloat(parts[2]) : 1.0;
+  const pitch = parts.length >= 4 ? parseFloat(parts[3]) : 1.0;
+
+  if (isNaN(volume) || volume < 0 || volume > 2) {
+    ctx.sendMessage("Invalid volume (0-2)");
+    return;
+  }
+
+  if (isNaN(pitch) || pitch < 0.5 || pitch > 2) {
+    ctx.sendMessage("Invalid pitch (0.5-2)");
+    return;
+  }
+
+  const assetMap = SoundEvent.getAssetMap();
+  const soundIndex = assetMap.getIndex(soundId);
+
+  if (soundIndex < 0) {
+    ctx.sendMessage("Sound not found: " + soundId);
+    return;
+  }
+
+  const senderName = ctx.getSenderName();
+  const universe = Universe.get();
+  const players = universe.getPlayers();
+
+  let foundPlayerRef = null;
+  for (let i = 0; i < players.length; i++) {
+    if (players[i].getUsername() === senderName) {
+      foundPlayerRef = players[i];
+      break;
+    }
+  }
+
+  if (!foundPlayerRef) {
+    ctx.sendMessage("Could not find player");
+    return;
+  }
+
+  const transform = foundPlayerRef.getTransform();
+  const pos = transform.getPosition();
+  const position = new Position(pos.getX(), pos.getY(), pos.getZ());
+
+  const packet = new PlaySoundEvent3D(soundIndex, SoundCategory.SFX, position, volume, pitch);
+  foundPlayerRef.getPacketHandler().write(packet);
+
+  ctx.sendMessage("Playing 3D sound: " + soundId + " at your position");
+});
+
+commands.register("particle", "Spawn a particle system at your position", (ctx) => {
+  const input = ctx.getInput();
+  const parts = input.split(" ");
+
+  if (parts.length < 2) {
+    ctx.sendMessage("Usage: /particle <particle_system_id> [scale] [r] [g] [b]");
+    return;
+  }
+
+  const particleId = parts[1];
+  const scale = parts.length >= 3 ? parseFloat(parts[2]) : 1.0;
+  const r = parts.length >= 4 ? parseInt(parts[3], 10) : 255;
+  const g = parts.length >= 5 ? parseInt(parts[4], 10) : 255;
+  const b = parts.length >= 6 ? parseInt(parts[5], 10) : 255;
+
+  if (isNaN(scale) || scale <= 0) {
+    ctx.sendMessage("Invalid scale");
+    return;
+  }
+
+  if (isNaN(r) || r < 0 || r > 255 || isNaN(g) || g < 0 || g > 255 || isNaN(b) || b < 0 || b > 255) {
+    ctx.sendMessage("Invalid RGB values (0-255)");
+    return;
+  }
+
+  const senderName = ctx.getSenderName();
+  const universe = Universe.get();
+  const players = universe.getPlayers();
+
+  let foundPlayerRef = null;
+  for (let i = 0; i < players.length; i++) {
+    if (players[i].getUsername() === senderName) {
+      foundPlayerRef = players[i];
+      break;
+    }
+  }
+
+  if (!foundPlayerRef) {
+    ctx.sendMessage("Could not find player");
+    return;
+  }
+
+  const transform = foundPlayerRef.getTransform();
+  const pos = transform.getPosition();
+  const rot = transform.getRotation();
+
+  const position = new Position(pos.getX(), pos.getY() + 2.0, pos.getZ());
+  const direction = new Direction(rot.getX(), rot.getY(), rot.getZ());
+  const color = new Color(r, g, b);
+
+  const packet = new SpawnParticleSystem(particleId, position, direction, scale, color);
+  foundPlayerRef.getPacketHandler().write(packet);
+
+  ctx.sendMessage("Spawned particle: " + particleId);
+});
+

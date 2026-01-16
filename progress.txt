@@ -28,6 +28,33 @@ Target: Port high-value gameplay APIs in batches of 1-3
 - ✅ Example build: examples/kitchensink - PASSED
 - ✅ Java build: loader - PASSED
 
+### Batch 2 - Sound and Particle Packets (5 APIs)
+**Date:** 2026-01-16
+**APIs Ported:**
+- Position (com.hypixel.hytale.protocol.Position)
+- Direction (com.hypixel.hytale.protocol.Direction)
+- PlaySoundEvent3D (com.hypixel.hytale.protocol.packets.world.PlaySoundEvent3D)
+- PlaySoundEventEntity (com.hypixel.hytale.protocol.packets.world.PlaySoundEventEntity)
+- SpawnParticleSystem (com.hypixel.hytale.protocol.packets.world.SpawnParticleSystem)
+
+**Changes Made:**
+- Added Java bindings in HytaleJS.java for all 5 APIs
+- Added TypeScript types in packages/core/src/types.ts
+- Added /playsound3d and /particle commands in examples/kitchensink/src/demo.ts demonstrating:
+  - Playing 3D positional sound at player location
+  - Spawning particle systems with customizable scale and color
+- Updated README.md with new APIs:
+  - Added Position and Direction under Math & Geometry
+  - Added PlaySoundEvent3D and PlaySoundEventEntity under Audio
+  - Added new Particles section with SpawnParticleSystem
+- All builds pass: TypeScript (core + kitchensink) and Java (shadowJar)
+
+**Verification:**
+- ✅ TypeScript build: packages/core - PASSED
+- ✅ Example build: examples/kitchensink - PASSED
+- ✅ Java build: loader shadowJar - PASSED
+- ✅ deploy.sh completed successfully
+
 ## Notes
 - Follow exact binding pattern from HytaleJS.java
 - Every API must have working example in demo.ts
