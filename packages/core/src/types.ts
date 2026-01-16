@@ -898,7 +898,22 @@ export interface PersistentDynamicLightConstructor {
   getComponentType(): ComponentType;
 }
 
+export interface JavaClass<T> {
+  new(...args: unknown[]): T;
+  class: unknown;
+}
+
+export interface JavaByteClass {
+  valueOf(value: number): number;
+}
+
+export interface JavaInterop {
+  type(className: "java.lang.Byte"): JavaByteClass;
+  type<T = unknown>(className: string): JavaClass<T>;
+}
+
 declare global {
+  const Java: JavaInterop;
   const logger: ScriptLogger;
   const plugin: unknown;
   const commands: ScriptCommandRegistry;

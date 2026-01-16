@@ -278,9 +278,10 @@ commands.register("dynamiclight", "Create and manipulate dynamic lights", (ctx) 
   const input = ctx.getInput();
   const parts = input.split(" ");
 
-  if (parts.length < 2) {
+  if (parts.length < 5) {
     ctx.sendMessage("Usage: /dynamiclight <r> <g> <b> <a>");
-    ctx.sendMessage("Example: /dynamiclight 255 100 50 200");
+    ctx.sendMessage("Example: /dynamiclight 127 100 50 100");
+    ctx.sendMessage("Note: Values are Java bytes (-128 to 127)");
     return;
   }
 
@@ -290,12 +291,20 @@ commands.register("dynamiclight", "Create and manipulate dynamic lights", (ctx) 
   const a = parseInt(parts[4], 10);
 
   if (isNaN(r) || isNaN(g) || isNaN(b) || isNaN(a)) {
-    ctx.sendMessage("Invalid color values. Use integers 0-255");
+    ctx.sendMessage("Invalid color values. Use integers -128 to 127");
     return;
   }
 
-  const colorLight = new ColorLight(r, g, b, a);
-  const dynamicLight = new DynamicLight(colorLight);
+  if (r < -128 || r > 127 || g < -128 || g > 127 || b < -128 || b > 127 || a < -128 || a > 127) {
+    ctx.sendMessage("Color values must be between -128 and 127 (Java byte range)");
+    return;
+  }
+
+  const ColorLightClass = Java.type("com.hypixel.hytale.protocol.ColorLight") as typeof ColorLight;
+  const actualLight = new ColorLightClass(r as never, g as never, b as never, a as never);
+
+  const DynamicLightClass = Java.type("com.hypixel.hytale.server.core.modules.entity.component.DynamicLight") as typeof DynamicLight;
+  const dynamicLight = new DynamicLightClass(actualLight);
 
   ctx.sendMessage("Created DynamicLight with color:");
   ctx.sendMessage("R: " + dynamicLight.getColorLight().getRed());
@@ -303,7 +312,10 @@ commands.register("dynamiclight", "Create and manipulate dynamic lights", (ctx) 
   ctx.sendMessage("B: " + dynamicLight.getColorLight().getBlue());
   ctx.sendMessage("A: " + dynamicLight.getColorLight().getAlpha());
 
-  const newColor = new ColorLight(r / 2, g / 2, b / 2, a);
+  const halfR = Math.floor(r / 2);
+  const halfG = Math.floor(g / 2);
+  const halfB = Math.floor(b / 2);
+  const newColor = new ColorLightClass(halfR as never, halfG as never, halfB as never, a as never);
   dynamicLight.setColorLight(newColor);
 
   ctx.sendMessage("Updated to half brightness:");
@@ -311,6 +323,10 @@ commands.register("dynamiclight", "Create and manipulate dynamic lights", (ctx) 
   ctx.sendMessage("G: " + dynamicLight.getColorLight().getGreen());
   ctx.sendMessage("B: " + dynamicLight.getColorLight().getBlue());
 
-  const persistentLight = new PersistentDynamicLight(colorLight);
+  const PersistentDynamicLightClass = Java.type(
+    "com.hypixel.hytale.server.core.modules.entity.component.PersistentDynamicLight",
+  ) as typeof PersistentDynamicLight;
+  const persistentLight = new PersistentDynamicLightClass(actualLight);
   ctx.sendMessage("Created PersistentDynamicLight (persists across saves)");
+  ctx.sendMessage("Persistent R: " + persistentLight.getColorLight().getRed());
 });
