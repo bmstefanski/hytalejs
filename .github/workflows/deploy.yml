@@ -1,0 +1,66 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build TypeScript
+        run: pnpm --filter hello-world-plugin build
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "21"
+
+      - name: Build loader JAR
+        run: cd loader && ./gradlew shadowJar
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Create remote directories
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "mkdir -p /home/ubuntu/hytale-server/mods/bmstefanski_HytaleJS/scripts"
+
+      - name: Deploy files
+        run: |
+          rsync -avz -e "ssh -i ~/.ssh/deploy_key" \
+            hytale-server/config.json \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/ubuntu/hytale-server/
+
+          rsync -avz -e "ssh -i ~/.ssh/deploy_key" \
+            loader/build/libs/HytaleJS.jar \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/ubuntu/hytale-server/mods/
+
+          rsync -avz -e "ssh -i ~/.ssh/deploy_key" \
+            examples/kitchensink/dist/demo.js \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/ubuntu/hytale-server/mods/bmstefanski_HytaleJS/scripts/
+
+      - name: Restart server
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "screen -S hytale -X quit || true && cd /home/ubuntu/hytale-server && screen -dmS hytale java -jar HytaleServer.jar --assets Assets.zip"
