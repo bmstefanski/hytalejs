@@ -17,6 +17,40 @@ TypeScript/JavaScript scripting for Hytale servers. Write plugins with full type
 - 🔊 **Sound API** - Play sounds to players
 - 📦 **Direct Java Bindings** - Access the full Hytale server API
 
+## Supported APIs
+
+### Core APIs
+- [x] **Universe** - Server universe and world management
+- [x] **HytaleServer** - Server instance and controls
+- [x] **Message** - Chat message creation and formatting
+- [x] **Player** - Player manipulation and queries
+- [x] **World** - World manipulation and queries
+
+### Items & Inventory
+- [x] **ItemStack** - Item stack creation and manipulation
+- [x] **Item** - Item type information and asset access
+
+### Math & Geometry
+- [x] **Vector3i**, **Vector3f**, **Vector3d** - 3D vectors
+- [x] **Vector2i**, **Vector2d**, **Vector2f** - 2D vectors
+- [x] **Transform** - Position and rotation transforms
+- [x] **Box** - Axis-aligned bounding boxes
+- [x] **Cylinder** - Cylindrical shapes
+
+### Graphics
+- [x] **Color** - RGB color values
+- [x] **ColorLight** - RGBA light colors
+
+### Audio
+- [x] **SoundEvent** - Sound event definitions
+- [x] **SoundCategory** - Sound categories (Music, Ambient, SFX, UI)
+- [x] **PlaySoundEvent2D** - 2D sound playback packets
+
+### Utilities
+- [x] **logger** - Server logging
+- [x] **commands** - Command registration
+- [x] **scheduler** - Task scheduling (delayed, repeating)
+
 ## Quick Example
 
 ```typescript

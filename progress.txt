@@ -1,0 +1,14 @@
+# Ralph Progress Tracker
+
+## Session Started
+APIs to port: 528 discovered (365 high priority)
+Target: Port high-value gameplay APIs in batches of 1-3
+
+## Completed Tasks
+(none yet)
+
+## Notes
+- Follow exact binding pattern from HytaleJS.java
+- Every API must have working example in demo.ts
+- Update README Supported APIs section after each batch
+- Run verification before committing: typecheck + gradle build
