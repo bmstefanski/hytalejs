@@ -58,7 +58,7 @@ jobs:
             ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/ubuntu/hytale-server/
 
           rsync -avz -e "ssh -i ~/.ssh/deploy_key" \
-            loader/build/libs/HytaleJS.jar \
+            hytale-server/mods/HytaleJS.jar \
             ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/ubuntu/hytale-server/mods/
 
           rsync -avz -e "ssh -i ~/.ssh/deploy_key" \
