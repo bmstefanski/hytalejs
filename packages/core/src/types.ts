@@ -704,14 +704,15 @@ export interface TransformConstructor {
 }
 
 export interface Color {
-  getRed(): number;
-  getGreen(): number;
-  getBlue(): number;
+  red: number;
+  green: number;
+  blue: number;
+  clone(): Color;
 }
 
 export interface ColorConstructor {
   new(): Color;
-  new(r: number, g: number, b: number): Color;
+  new(red: number, green: number, blue: number): Color;
   new(other: Color): Color;
 }
 
