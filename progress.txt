@@ -5,7 +5,28 @@ APIs to port: 528 discovered (365 high priority)
 Target: Port high-value gameplay APIs in batches of 1-3
 
 ## Completed Tasks
-(none yet)
+
+### Batch 1 - Dynamic Lighting (2 APIs)
+**Date:** 2026-01-16
+**APIs Ported:**
+- DynamicLight (com.hypixel.hytale.server.core.modules.entity.component.DynamicLight)
+- PersistentDynamicLight (com.hypixel.hytale.server.core.modules.entity.component.PersistentDynamicLight)
+
+**Changes Made:**
+- Added Java bindings in HytaleJS.java
+- Added TypeScript types in packages/core/src/types.ts
+- Added /dynamiclight command in examples/kitchensink/src/demo.ts demonstrating:
+  - Creating DynamicLight with ColorLight
+  - Getting/setting color values
+  - Creating PersistentDynamicLight for persistent storage
+- Updated README.md with new Lighting section
+- All builds pass: TypeScript (core + kitchensink) and Java (gradle)
+- Marked APIs as passes: true in discovered-apis.json
+
+**Verification:**
+- ✅ TypeScript build: packages/core - PASSED
+- ✅ Example build: examples/kitchensink - PASSED
+- ✅ Java build: loader - PASSED
 
 ## Notes
 - Follow exact binding pattern from HytaleJS.java

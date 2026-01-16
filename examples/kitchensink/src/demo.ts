@@ -273,3 +273,44 @@ commands.register("playsound", "Play a sound to yourself", (ctx) => {
 
   ctx.sendMessage("Playing sound: " + soundId);
 });
+
+commands.register("dynamiclight", "Create and manipulate dynamic lights", (ctx) => {
+  const input = ctx.getInput();
+  const parts = input.split(" ");
+
+  if (parts.length < 2) {
+    ctx.sendMessage("Usage: /dynamiclight <r> <g> <b> <a>");
+    ctx.sendMessage("Example: /dynamiclight 255 100 50 200");
+    return;
+  }
+
+  const r = parseInt(parts[1], 10);
+  const g = parseInt(parts[2], 10);
+  const b = parseInt(parts[3], 10);
+  const a = parseInt(parts[4], 10);
+
+  if (isNaN(r) || isNaN(g) || isNaN(b) || isNaN(a)) {
+    ctx.sendMessage("Invalid color values. Use integers 0-255");
+    return;
+  }
+
+  const colorLight = new ColorLight(r, g, b, a);
+  const dynamicLight = new DynamicLight(colorLight);
+
+  ctx.sendMessage("Created DynamicLight with color:");
+  ctx.sendMessage("R: " + dynamicLight.getColorLight().getRed());
+  ctx.sendMessage("G: " + dynamicLight.getColorLight().getGreen());
+  ctx.sendMessage("B: " + dynamicLight.getColorLight().getBlue());
+  ctx.sendMessage("A: " + dynamicLight.getColorLight().getAlpha());
+
+  const newColor = new ColorLight(r / 2, g / 2, b / 2, a);
+  dynamicLight.setColorLight(newColor);
+
+  ctx.sendMessage("Updated to half brightness:");
+  ctx.sendMessage("R: " + dynamicLight.getColorLight().getRed());
+  ctx.sendMessage("G: " + dynamicLight.getColorLight().getGreen());
+  ctx.sendMessage("B: " + dynamicLight.getColorLight().getBlue());
+
+  const persistentLight = new PersistentDynamicLight(colorLight);
+  ctx.sendMessage("Created PersistentDynamicLight (persists across saves)");
+});

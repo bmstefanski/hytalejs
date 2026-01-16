@@ -69,6 +69,9 @@ public class HytaleJS extends JavaPlugin {
     jsContext.getBindings("js").putMember("SoundCategory", jsContext.eval("js", "Java.type('com.hypixel.hytale.protocol.SoundCategory')"));
     jsContext.getBindings("js").putMember("PlaySoundEvent2D", jsContext.eval("js", "Java.type('com.hypixel.hytale.protocol.packets.world.PlaySoundEvent2D')"));
 
+    jsContext.getBindings("js").putMember("DynamicLight", jsContext.eval("js", "Java.type('com.hypixel.hytale.server.core.modules.entity.component.DynamicLight')"));
+    jsContext.getBindings("js").putMember("PersistentDynamicLight", jsContext.eval("js", "Java.type('com.hypixel.hytale.server.core.modules.entity.component.PersistentDynamicLight')"));
+
     loadScripts();
   }
 

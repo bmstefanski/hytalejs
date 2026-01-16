@@ -874,6 +874,30 @@ export interface PlayerRef {
   sendMessage(message: Message): void;
 }
 
+export interface DynamicLight {
+  getColorLight(): ColorLight;
+  setColorLight(colorLight: ColorLight): void;
+  consumeNetworkOutdated(): boolean;
+  clone(): DynamicLight;
+}
+
+export interface DynamicLightConstructor {
+  new(): DynamicLight;
+  new(colorLight: ColorLight): DynamicLight;
+  getComponentType(): ComponentType;
+}
+
+export interface PersistentDynamicLight {
+  getColorLight(): ColorLight;
+  setColorLight(colorLight: ColorLight): void;
+  clone(): PersistentDynamicLight;
+}
+
+export interface PersistentDynamicLightConstructor {
+  new(colorLight: ColorLight): PersistentDynamicLight;
+  getComponentType(): ComponentType;
+}
+
 declare global {
   const logger: ScriptLogger;
   const plugin: unknown;
@@ -898,4 +922,6 @@ declare global {
   const SoundEvent: SoundEventClass;
   const SoundCategory: SoundCategoryEnum;
   const PlaySoundEvent2D: PlaySoundEvent2DConstructor;
+  const DynamicLight: DynamicLightConstructor;
+  const PersistentDynamicLight: PersistentDynamicLightConstructor;
 }

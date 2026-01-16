@@ -41,6 +41,10 @@ TypeScript/JavaScript scripting for Hytale servers. Write plugins with full type
 - [x] **Color** - RGB color values
 - [x] **ColorLight** - RGBA light colors
 
+### Lighting
+- [x] **DynamicLight** - Dynamic light component for entities
+- [x] **PersistentDynamicLight** - Persistent dynamic light component (saved across restarts)
+
 ### Audio
 - [x] **SoundEvent** - Sound event definitions
 - [x] **SoundCategory** - Sound categories (Music, Ambient, SFX, UI)
