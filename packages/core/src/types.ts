@@ -820,6 +820,19 @@ export interface SoundEventClass {
   getAssetMap(): IndexedAssetMap<string, SoundEvent>;
 }
 
+export interface ParticleSystemAsset {
+  getId(): string;
+  getLifeSpan(): number;
+  getCullDistance(): number;
+  getBoundingRadius(): number;
+  isImportant(): boolean;
+}
+
+export interface ParticleSystemClass {
+  getAssetStore(): AssetStore;
+  getAssetMap(): DefaultAssetMap;
+}
+
 export interface SoundCategory {
   name(): string;
   ordinal(): number;
@@ -1017,4 +1030,5 @@ declare global {
   const PlaySoundEvent3D: PlaySoundEvent3DConstructor;
   const PlaySoundEventEntity: PlaySoundEventEntityConstructor;
   const SpawnParticleSystem: SpawnParticleSystemConstructor;
+  const ParticleSystem: ParticleSystemClass;
 }

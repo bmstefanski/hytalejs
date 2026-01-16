@@ -343,9 +343,9 @@ commands.register("particle", "Spawn a particle system at your position", (ctx) 
 
   const particleId = parts[1];
   const scale = parts.length >= 3 ? parseFloat(parts[2]) : 1.0;
-  const r = parts.length >= 4 ? parseInt(parts[3], 10) : 255;
-  const g = parts.length >= 5 ? parseInt(parts[4], 10) : 255;
-  const b = parts.length >= 6 ? parseInt(parts[5], 10) : 255;
+  let r = parts.length >= 4 ? parseInt(parts[3], 10) : 255;
+  let g = parts.length >= 5 ? parseInt(parts[4], 10) : 255;
+  let b = parts.length >= 6 ? parseInt(parts[5], 10) : 255;
 
   if (isNaN(scale) || scale <= 0) {
     ctx.sendMessage("Invalid scale");
@@ -356,6 +356,10 @@ commands.register("particle", "Spawn a particle system at your position", (ctx) 
     ctx.sendMessage("Invalid RGB values (0-255)");
     return;
   }
+
+  if (r > 127) r = r - 256;
+  if (g > 127) g = g - 256;
+  if (b > 127) b = b - 256;
 
   const senderName = ctx.getSenderName();
   const universe = Universe.get();
@@ -391,5 +395,30 @@ commands.register("particle", "Spawn a particle system at your position", (ctx) 
   foundPlayerRef.getPacketHandler().write(packet);
 
   ctx.sendMessage("Spawned particle: " + particleId);
+});
+
+commands.register("particlelist", "List all available particle system IDs", (ctx) => {
+  const input = ctx.getInput();
+  const parts = input.split(" ");
+  const filter = parts.length >= 2 ? parts[1].toLowerCase() : "";
+
+  const assetMap = ParticleSystem.getAssetMap();
+  const map = assetMap.getAssetMap();
+  const keys = map.keySet();
+  const iterator = keys.iterator();
+
+  let count = 0;
+  const maxResults = 20;
+
+  while (iterator.hasNext() && count < maxResults) {
+    const key = iterator.next() as string;
+    if (!filter || key.toLowerCase().includes(filter)) {
+      ctx.sendMessage(key);
+      count++;
+    }
+  }
+
+  const total = assetMap.getAssetCount();
+  ctx.sendMessage("Showing " + count + " of " + total + " particles" + (filter ? " (filter: " + filter + ")" : ""));
 });
 
