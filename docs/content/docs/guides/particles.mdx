@@ -1,0 +1,186 @@
+---
+title: Particles
+description: Spawn particle effects in the world
+---
+
+Spawn particle systems in the world with customizable properties like position, rotation, scale, and color.
+
+## Spawning a Particle System
+
+```typescript
+const position = new Position(100, 64, -50);
+const rotation = new Direction(0, 0, 0);
+const color = new Color(255, 0, 0);  // Red
+
+const packet = new SpawnParticleSystem(
+  "hytale:particles.smoke",
+  position,
+  rotation,
+  1.0,   // Scale
+  color
+);
+
+playerRef.getPacketHandler().write(packet);
+```
+
+## Color Conversion
+
+The `Color` class uses Java signed bytes (-128 to 127) internally, but you provide RGB values (0-255). Values above 127 must be converted:
+
+```typescript
+// Helper to convert 0-255 RGB to signed bytes
+let r = 255, g = 100, b = 50;
+
+// Convert values > 127 to negative bytes
+if (r > 127) r = r - 256;  // 255 → -1
+if (g > 127) g = g - 256;  // 100 stays 100
+if (b > 127) b = b - 256;  // 50 stays 50
+
+const color = new Color(r, g, b);
+```
+
+**Common conversions:**
+- `255` (bright) → `-1`
+- `200` → `-56`
+- `128` → `-128`
+- `127` and below → no conversion needed
+
+## Listing Available Particles
+
+```typescript
+commands.register("particlelist", "List particles", (ctx) => {
+  const input = ctx.getInput();
+  const parts = input.split(" ");
+  const filter = parts.length >= 2 ? parts[1].toLowerCase() : "";
+
+  const assetMap = ParticleSystem.getAssetMap();
+  const map = assetMap.getAssetMap();
+  const keys = map.keySet();
+  const iterator = keys.iterator();
+
+  let count = 0;
+  const maxResults = 20;
+
+  while (iterator.hasNext() && count < maxResults) {
+    const key = iterator.next() as string;
+    if (!filter || key.toLowerCase().includes(filter)) {
+      ctx.sendMessage(key);
+      count++;
+    }
+  }
+
+  const total = assetMap.getAssetCount();
+  ctx.sendMessage(`Showing ${count} of ${total} particles`);
+});
+```
+
+## Full Example: Particle Command
+
+```typescript
+commands.register("particle", "Spawn a particle system", (ctx) => {
+  const input = ctx.getInput();
+  const parts = input.split(" ");
+
+  if (parts.length < 2) {
+    ctx.sendMessage("Usage: /particle <particle_id> [scale] [r] [g] [b]");
+    return;
+  }
+
+  const particleId = parts[1];
+  const scale = parts.length >= 3 ? parseFloat(parts[2]) : 1.0;
+  let r = parts.length >= 4 ? parseInt(parts[3], 10) : 255;
+  let g = parts.length >= 5 ? parseInt(parts[4], 10) : 255;
+  let b = parts.length >= 6 ? parseInt(parts[5], 10) : 255;
+
+  // Validate inputs
+  if (isNaN(scale) || scale <= 0) {
+    ctx.sendMessage("Invalid scale");
+    return;
+  }
+
+  if (isNaN(r) || r < 0 || r > 255 || isNaN(g) || g < 0 || g > 255 || isNaN(b) || b < 0 || b > 255) {
+    ctx.sendMessage("Invalid RGB values (0-255)");
+    return;
+  }
+
+  // Convert RGB to signed bytes
+  if (r > 127) r = r - 256;
+  if (g > 127) g = g - 256;
+  if (b > 127) b = b - 256;
+
+  // Find the player
+  const senderName = ctx.getSenderName();
+  const players = Universe.get().getPlayers();
+
+  let playerRef = null;
+  for (let i = 0; i < players.length; i++) {
+    if (players[i].getUsername() === senderName) {
+      playerRef = players[i];
+      break;
+    }
+  }
+
+  if (!playerRef) {
+    ctx.sendMessage("Could not find player");
+    return;
+  }
+
+  // Get player position and spawn particles above them
+  const transform = playerRef.getTransform();
+  const pos = transform.getPosition();
+  const rot = transform.getRotation();
+
+  const position = new Position(pos.getX(), pos.getY() + 2.0, pos.getZ());
+  const direction = new Direction(rot.getX(), rot.getY(), rot.getZ());
+  const color = new Color(r, g, b);
+
+  const packet = new SpawnParticleSystem(particleId, position, direction, scale, color);
+  playerRef.getPacketHandler().write(packet);
+
+  ctx.sendMessage(`Spawned particle: ${particleId}`);
+});
+```
+
+## Example Usage
+
+```bash
+# Spawn default white smoke
+/particle hytale:particles.smoke
+
+# Large red particles (scale 2.0, RGB 255,0,0)
+/particle hytale:particles.smoke 2.0 255 0 0
+
+# Blue particles (scale 1.5, RGB 0,100,255)
+/particle hytale:particles.smoke 1.5 0 100 255
+
+# Purple particles (RGB 200,0,200)
+/particle hytale:particles.smoke 1.0 200 0 200
+```
+
+## Particle Properties
+
+### Position
+- **X**: East (+) / West (-)
+- **Y**: Up (+) / Down (-)
+- **Z**: South (+) / North (-)
+
+### Scale
+- Multiplier for particle size
+- Typical range: `0.5` to `5.0`
+- `1.0` = default size
+
+### Color Tinting
+- RGB values: `0` to `255`
+- Automatically converted to signed bytes for Java
+- Tints the particle texture
+
+## Broadcasting to All Players
+
+To show particles to everyone:
+
+```typescript
+const players = Universe.get().getPlayers();
+for (let i = 0; i < players.length; i++) {
+  players[i].getPacketHandler().write(packet);
+}
+```

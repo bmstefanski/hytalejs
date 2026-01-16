@@ -3,9 +3,11 @@ title: Sounds
 description: Play sounds to players
 ---
 
-Play sound effects to players using the sound system.
+Play sound effects to players using the sound system. HytaleJS supports both 2D (non-positional) and 3D (positional) sound playback.
 
-## Playing a Sound
+## Playing a 2D Sound
+
+2D sounds are played without spatial audio - all players hear them at the same volume regardless of position.
 
 ```typescript
 const assetMap = SoundEvent.getAssetMap();
@@ -14,8 +16,47 @@ const soundIndex = assetMap.getIndex("sound_id_here");
 const packet = new PlaySoundEvent2D(
   soundIndex,
   SoundCategory.SFX,
-  1.0,
-  1.0
+  1.0,  // Volume
+  1.0   // Pitch
+);
+
+playerRef.getPacketHandler().write(packet);
+```
+
+## Playing a 3D Sound
+
+3D sounds are played at a specific world position with spatial audio. Players hear the sound with volume and panning based on their distance and direction from the source.
+
+```typescript
+const assetMap = SoundEvent.getAssetMap();
+const soundIndex = assetMap.getIndex("hytale:sfx.explosion");
+
+// Create a position in world space
+const position = new Position(100, 64, -50);
+
+const packet = new PlaySoundEvent3D(
+  soundIndex,
+  SoundCategory.SFX,
+  position,
+  1.0,  // Volume modifier
+  1.0   // Pitch modifier
+);
+
+playerRef.getPacketHandler().write(packet);
+```
+
+## Playing Sound Attached to Entity
+
+Play a sound that follows an entity as it moves:
+
+```typescript
+const soundIndex = SoundEvent.getAssetMap().getIndex("hytale:sfx.footstep.grass");
+
+const packet = new PlaySoundEventEntity(
+  soundIndex,
+  entityNetworkId,  // Entity's network ID
+  1.0,  // Volume
+  1.0   // Pitch
 );
 
 playerRef.getPacketHandler().write(packet);
@@ -119,5 +160,57 @@ commands.register("playsound", "Play a sound", (ctx) => {
   playerRef.getPacketHandler().write(packet);
 
   ctx.sendMessage("Playing: " + soundId);
+});
+```
+
+## Full Example: 3D Playsound Command
+
+```typescript
+commands.register("playsound3d", "Play a sound at your position", (ctx) => {
+  const input = ctx.getInput();
+  const parts = input.split(" ");
+
+  if (parts.length < 2) {
+    ctx.sendMessage("Usage: /playsound3d <sound_id> [volume] [pitch]");
+    return;
+  }
+
+  const soundId = parts[1];
+  const volume = parts.length >= 3 ? parseFloat(parts[2]) : 1.0;
+  const pitch = parts.length >= 4 ? parseFloat(parts[3]) : 1.0;
+
+  const assetMap = SoundEvent.getAssetMap();
+  const soundIndex = assetMap.getIndex(soundId);
+
+  if (soundIndex < 0) {
+    ctx.sendMessage("Sound not found: " + soundId);
+    return;
+  }
+
+  const senderName = ctx.getSenderName();
+  const players = Universe.get().getPlayers();
+
+  let playerRef = null;
+  for (let i = 0; i < players.length; i++) {
+    if (players[i].getUsername() === senderName) {
+      playerRef = players[i];
+      break;
+    }
+  }
+
+  if (!playerRef) {
+    ctx.sendMessage("Could not find player");
+    return;
+  }
+
+  // Get player's position for 3D sound
+  const transform = playerRef.getTransform();
+  const pos = transform.getPosition();
+  const position = new Position(pos.getX(), pos.getY(), pos.getZ());
+
+  const packet = new PlaySoundEvent3D(soundIndex, SoundCategory.SFX, position, volume, pitch);
+  playerRef.getPacketHandler().write(packet);
+
+  ctx.sendMessage("Playing 3D sound: " + soundId);
 });
 ```
