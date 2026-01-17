@@ -985,6 +985,49 @@ export interface SpawnParticleSystemConstructor {
   new(other: SpawnParticleSystem): SpawnParticleSystem;
 }
 
+export interface AudioComponent {
+  getComponentType(): ComponentType;
+  getSoundEventIds(): number[];
+  addSound(soundEventIndex: number): void;
+  consumeNetworkOutdated(): boolean;
+  clone(): AudioComponent;
+}
+
+export interface AudioComponentConstructor {
+  new(): AudioComponent;
+  getComponentType(): ComponentType;
+}
+
+export interface DisplayNameComponent {
+  getComponentType(): ComponentType;
+  getDisplayName(): Message;
+  clone(): DisplayNameComponent;
+}
+
+export interface DisplayNameComponentConstructor {
+  new(): DisplayNameComponent;
+  new(displayName: Message): DisplayNameComponent;
+  getComponentType(): ComponentType;
+}
+
+export interface TransformComponent {
+  getComponentType(): ComponentType;
+  getPosition(): Vector3d;
+  setPosition(position: Vector3d): void;
+  teleportPosition(position: Vector3d): void;
+  getRotation(): Vector3f;
+  setRotation(rotation: Vector3f): void;
+  getTransform(): Transform;
+  teleportRotation(rotation: Vector3f): void;
+  getSentTransform(): Transform;
+  getChunk(): unknown;
+}
+
+export interface TransformComponentConstructor {
+  new(): TransformComponent;
+  getComponentType(): ComponentType;
+}
+
 export interface JavaClass<T> {
   new(...args: unknown[]): T;
   class: unknown;
@@ -1032,4 +1075,7 @@ declare global {
   const PlaySoundEventEntity: PlaySoundEventEntityConstructor;
   const SpawnParticleSystem: SpawnParticleSystemConstructor;
   const ParticleSystem: ParticleSystemClass;
+  const AudioComponent: AudioComponentConstructor;
+  const DisplayNameComponent: DisplayNameComponentConstructor;
+  const TransformComponent: TransformComponentConstructor;
 }

@@ -51,6 +51,11 @@ TypeScript/JavaScript scripting for Hytale servers. Write plugins with full type
 - [x] **DynamicLight** - Dynamic light component for entities
 - [x] **PersistentDynamicLight** - Persistent dynamic light component (saved across restarts)
 
+### Entity Components
+- [x] **AudioComponent** - Add sounds to entities
+- [x] **DisplayNameComponent** - Entity display name management
+- [x] **TransformComponent** - Entity position and rotation manipulation
+
 ### Audio
 - [x] **SoundEvent** - Sound event definitions
 - [x] **SoundCategory** - Sound categories (Music, Ambient, SFX, UI)

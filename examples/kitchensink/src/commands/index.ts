@@ -10,3 +10,6 @@ export { registerPlaySoundCommand } from "./playsound";
 export { registerPlaySound3DCommand } from "./playsound3d";
 export { registerParticleCommand } from "./particle";
 export { registerParticleListCommand } from "./particlelist";
+export { registerTpCommand } from "./tp";
+export { registerSpinCommand } from "./spin";
+export { registerMyNameCommand } from "./myname";

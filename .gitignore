@@ -12,3 +12,9 @@ node_modules/
 hytale-server/*
 !hytale-server/config.json
 loader/bin/
+
+# Ralph scripts and API discovery files
+ralph-loop.sh
+ralph-once.sh
+API_DISCOVERY_REPORT.md
+discovered-apis.json

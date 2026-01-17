@@ -55,6 +55,29 @@ Target: Port high-value gameplay APIs in batches of 1-3
 - ✅ Java build: loader shadowJar - PASSED
 - ✅ deploy.sh completed successfully
 
+### Batch 3 - Entity Components (3 APIs)
+**Date:** 2026-01-17
+**APIs Ported:**
+- AudioComponent (com.hypixel.hytale.server.core.modules.entity.component.AudioComponent)
+- DisplayNameComponent (com.hypixel.hytale.server.core.modules.entity.component.DisplayNameComponent)
+- TransformComponent (com.hypixel.hytale.server.core.modules.entity.component.TransformComponent)
+
+**Changes Made:**
+- Added Java bindings in HytaleJS.java for all 3 components
+- Added TypeScript types in packages/core/src/types.ts
+- Added /tp, /spin, and /myname commands in examples/kitchensink/src/demo.ts demonstrating:
+  - /tp: Teleport to coordinates using Transform manipulation
+  - /spin: Rotate player 180 degrees using Transform rotation
+  - /myname: Show player display name
+- Updated README.md with new Entity Components section
+- All builds pass: TypeScript (kitchensink) and Java (shadowJar)
+- Marked APIs as passes: true in discovered-apis.json
+
+**Verification:**
+- ✅ Example build: examples/kitchensink - PASSED
+- ✅ Java build: loader shadowJar - PASSED
+- ✅ deploy.sh completed successfully
+
 ## Notes
 - Follow exact binding pattern from HytaleJS.java
 - Every API must have working example in demo.ts
