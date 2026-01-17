@@ -10,10 +10,10 @@ Spawn particle systems in the world with customizable properties like position, 
 ```typescript
 const position = new Position(100, 64, -50);
 const rotation = new Direction(0, 0, 0);
-const color = new Color(255, 0, 0);  // Red
+const color = new Color(255, 0, 0);  // Red (requires byte conversion)
 
 const packet = new SpawnParticleSystem(
-  "hytale:particles.smoke",
+  "Fire_ChargeRed",
   position,
   rotation,
   1.0,   // Scale
@@ -144,17 +144,17 @@ commands.register("particle", "Spawn a particle system", (ctx) => {
 ## Example Usage
 
 ```bash
-# Spawn default white smoke
-/particle hytale:particles.smoke
+# Spawn default white fire charge
+/particle Fire_ChargeRed
 
 # Large red particles (scale 2.0, RGB 255,0,0)
-/particle hytale:particles.smoke 2.0 255 0 0
+/particle Fire_ChargeRed 2.0 255 0 0
 
-# Blue particles (scale 1.5, RGB 0,100,255)
-/particle hytale:particles.smoke 1.5 0 100 255
+# Blue fire charge (scale 1.5, RGB 0,100,255)
+/particle Fire_ChargeRed 1.5 0 100 255
 
-# Purple particles (RGB 200,0,200)
-/particle hytale:particles.smoke 1.0 200 0 200
+# Purple fire charge (RGB 200,0,200)
+/particle Fire_ChargeRed 1.0 200 0 200
 ```
 
 ## Particle Properties

@@ -11,7 +11,7 @@ Play sound effects to players using the sound system. HytaleJS supports both 2D 
 
 ```typescript
 const assetMap = SoundEvent.getAssetMap();
-const soundIndex = assetMap.getIndex("sound_id_here");
+const soundIndex = assetMap.getIndex("SFX_Global_Weather_Thunder");
 
 const packet = new PlaySoundEvent2D(
   soundIndex,
@@ -29,7 +29,7 @@ playerRef.getPacketHandler().write(packet);
 
 ```typescript
 const assetMap = SoundEvent.getAssetMap();
-const soundIndex = assetMap.getIndex("hytale:sfx.explosion");
+const soundIndex = assetMap.getIndex("SFX_Global_Weather_Thunder");
 
 // Create a position in world space
 const position = new Position(100, 64, -50);
@@ -50,7 +50,7 @@ playerRef.getPacketHandler().write(packet);
 Play a sound that follows an entity as it moves:
 
 ```typescript
-const soundIndex = SoundEvent.getAssetMap().getIndex("hytale:sfx.footstep.grass");
+const soundIndex = SoundEvent.getAssetMap().getIndex("SFX_Global_Weather_Thunder");
 
 const packet = new PlaySoundEventEntity(
   soundIndex,
