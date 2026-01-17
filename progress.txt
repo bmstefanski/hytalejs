@@ -65,13 +65,21 @@ Target: Port high-value gameplay APIs in batches of 1-3
 **Changes Made:**
 - Added Java bindings in HytaleJS.java for all 3 components
 - Added TypeScript types in packages/core/src/types.ts
-- Added /tp, /spin, and /myname commands in examples/kitchensink/src/demo.ts demonstrating:
-  - /tp: Teleport to coordinates using Transform manipulation
-  - /spin: Rotate player 180 degrees using Transform rotation
-  - /myname: Show player display name
 - Updated README.md with new Entity Components section
 - All builds pass: TypeScript (kitchensink) and Java (shadowJar)
 - Marked APIs as passes: true in discovered-apis.json
+
+**Type Corrections:**
+- Fixed DisplayNameComponent.getDisplayName() to return nullable (Message | null)
+- Fixed TransformComponent.getSentTransform() to return ModelTransform (was incorrectly Transform)
+- Fixed TransformComponent.getChunk() to be nullable
+- Added ModelTransform interface and Java binding
+- Added missing Vector3f public fields (x, y, z) and setter methods
+- Added PlayerRef.updatePosition() method to TypeScript types
+
+**Notes:**
+- No command examples for this batch - these are low-level component APIs not easily demoable
+- Updated plan with better API selection criteria to prioritize packet/asset classes over components
 
 **Verification:**
 - ✅ Example build: examples/kitchensink - PASSED

@@ -410,14 +410,26 @@ export interface Vector3i {
 }
 
 export interface Vector3f {
+  x: number;
+  y: number;
+  z: number;
   clone(): Vector3f;
   add(arg0: number, arg1: number, arg2: number): Vector3f;
   add(arg0: Vector3f): Vector3f;
   subtract(arg0: Vector3f): Vector3f;
   subtract(arg0: number, arg1: number, arg2: number): Vector3f;
-  getY(): number;
   getX(): number;
+  getY(): number;
   getZ(): number;
+  setX(x: number): void;
+  setY(y: number): void;
+  setZ(z: number): void;
+  getPitch(): number;
+  getYaw(): number;
+  getRoll(): number;
+  setPitch(pitch: number): void;
+  setYaw(yaw: number): void;
+  setRoll(roll: number): void;
 }
 
 export interface Vector3d {
@@ -882,6 +894,7 @@ export interface PlayerRef {
   getTransform(): Transform;
   getWorldUuid(): { toString(): string };
   getHeadRotation(): Vector3f;
+  updatePosition(world: World, transform: Transform, headRotation: Vector3f): void;
   getPacketHandler(): PacketHandler;
   referToServer(host: string, port: number): void;
   referToServer(host: string, port: number, data: unknown[]): void;
