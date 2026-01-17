@@ -624,24 +624,25 @@ export interface TransformConstructor {
     new (x: number, y: number, z: number, pitch: number, yaw: number, roll: number): Transform;
 }
 export interface Color {
-    getRed(): number;
-    getGreen(): number;
-    getBlue(): number;
+    red: number;
+    green: number;
+    blue: number;
+    clone(): Color;
 }
 export interface ColorConstructor {
     new (): Color;
-    new (r: number, g: number, b: number): Color;
+    new (red: number, green: number, blue: number): Color;
     new (other: Color): Color;
 }
 export interface ColorLight {
-    getRed(): number;
-    getGreen(): number;
-    getBlue(): number;
-    getAlpha(): number;
+    radius: number;
+    red: number;
+    green: number;
+    blue: number;
 }
 export interface ColorLightConstructor {
     new (): ColorLight;
-    new (r: number, g: number, b: number, a: number): ColorLight;
+    new (radius: number, red: number, green: number, blue: number): ColorLight;
     new (other: ColorLight): ColorLight;
 }
 export interface Vector2iConstructor {
@@ -726,6 +727,17 @@ export interface SoundEventClass {
     getAssetStore(): AssetStore;
     getAssetMap(): IndexedAssetMap<string, SoundEvent>;
 }
+export interface ParticleSystemAsset {
+    getId(): string;
+    getLifeSpan(): number;
+    getCullDistance(): number;
+    getBoundingRadius(): number;
+    isImportant(): boolean;
+}
+export interface ParticleSystemClass {
+    getAssetStore(): AssetStore;
+    getAssetMap(): DefaultAssetMap;
+}
 export interface SoundCategory {
     name(): string;
     ordinal(): number;
@@ -778,7 +790,102 @@ export interface PlayerRef {
     referToServer(host: string, port: number, data: unknown[]): void;
     sendMessage(message: Message): void;
 }
+export interface DynamicLight {
+    getColorLight(): ColorLight;
+    setColorLight(colorLight: ColorLight): void;
+    consumeNetworkOutdated(): boolean;
+    clone(): DynamicLight;
+}
+export interface DynamicLightConstructor {
+    new (): DynamicLight;
+    new (colorLight: ColorLight): DynamicLight;
+    getComponentType(): ComponentType;
+}
+export interface PersistentDynamicLight {
+    getColorLight(): ColorLight;
+    setColorLight(colorLight: ColorLight): void;
+    clone(): PersistentDynamicLight;
+}
+export interface PersistentDynamicLightConstructor {
+    new (colorLight: ColorLight): PersistentDynamicLight;
+    getComponentType(): ComponentType;
+}
+export interface Position {
+    x: number;
+    y: number;
+    z: number;
+    clone(): Position;
+}
+export interface PositionConstructor {
+    new (): Position;
+    new (x: number, y: number, z: number): Position;
+    new (other: Position): Position;
+}
+export interface Direction {
+    yaw: number;
+    pitch: number;
+    roll: number;
+    clone(): Direction;
+}
+export interface DirectionConstructor {
+    new (): Direction;
+    new (yaw: number, pitch: number, roll: number): Direction;
+    new (other: Direction): Direction;
+}
+export interface PlaySoundEvent3D {
+    soundEventIndex: number;
+    category: SoundCategory;
+    position: Position;
+    volumeModifier: number;
+    pitchModifier: number;
+    getId(): number;
+    clone(): PlaySoundEvent3D;
+}
+export interface PlaySoundEvent3DConstructor {
+    new (): PlaySoundEvent3D;
+    new (soundEventIndex: number, category: SoundCategory, position: Position, volumeModifier: number, pitchModifier: number): PlaySoundEvent3D;
+    new (other: PlaySoundEvent3D): PlaySoundEvent3D;
+}
+export interface PlaySoundEventEntity {
+    soundEventIndex: number;
+    networkId: number;
+    volumeModifier: number;
+    pitchModifier: number;
+    getId(): number;
+    clone(): PlaySoundEventEntity;
+}
+export interface PlaySoundEventEntityConstructor {
+    new (): PlaySoundEventEntity;
+    new (soundEventIndex: number, networkId: number, volumeModifier: number, pitchModifier: number): PlaySoundEventEntity;
+    new (other: PlaySoundEventEntity): PlaySoundEventEntity;
+}
+export interface SpawnParticleSystem {
+    particleSystemId: string;
+    position: Position;
+    rotation: Direction;
+    scale: number;
+    color: Color;
+    getId(): number;
+    clone(): SpawnParticleSystem;
+}
+export interface SpawnParticleSystemConstructor {
+    new (): SpawnParticleSystem;
+    new (particleSystemId: string, position: Position, rotation: Direction, scale: number, color: Color): SpawnParticleSystem;
+    new (other: SpawnParticleSystem): SpawnParticleSystem;
+}
+export interface JavaClass<T> {
+    new (...args: unknown[]): T;
+    class: unknown;
+}
+export interface JavaByteClass {
+    valueOf(value: number): number;
+}
+export interface JavaInterop {
+    type(className: "java.lang.Byte"): JavaByteClass;
+    type<T = unknown>(className: string): JavaClass<T>;
+}
 declare global {
+    const Java: JavaInterop;
     const logger: ScriptLogger;
     const plugin: unknown;
     const commands: ScriptCommandRegistry;
@@ -802,5 +909,13 @@ declare global {
     const SoundEvent: SoundEventClass;
     const SoundCategory: SoundCategoryEnum;
     const PlaySoundEvent2D: PlaySoundEvent2DConstructor;
+    const DynamicLight: DynamicLightConstructor;
+    const PersistentDynamicLight: PersistentDynamicLightConstructor;
+    const Position: PositionConstructor;
+    const Direction: DirectionConstructor;
+    const PlaySoundEvent3D: PlaySoundEvent3DConstructor;
+    const PlaySoundEventEntity: PlaySoundEventEntityConstructor;
+    const SpawnParticleSystem: SpawnParticleSystemConstructor;
+    const ParticleSystem: ParticleSystemClass;
 }
 //# sourceMappingURL=types.d.ts.map
