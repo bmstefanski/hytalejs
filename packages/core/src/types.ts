@@ -985,6 +985,19 @@ export interface SpawnParticleSystemConstructor {
   new(other: SpawnParticleSystem): SpawnParticleSystem;
 }
 
+export interface ModelTransform {
+  position: Position | null;
+  bodyOrientation: Direction | null;
+  lookOrientation: Direction | null;
+  clone(): ModelTransform;
+}
+
+export interface ModelTransformConstructor {
+  new(): ModelTransform;
+  new(position: Position | null, bodyOrientation: Direction | null, lookOrientation: Direction | null): ModelTransform;
+  new(other: ModelTransform): ModelTransform;
+}
+
 export interface AudioComponent {
   getComponentType(): ComponentType;
   getSoundEventIds(): number[];
@@ -1000,7 +1013,7 @@ export interface AudioComponentConstructor {
 
 export interface DisplayNameComponent {
   getComponentType(): ComponentType;
-  getDisplayName(): Message;
+  getDisplayName(): Message | null;
   clone(): DisplayNameComponent;
 }
 
@@ -1019,8 +1032,8 @@ export interface TransformComponent {
   setRotation(rotation: Vector3f): void;
   getTransform(): Transform;
   teleportRotation(rotation: Vector3f): void;
-  getSentTransform(): Transform;
-  getChunk(): unknown;
+  getSentTransform(): ModelTransform;
+  getChunk(): unknown | null;
 }
 
 export interface TransformComponentConstructor {
@@ -1075,6 +1088,7 @@ declare global {
   const PlaySoundEventEntity: PlaySoundEventEntityConstructor;
   const SpawnParticleSystem: SpawnParticleSystemConstructor;
   const ParticleSystem: ParticleSystemClass;
+  const ModelTransform: ModelTransformConstructor;
   const AudioComponent: AudioComponentConstructor;
   const DisplayNameComponent: DisplayNameComponentConstructor;
   const TransformComponent: TransformComponentConstructor;

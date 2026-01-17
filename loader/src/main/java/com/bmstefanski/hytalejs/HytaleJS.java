@@ -74,6 +74,7 @@ public class HytaleJS extends JavaPlugin {
 
     jsContext.getBindings("js").putMember("Position", jsContext.eval("js", "Java.type('com.hypixel.hytale.protocol.Position')"));
     jsContext.getBindings("js").putMember("Direction", jsContext.eval("js", "Java.type('com.hypixel.hytale.protocol.Direction')"));
+    jsContext.getBindings("js").putMember("ModelTransform", jsContext.eval("js", "Java.type('com.hypixel.hytale.protocol.ModelTransform')"));
     jsContext.getBindings("js").putMember("PlaySoundEvent3D", jsContext.eval("js", "Java.type('com.hypixel.hytale.protocol.packets.world.PlaySoundEvent3D')"));
     jsContext.getBindings("js").putMember("PlaySoundEventEntity", jsContext.eval("js", "Java.type('com.hypixel.hytale.protocol.packets.world.PlaySoundEventEntity')"));
     jsContext.getBindings("js").putMember("SpawnParticleSystem", jsContext.eval("js", "Java.type('com.hypixel.hytale.protocol.packets.world.SpawnParticleSystem')"));
