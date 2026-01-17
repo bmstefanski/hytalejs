@@ -1054,6 +1054,38 @@ export interface TransformComponentConstructor {
   getComponentType(): ComponentType;
 }
 
+export interface ActiveEntityEffect {
+  getEntityEffectIndex(): number;
+  getInitialDuration(): number;
+  getRemainingDuration(): number;
+  isInfinite(): boolean;
+  isDebuff(): boolean;
+  isInvulnerable(): boolean;
+  toString(): string;
+}
+
+export interface ActiveEntityEffectConstructor {
+  new(): ActiveEntityEffect;
+  new(entityEffectId: string, entityEffectIndex: number, duration: number, debuff: boolean, statusEffectIcon: string | null, invulnerable: boolean): ActiveEntityEffect;
+  new(entityEffectId: string, entityEffectIndex: number, infinite: boolean, invulnerable: boolean): ActiveEntityEffect;
+}
+
+export interface CameraManager {
+  getComponentType(): ComponentType;
+  resetCamera(ref: PlayerRef): void;
+  getLastScreenPoint(): Vector2d;
+  setLastScreenPoint(lastScreenPoint: Vector2d): void;
+  setLastBlockPosition(targetBlock: Vector3i): void;
+  getLastTargetBlock(): Vector3i | null;
+  clone(): CameraManager;
+  toString(): string;
+}
+
+export interface CameraManagerConstructor {
+  new(): CameraManager;
+  getComponentType(): ComponentType;
+}
+
 export interface JavaClass<T> {
   new(...args: unknown[]): T;
   class: unknown;
@@ -1105,4 +1137,6 @@ declare global {
   const AudioComponent: AudioComponentConstructor;
   const DisplayNameComponent: DisplayNameComponentConstructor;
   const TransformComponent: TransformComponentConstructor;
+  const ActiveEntityEffect: ActiveEntityEffectConstructor;
+  const CameraManager: CameraManagerConstructor;
 }

@@ -84,6 +84,9 @@ public class HytaleJS extends JavaPlugin {
     jsContext.getBindings("js").putMember("DisplayNameComponent", jsContext.eval("js", "Java.type('com.hypixel.hytale.server.core.modules.entity.component.DisplayNameComponent')"));
     jsContext.getBindings("js").putMember("TransformComponent", jsContext.eval("js", "Java.type('com.hypixel.hytale.server.core.modules.entity.component.TransformComponent')"));
 
+    jsContext.getBindings("js").putMember("ActiveEntityEffect", jsContext.eval("js", "Java.type('com.hypixel.hytale.server.core.entity.effect.ActiveEntityEffect')"));
+    jsContext.getBindings("js").putMember("CameraManager", jsContext.eval("js", "Java.type('com.hypixel.hytale.server.core.entity.entities.player.CameraManager')"));
+
     loadScripts();
   }
 

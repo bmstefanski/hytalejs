@@ -86,6 +86,29 @@ Target: Port high-value gameplay APIs in batches of 1-3
 - ✅ Java build: loader shadowJar - PASSED
 - ✅ deploy.sh completed successfully
 
+### Batch 4 - Entity Effect and Camera APIs (2 APIs)
+**Date:** 2026-01-17
+**APIs Ported:**
+- ActiveEntityEffect (com.hypixel.hytale.server.core.entity.effect.ActiveEntityEffect)
+- CameraManager (com.hypixel.hytale.server.core.entity.entities.player.CameraManager)
+
+**Changes Made:**
+- Added Java bindings in HytaleJS.java for both APIs
+- Added TypeScript types in packages/core/src/types.ts
+- Updated README.md Entity Components section
+- All builds pass: TypeScript (kitchensink) and Java (shadowJar)
+- Marked APIs as passes: true in discovered-apis.json
+
+**Notes:**
+- No command examples for this batch - these are ECS component APIs not easily accessible from command context
+- ActiveEntityEffect represents runtime effect instances on entities
+- CameraManager tracks player camera state and target blocks
+
+**Verification:**
+- ✅ Example build: examples/kitchensink - PASSED
+- ✅ Java build: loader shadowJar - PASSED
+- ✅ deploy.sh completed successfully
+
 ## Notes
 - Follow exact binding pattern from HytaleJS.java
 - Every API must have working example in demo.ts

@@ -55,6 +55,8 @@ TypeScript/JavaScript scripting for Hytale servers. Write plugins with full type
 - [x] **AudioComponent** - Add sounds to entities
 - [x] **DisplayNameComponent** - Entity display name management
 - [x] **TransformComponent** - Entity position and rotation manipulation
+- [x] **ActiveEntityEffect** - Query active effects on entities (duration, type, properties)
+- [x] **CameraManager** - Player camera state and target block tracking
 
 ### Audio
 - [x] **SoundEvent** - Sound event definitions
