@@ -130,7 +130,7 @@ public class HytaleJSCommand extends CommandBase {
   }
 
   private void showTasks(CommandContext context) {
-    List<ContextPool.QueuedOperation> queued = plugin.getQueuedOperations();
+    List<ScriptRuntimePool.QueuedOperation> queued = plugin.getQueuedOperations();
 
     context.sendMessage(Message.empty()
       .insert(Message.raw("--- ").color(COLOR_ACCENT))
@@ -146,7 +146,7 @@ public class HytaleJSCommand extends CommandBase {
     }
 
     for (int i = 0; i < queued.size(); i++) {
-      ContextPool.QueuedOperation op = queued.get(i);
+      ScriptRuntimePool.QueuedOperation op = queued.get(i);
       String waitTime = formatWaitTime(op.getWaitTimeMs());
       String icon = getOperationIcon(op.getOperation());
 
@@ -215,4 +215,3 @@ public class HytaleJSCommand extends CommandBase {
     return bar.toString();
   }
 }
-
