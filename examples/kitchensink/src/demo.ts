@@ -20,6 +20,9 @@ import {
   registerSetBlockCommand,
   registerBreakBlockCommand,
   registerGetBlockCommand,
+  registerSphereCommand,
+  registerPyramidCommand,
+  registerWallCommand,
 } from "./commands";
 
 import { startAutoMessages } from "./schedulers/auto-messages";
@@ -43,5 +46,8 @@ registerParticleListCommand();
 registerSetBlockCommand();
 registerBreakBlockCommand();
 registerGetBlockCommand();
+registerSphereCommand();
+registerPyramidCommand();
+registerWallCommand();
 
 startAutoMessages();

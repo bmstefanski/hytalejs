@@ -13,3 +13,6 @@ export { registerParticleListCommand } from "./particlelist";
 export { registerSetBlockCommand } from "./setblock";
 export { registerBreakBlockCommand } from "./breakblock";
 export { registerGetBlockCommand } from "./getblock";
+export { registerSphereCommand } from "./sphere";
+export { registerPyramidCommand } from "./pyramid";
+export { registerWallCommand } from "./wall";
