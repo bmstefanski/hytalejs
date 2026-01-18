@@ -18,3 +18,6 @@ ralph-loop.sh
 ralph-once.sh
 API_DISCOVERY_REPORT.md
 discovered-apis.json
+
+# Planning directory
+plns/

@@ -3861,34 +3861,8 @@ export interface SnapshotBuffer {
   clone(): unknown;
 }
 
-export interface SnapshotProvider {
-  fork(chainData: unknown, type: unknown, context: unknown, rootInteraction: unknown, waitForCompletion: boolean): unknown;
-  duplicate(): unknown;
-  getEntity(): unknown;
-  getOwningEntity(): unknown;
-  execute(commands: unknown[]): void;
-  getChain(): unknown;
-  getEntry(): unknown;
-  getOperationCounter(): number;
-  setOperationCounter(value: number): void;
-  jump(label: string): void;
-}
-
 export interface SnapshotSystems {
   new (): SnapshotSystems;
-}
-
-export interface Source {
-  getDamageCauseIndex(): number;
-  setDamageCauseIndex(index: number): void;
-  getCause(): unknown;
-  getSource(): unknown;
-  setSource(source: unknown): void;
-  getAmount(): number;
-  setAmount(amount: number): void;
-  getInitialAmount(): number;
-  getDeathMessage(): unknown;
-  getMetaStore(): unknown;
 }
 
 export interface SprintingCondition {
@@ -5909,9 +5883,7 @@ declare global {
   const ServerPlayerListModule: ServerPlayerListModule;
   const SingleplayerRequestAccessEvent: SingleplayerRequestAccessEvent;
   const SnapshotBuffer: SnapshotBuffer;
-  const SnapshotProvider: SnapshotProvider;
   const SnapshotSystems: SnapshotSystems;
-  const Source: Source;
   const SprintingCondition: SprintingCondition;
   const SprintStaminaRegenDelay: SprintStaminaRegenDelay;
   const StabSelector: StabSelector;

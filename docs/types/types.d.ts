@@ -3336,18 +3336,6 @@ export interface SnapshotBuffer {
     getOldestTickIndex(): number;
     clone(): unknown;
 }
-export interface SnapshotProvider {
-    fork(chainData: unknown, type: unknown, context: unknown, rootInteraction: unknown, waitForCompletion: boolean): unknown;
-    duplicate(): unknown;
-    getEntity(): unknown;
-    getOwningEntity(): unknown;
-    execute(commands: unknown[]): void;
-    getChain(): unknown;
-    getEntry(): unknown;
-    getOperationCounter(): number;
-    setOperationCounter(value: number): void;
-    jump(label: string): void;
-}
 export interface SnapshotSystems {
     new (): SnapshotSystems;
 }
@@ -5118,7 +5106,6 @@ declare global {
     const ServerPlayerListModule: ServerPlayerListModule;
     const SingleplayerRequestAccessEvent: SingleplayerRequestAccessEvent;
     const SnapshotBuffer: SnapshotBuffer;
-    const SnapshotProvider: SnapshotProvider;
     const SnapshotSystems: SnapshotSystems;
     const Source: Source;
     const SprintingCondition: SprintingCondition;

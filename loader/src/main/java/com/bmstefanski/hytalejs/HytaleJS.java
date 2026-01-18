@@ -427,9 +427,7 @@ public class HytaleJS extends JavaPlugin {
 
     jsContext.getBindings("js").putMember("SingleplayerRequestAccessEvent", jsContext.eval("js", "Java.type('com.hypixel.hytale.server.core.modules.singleplayer.SingleplayerRequestAccessEvent')"));
     jsContext.getBindings("js").putMember("SnapshotBuffer", jsContext.eval("js", "Java.type('com.hypixel.hytale.server.core.modules.entity.component.SnapshotBuffer')"));
-    jsContext.getBindings("js").putMember("SnapshotProvider", jsContext.eval("js", "Java.type('com.hypixel.hytale.server.core.entity.SnapshotProvider')"));
     jsContext.getBindings("js").putMember("SnapshotSystems", jsContext.eval("js", "Java.type('com.hypixel.hytale.server.core.modules.entity.system.SnapshotSystems')"));
-    jsContext.getBindings("js").putMember("Source", jsContext.eval("js", "Java.type('com.hypixel.hytale.server.core.modules.entity.damage.Source')"));
     jsContext.getBindings("js").putMember("SprintingCondition", jsContext.eval("js", "Java.type('com.hypixel.hytale.server.core.modules.entitystats.asset.condition.SprintingCondition')"));
     jsContext.getBindings("js").putMember("SprintStaminaRegenDelay", jsContext.eval("js", "Java.type('com.hypixel.hytale.server.core.modules.entity.stamina.SprintStaminaRegenDelay')"));
     jsContext.getBindings("js").putMember("StabSelector", jsContext.eval("js", "Java.type('com.hypixel.hytale.server.core.modules.interaction.interaction.config.selector.StabSelector')"));
