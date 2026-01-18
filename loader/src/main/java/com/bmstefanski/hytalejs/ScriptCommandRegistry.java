@@ -3,13 +3,21 @@ package com.bmstefanski.hytalejs;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import org.graalvm.polyglot.Value;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 
 public class ScriptCommandRegistry {
   private final JavaPlugin plugin;
+  private final Set<String> registeredCommandNames = new HashSet<>();
+  private ContextPool contextPool;
 
   public ScriptCommandRegistry(JavaPlugin plugin) {
     this.plugin = plugin;
+  }
+
+  public void setContextPool(ContextPool contextPool) {
+    this.contextPool = contextPool;
   }
 
   public void register(String name, String description, Value callback) {
@@ -26,9 +34,16 @@ public class ScriptCommandRegistry {
       return;
     }
 
-    ScriptCommand command = permission != null && !permission.isEmpty()
-      ? new ScriptCommand(name, description, permission, callback)
-      : new ScriptCommand(name, description, callback);
+    callback.getContext().getBindings("js").getMember("__commandCallbacks__").putMember(name, callback);
+
+    if (registeredCommandNames.contains(name)) {
+      return;
+    }
+    registeredCommandNames.add(name);
+
+    PooledScriptCommand command = permission != null && !permission.isEmpty()
+      ? new PooledScriptCommand(name, description, permission, contextPool)
+      : new PooledScriptCommand(name, description, contextPool);
     plugin.getCommandRegistry().registerCommand(command);
     plugin.getLogger().at(Level.INFO).log("Registered command: /%s%s", name,
       permission != null && !permission.isEmpty() ? " (requires: " + permission + ")" : "");

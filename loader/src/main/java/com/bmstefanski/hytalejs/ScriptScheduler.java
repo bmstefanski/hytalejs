@@ -4,15 +4,49 @@ import com.hypixel.hytale.server.core.HytaleServer;
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.HostAccess;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 public class ScriptScheduler {
+  private static final Logger LOGGER = Logger.getLogger("HytaleJS|Scheduler");
+  private ContextPool contextPool;
+  private final ConcurrentHashMap<String, ScriptTask> scheduledTasks = new ConcurrentHashMap<>();
+
+  public void setContextPool(ContextPool contextPool) {
+    this.contextPool = contextPool;
+  }
+
+  private String getCallbackKey(Value callback) {
+    return "cb_" + System.identityHashCode(callback);
+  }
 
   @HostAccess.Export
   public ScriptTask runLater(Value callback, long delayMs) {
+    String key = getCallbackKey(callback) + "_later_" + delayMs + "_" + System.currentTimeMillis();
+    callback.getContext().getBindings("js").getMember("__schedulerCallbacks__").putMember(key, callback);
+
     ScheduledFuture<?> future = HytaleServer.SCHEDULED_EXECUTOR.schedule(
-      () -> callback.executeVoid(),
+      () -> {
+        try {
+          if (contextPool != null) {
+            contextPool.executeInContext((ContextPool.ContextRunnable) ctx -> {
+              Value callbacks = ctx.getBindings("js").getMember("__schedulerCallbacks__");
+              Value cb = callbacks.getMember(key);
+              if (cb != null && cb.canExecute()) {
+                cb.executeVoid();
+                callbacks.removeMember(key);
+              }
+            });
+          } else {
+            callback.executeVoid();
+          }
+        } catch (Exception e) {
+          LOGGER.log(Level.SEVERE, "Error in runLater task", e);
+        }
+      },
       delayMs,
       TimeUnit.MILLISECONDS
     );
@@ -21,24 +55,78 @@ public class ScriptScheduler {
 
   @HostAccess.Export
   public ScriptTask runRepeating(Value callback, long delayMs, long periodMs) {
+    String key = getCallbackKey(callback) + "_repeat_" + delayMs + "_" + periodMs;
+
+    ScriptTask existing = scheduledTasks.get(key);
+    if (existing != null) {
+      return existing;
+    }
+
+    callback.getContext().getBindings("js").getMember("__schedulerCallbacks__").putMember(key, callback);
+
     ScheduledFuture<?> future = HytaleServer.SCHEDULED_EXECUTOR.scheduleAtFixedRate(
-      () -> callback.executeVoid(),
+      () -> {
+        try {
+          if (contextPool != null) {
+            contextPool.executeInContext((ContextPool.ContextRunnable) ctx -> {
+              Value callbacks = ctx.getBindings("js").getMember("__schedulerCallbacks__");
+              Value cb = callbacks.getMember(key);
+              if (cb != null && cb.canExecute()) {
+                cb.executeVoid();
+              }
+            });
+          } else {
+            callback.executeVoid();
+          }
+        } catch (Exception e) {
+          LOGGER.log(Level.SEVERE, "Error in runRepeating task", e);
+        }
+      },
       delayMs,
       periodMs,
       TimeUnit.MILLISECONDS
     );
-    return new ScriptTask(future);
+    ScriptTask task = new ScriptTask(future);
+    scheduledTasks.put(key, task);
+    return task;
   }
 
   @HostAccess.Export
   public ScriptTask runRepeatingWithDelay(Value callback, long delayMs, long periodMs) {
+    String key = getCallbackKey(callback) + "_repeatdelay_" + delayMs + "_" + periodMs;
+
+    ScriptTask existing = scheduledTasks.get(key);
+    if (existing != null) {
+      return existing;
+    }
+
+    callback.getContext().getBindings("js").getMember("__schedulerCallbacks__").putMember(key, callback);
+
     ScheduledFuture<?> future = HytaleServer.SCHEDULED_EXECUTOR.scheduleWithFixedDelay(
-      () -> callback.executeVoid(),
+      () -> {
+        try {
+          if (contextPool != null) {
+            contextPool.executeInContext((ContextPool.ContextRunnable) ctx -> {
+              Value callbacks = ctx.getBindings("js").getMember("__schedulerCallbacks__");
+              Value cb = callbacks.getMember(key);
+              if (cb != null && cb.canExecute()) {
+                cb.executeVoid();
+              }
+            });
+          } else {
+            callback.executeVoid();
+          }
+        } catch (Exception e) {
+          LOGGER.log(Level.SEVERE, "Error in runRepeatingWithDelay task", e);
+        }
+      },
       delayMs,
       periodMs,
       TimeUnit.MILLISECONDS
     );
-    return new ScriptTask(future);
+    ScriptTask task = new ScriptTask(future);
+    scheduledTasks.put(key, task);
+    return task;
   }
 
   public static class ScriptTask {

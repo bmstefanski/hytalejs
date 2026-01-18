@@ -4,16 +4,18 @@ import com.hypixel.hytale.event.IEvent;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import org.graalvm.polyglot.Value;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
 public class ScriptEventRegistry {
   private final JavaPlugin plugin;
-  private final List<RegisteredHandler> registeredHandlers = new ArrayList<>();
+  private final Set<String> registeredEventTypes = new HashSet<>();
+  private int handlerCount = 0;
+  private ContextPool contextPool;
 
   private static final Map<String, String> EVENT_CLASSES = new HashMap<>();
 
@@ -62,6 +64,10 @@ public class ScriptEventRegistry {
     this.plugin = plugin;
   }
 
+  public void setContextPool(ContextPool contextPool) {
+    this.contextPool = contextPool;
+  }
+
   @SuppressWarnings("unchecked")
   public void registerHandler(String eventType, Value callback) {
     String className = EVENT_CLASSES.get(eventType);
@@ -75,12 +81,26 @@ public class ScriptEventRegistry {
       return;
     }
 
+    callback.getContext().getBindings("js").getMember("__eventCallbacks__").putMember(eventType, callback);
+    handlerCount++;
+
+    if (registeredEventTypes.contains(eventType)) {
+      return;
+    }
+    registeredEventTypes.add(eventType);
+
     try {
       Class<?> eventClass = Class.forName(className);
 
       Consumer<Object> handler = event -> {
         try {
-          callback.execute(event);
+          contextPool.executeInContext(ctx -> {
+            Value callbacks = ctx.getBindings("js").getMember("__eventCallbacks__");
+            Value cb = callbacks.getMember(eventType);
+            if (cb != null && cb.canExecute()) {
+              cb.execute(event);
+            }
+          });
         } catch (Exception e) {
           plugin.getLogger().at(Level.SEVERE).withCause(e).log("Error executing handler for %s", eventType);
         }
@@ -91,7 +111,6 @@ public class ScriptEventRegistry {
         (Consumer<IEvent<Void>>) (Consumer<?>) handler
       );
 
-      registeredHandlers.add(new RegisteredHandler(eventType, callback));
       plugin.getLogger().at(Level.INFO).log("Registered handler for event: %s", eventType);
 
     } catch (ClassNotFoundException e) {
@@ -116,7 +135,7 @@ public class ScriptEventRegistry {
   }
 
   public int getHandlerCount() {
-    return registeredHandlers.size();
+    return handlerCount;
   }
 
   public static boolean isValidEventType(String eventType) {
@@ -125,8 +144,5 @@ public class ScriptEventRegistry {
 
   public static String[] getAvailableEvents() {
     return EVENT_CLASSES.keySet().toArray(new String[0]);
-  }
-
-  private record RegisteredHandler(String eventType, Value callback) {
   }
 }
