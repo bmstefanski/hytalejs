@@ -59,34 +59,19 @@ public class HytaleJS extends JavaPlugin {
   }
 
   private ScriptRuntimePool createRuntimePool(HytaleJSConfig config) {
-    String engine = config.getEngine() == null ? "graal" : config.getEngine().toLowerCase();
-    if (engine.equals("javet")) {
-      JavetRuntimePool.RuntimeType runtimeType = parseJavetRuntimeType(config);
+    String runtime = config.getRuntime() == null ? "graal" : config.getRuntime().toLowerCase();
+    if (runtime.equals("javet")) {
       JavetNativeLibraryManager.prepare(config, getDataDirectory(), getLogger());
-      getLogger().at(Level.INFO).log("Initializing Javet runtime pool (%s)", runtimeType.name());
-      return new JavetRuntimePool(config.getPoolSize(), runtimeType, this::setupBindings);
+      getLogger().at(Level.INFO).log("Initializing Javet runtime pool (V8)");
+      return new JavetRuntimePool(config.getPoolSize(), this::setupBindings);
     }
 
-    if (!engine.equals("graal")) {
-      getLogger().at(Level.WARNING).log("Unknown engine '%s', defaulting to GraalJS", engine);
+    if (!runtime.equals("graal")) {
+      getLogger().at(Level.WARNING).log("Unknown runtime '%s', defaulting to GraalJS", runtime);
     }
 
     getLogger().at(Level.INFO).log("Initializing GraalJS runtime pool");
     return new GraalRuntimePool(config.getPoolSize(), this::setupBindings);
-  }
-
-  private JavetRuntimePool.RuntimeType parseJavetRuntimeType(HytaleJSConfig config) {
-    String runtime = config.getJavet() != null && config.getJavet().getRuntime() != null
-      ? config.getJavet().getRuntime().toLowerCase()
-      : "v8";
-    if (runtime.equals("node")) {
-      getLogger().at(Level.WARNING).log("Javet Node runtime is not bundled; defaulting to V8");
-      return JavetRuntimePool.RuntimeType.V8;
-    }
-    if (!runtime.equals("v8")) {
-      getLogger().at(Level.WARNING).log("Unknown Javet runtime '%s', defaulting to V8", runtime);
-    }
-    return JavetRuntimePool.RuntimeType.V8;
   }
 
   private void setupBindings(ScriptRuntime runtime) {

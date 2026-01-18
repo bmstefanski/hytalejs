@@ -12,18 +12,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Consumer;
 
 public class JavetRuntimePool implements ScriptRuntimePool {
-  public enum RuntimeType {
-    V8,
-    NODE
-  }
-
   private final V8Host host;
   private final List<ScriptRuntime> allRuntimes;
   private final BlockingQueue<ScriptRuntime> available;
   private final ConcurrentHashMap<Thread, PendingRequest> pendingRequests = new ConcurrentHashMap<>();
 
-  public JavetRuntimePool(int size, RuntimeType runtimeType, Consumer<ScriptRuntime> runtimeInitializer) {
-    host = runtimeType == RuntimeType.NODE ? V8Host.getNodeInstance() : V8Host.getV8Instance();
+  public JavetRuntimePool(int size, Consumer<ScriptRuntime> runtimeInitializer) {
+    host = V8Host.getV8Instance();
     allRuntimes = new ArrayList<>(size);
     available = new LinkedBlockingQueue<>(size);
 

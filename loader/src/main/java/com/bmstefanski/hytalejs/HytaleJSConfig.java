@@ -2,6 +2,7 @@ package com.bmstefanski.hytalejs;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.annotations.SerializedName;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,21 +16,22 @@ public class HytaleJSConfig {
   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
   private int poolSize = DEFAULT_POOL_SIZE;
-  private String engine = "graal";
+  @SerializedName(value = "runtime", alternate = {"engine"})
+  private String runtime = "graal";
   private JavetConfig javet = new JavetConfig();
 
   public static HytaleJSConfig load(Path configPath) {
     if (!Files.exists(configPath)) {
       HytaleJSConfig config = new HytaleJSConfig();
       config.save(configPath);
-      LOGGER.log(Level.INFO, "Created default config.json with poolSize: " + DEFAULT_POOL_SIZE + ", engine: " + config.engine);
+      LOGGER.log(Level.INFO, "Created default config.json with poolSize: " + DEFAULT_POOL_SIZE + ", runtime: " + config.runtime);
       return config;
     }
 
     try {
       String content = Files.readString(configPath);
       HytaleJSConfig config = GSON.fromJson(content, HytaleJSConfig.class);
-      LOGGER.log(Level.INFO, "Loaded config.json with poolSize: " + config.poolSize + ", engine: " + config.engine);
+      LOGGER.log(Level.INFO, "Loaded config.json with poolSize: " + config.poolSize + ", runtime: " + config.runtime);
       return config;
     } catch (Exception e) {
       LOGGER.log(Level.WARNING, "Failed to load config.json, using defaults", e);
@@ -50,8 +52,8 @@ public class HytaleJSConfig {
     return poolSize;
   }
 
-  public String getEngine() {
-    return engine;
+  public String getRuntime() {
+    return runtime;
   }
 
   public JavetConfig getJavet() {
@@ -59,13 +61,8 @@ public class HytaleJSConfig {
   }
 
   public static class JavetConfig {
-    private String runtime = "v8";
     private boolean download = true;
     private String downloadBaseUrl = "https://repo1.maven.org/maven2";
-
-    public String getRuntime() {
-      return runtime;
-    }
 
     public boolean isDownloadEnabled() {
       return download;
