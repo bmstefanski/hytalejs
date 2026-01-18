@@ -3,8 +3,8 @@
   "pages": [
     "index",
     "getting-started",
-    "guides",
     "concurrency",
+    "guides",
     "api"
   ]
 }

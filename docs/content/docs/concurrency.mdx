@@ -123,7 +123,10 @@ A long task is any synchronous operation that holds a context for an extended pe
 
 **Common Long Task Patterns**
 
-1. **Large Loops** - The `/sphere` command example:
+1. **Large Loops** - Building structures with nested iterations
+
+The `/sphere` command creates a hollow sphere by iterating through a 3D volume to find blocks at the sphere's surface.
+
 ```typescript
 // Creates ~3,700 blocks for radius 30
 for (let x = -radius; x <= radius; x++) {
@@ -140,7 +143,10 @@ for (let x = -radius; x <= radius; x++) {
 ```
 For radius 30: ~61³ = 226,981 iterations to find ~3,700 blocks to place.
 
-2. **Heavy Computations** - Complex calculations without yielding:
+2. **Heavy Computations** - CPU-intensive calculations that run synchronously
+
+Mathematical operations or data processing that doesn't interact with the game world but takes significant CPU time.
+
 ```typescript
 // Bad: blocks context for entire calculation
 let result = 0;
@@ -149,7 +155,10 @@ for (let i = 0; i < 1000000; i++) {
 }
 ```
 
-3. **Sequential World Operations** - Multiple expensive calls in succession:
+3. **Sequential World Operations** - Multiple expensive API calls in a loop
+
+Reading or modifying many blocks in sequence without batching.
+
 ```typescript
 // Each operation holds context
 for (let i = 0; i < 100; i++) {
@@ -170,70 +179,11 @@ for (let i = 0; i < 100; i++) {
 
 **`/hytalejs poolstats`** - View context pool statistics and current usage
 
-_[Screenshot: /hytalejs poolstats output]_
+![](./pool-stats.png)
 
 **`/hytalejs tasks`** - Show operations waiting in queue
 
-_[Screenshot: /hytalejs tasks output]_
-
-## Technical Implementation Details
-
-**Context Pool Implementation**
-
-HytaleJS creates a pool of isolated GraalJS contexts at startup. Each context:
-- Shares a common GraalJS Engine for compilation cache efficiency
-- Has identical JavaScript bindings (`plugin`, `logger`, `commands`, etc.)
-- Loads the same script code
-- Stores callbacks in context-local storage (`__commandCallbacks__`, `__eventCallbacks__`, `__schedulerCallbacks__`)
-
-**Callback Storage & Execution**
-
-When a script registers a handler:
-```typescript
-commands.register("hello", "Say hello", (ctx) => {
-  ctx.sendMessage("Hello!");
-});
-```
-
-1. The callback is stored in the calling context's `__commandCallbacks__` object
-2. Command is registered with Hytale's command system
-3. All other contexts in the pool also load the script and store their own callback references
-
-When the command executes:
-1. Hytale dispatches to Java handler
-2. Handler acquires available context from pool
-3. Looks up callback in that context's `__commandCallbacks__`
-4. Executes callback
-5. Releases context back to pool
-
-**Threading Model**
-
-```
-Operation Request
-    │
-    ▼
-┌─────────────────┐
-│ Acquire Context │──── Blocks if all contexts busy
-└────────┬────────┘
-         │
-         ▼
-    ctx.enter() ──────── Marks context as owned by current thread
-         │
-         ▼
-┌─────────────────┐
-│ Execute JS Code │
-└────────┬────────┘
-         │
-         ▼
-    ctx.leave() ──────── Releases context ownership
-         │
-         ▼
-┌─────────────────┐
-│ Return to Pool  │
-└─────────────────┘
-```
-
-This follows GraalJS's threading requirements: contexts can be accessed from different threads, but only one thread at a time via `enter()`/`leave()`.
+![](./queued-tasks.png)
 
 ## Limitations & Pool Exhaustion
 
@@ -283,6 +233,5 @@ Edit this value and restart the server to apply changes.
 ## References
 
 - [GraalVM Multithreading Documentation](https://www.graalvm.org/latest/reference-manual/js/Multithreading/)
-- [Multi-threaded Java-JavaScript Interoperability in GraalVM](https://medium.com/graalvm/multi-threaded-java-javascript-language-interoperability-in-graalvm-2f19c1f9c37b)
 - [Node.js Event Loop](https://nodejs.org/en/learn/asynchronous-work/event-loop-timers-and-nexttick)
 - [Node.js: Don't Block the Event Loop](https://nodejs.org/en/learn/asynchronous-work/dont-block-the-event-loop)
