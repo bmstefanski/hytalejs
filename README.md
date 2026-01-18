@@ -17,61 +17,20 @@ TypeScript/JavaScript scripting for Hytale servers. Write plugins with full type
 - 🔊 **Sound API** - Play sounds to players
 - 📦 **Direct Java Bindings** - Access the full Hytale server API
 
-## Documentation
-
-📚 **[Complete API Documentation](docs/API.md)** - Detailed reference for all APIs with examples
-
 ## Supported APIs
 
-### Core APIs
-- [x] **Universe** - Server universe and world management
-- [x] **HytaleServer** - Server instance and controls
-- [x] **Message** - Chat message creation and formatting
-- [x] **Player** - Player manipulation and queries
-- [x] **World** - World manipulation and queries
+HytaleJS provides bindings to all major Hytale APIs (528+ supported APIs) including:
 
-### Items & Inventory
-- [x] **ItemStack** - Item stack creation and manipulation
-- [x] **Item** - Item type information and asset access
-
-### Math & Geometry
-- [x] **Vector3i**, **Vector3f**, **Vector3d** - 3D vectors
-- [x] **Vector2i**, **Vector2d**, **Vector2f** - 2D vectors
-- [x] **Transform** - Position and rotation transforms
-- [x] **Position** - 3D world positions for packets
-- [x] **Direction** - Rotation angles (yaw, pitch, roll)
-- [x] **Box** - Axis-aligned bounding boxes
-- [x] **Cylinder** - Cylindrical shapes
-
-### Graphics
-- [x] **Color** - RGB color values
-- [x] **ColorLight** - RGBA light colors
-
-### Lighting
-- [x] **DynamicLight** - Dynamic light component for entities
-- [x] **PersistentDynamicLight** - Persistent dynamic light component (saved across restarts)
-
-### Entity Components
-- [x] **AudioComponent** - Add sounds to entities
-- [x] **DisplayNameComponent** - Entity display name management
-- [x] **TransformComponent** - Entity position and rotation manipulation
-- [x] **ActiveEntityEffect** - Query active effects on entities (duration, type, properties)
-- [x] **CameraManager** - Player camera state and target block tracking
-
-### Audio
-- [x] **SoundEvent** - Sound event definitions
-- [x] **SoundCategory** - Sound categories (Music, Ambient, SFX, UI)
-- [x] **PlaySoundEvent2D** - 2D sound playback packets
-- [x] **PlaySoundEvent3D** - 3D positional sound playback packets
-- [x] **PlaySoundEventEntity** - Entity-attached sound playback packets
-
-### Particles
-- [x] **SpawnParticleSystem** - Spawn particle systems in the world
-
-### Utilities
-- [x] **logger** - Server logging
-- [x] **commands** - Command registration
-- [x] **scheduler** - Task scheduling (delayed, repeating)
+- Server management, events, commands, and task scheduling
+- Players, entities, components, and stats
+- World manipulation, blocks, and prefabs
+- Combat, interactions, abilities, and effects
+- Items, inventory, and crafting
+- Audio, particles, and lighting
+- Physics, collision, and movement
+- UI, cosmetics, and camera control
+- Networking, access control, and internationalization
+- Math utilities and geometry
 
 ## Quick Example
 
