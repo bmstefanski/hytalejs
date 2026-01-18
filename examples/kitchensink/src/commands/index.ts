@@ -10,3 +10,6 @@ export { registerPlaySoundCommand } from "./playsound";
 export { registerPlaySound3DCommand } from "./playsound3d";
 export { registerParticleCommand } from "./particle";
 export { registerParticleListCommand } from "./particlelist";
+export { registerSetBlockCommand } from "./setblock";
+export { registerBreakBlockCommand } from "./breakblock";
+export { registerGetBlockCommand } from "./getblock";

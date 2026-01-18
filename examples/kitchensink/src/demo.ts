@@ -17,6 +17,9 @@ import {
   registerPlaySound3DCommand,
   registerParticleCommand,
   registerParticleListCommand,
+  registerSetBlockCommand,
+  registerBreakBlockCommand,
+  registerGetBlockCommand,
 } from "./commands";
 
 import { startAutoMessages } from "./schedulers/auto-messages";
@@ -37,5 +40,8 @@ registerPlaySoundCommand();
 registerPlaySound3DCommand();
 registerParticleCommand();
 registerParticleListCommand();
+registerSetBlockCommand();
+registerBreakBlockCommand();
+registerGetBlockCommand();
 
 startAutoMessages();
