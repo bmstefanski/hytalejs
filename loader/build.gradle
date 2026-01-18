@@ -21,6 +21,19 @@ dependencies {
   implementation 'org.graalvm.polyglot:polyglot:24.1.1'
   implementation 'org.graalvm.polyglot:js-community:24.1.1'
   implementation 'com.google.code.gson:gson:2.11.0'
+
+  def javetVersion = '5.0.3'
+  def os = org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.currentOperatingSystem
+  def arch = System.getProperty('os.arch')
+  def javetArch = (arch == 'aarch64' || arch == 'arm64') ? 'arm64' : 'x86_64'
+  def javetOs = os.isMacOsX() ? 'macos' : os.isLinux() ? 'linux' : os.isWindows() ? 'windows' : null
+
+  implementation "com.caoccao.javet:javet:${javetVersion}"
+  if (javetOs != null) {
+    implementation "com.caoccao.javet:javet-v8-${javetOs}-${javetArch}:${javetVersion}"
+  } else {
+    throw new GradleException("Unsupported OS for Javet runtime: ${os}")
+  }
 }
 
 shadowJar {
