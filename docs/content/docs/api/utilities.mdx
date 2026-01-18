@@ -88,46 +88,6 @@ const msg = Message.raw("Hello!")
 player.sendMessage(msg);
 ```
 
-## Sound
-
-### SoundEvent
-
-<AutoTypeTable path="./types/index.d.ts" name="SoundEvent" />
-
-### SoundEventClass
-
-Access sound registry via `SoundEvent.getAssetMap()`.
-
-<AutoTypeTable path="./types/index.d.ts" name="SoundEventClass" />
-
-### SoundCategory
-
-<AutoTypeTable path="./types/index.d.ts" name="SoundCategory" />
-
-### SoundCategoryEnum
-
-<AutoTypeTable path="./types/index.d.ts" name="SoundCategoryEnum" />
-
-### PlaySoundEvent2D
-
-Packet to play a 2D sound to a player.
-
-<AutoTypeTable path="./types/index.d.ts" name="PlaySoundEvent2D" />
-
-### PacketHandler
-
-Used to send packets to players.
-
-<AutoTypeTable path="./types/index.d.ts" name="PacketHandler" />
-
-### Usage
-
-```typescript
-const soundIndex = SoundEvent.getAssetMap().getIndex("sound_id");
-const packet = new PlaySoundEvent2D(soundIndex, SoundCategory.SFX, 1.0, 1.0);
-playerRef.getPacketHandler().write(packet);
-```
-
 ## Event Handler
 
 ### EventHandler
