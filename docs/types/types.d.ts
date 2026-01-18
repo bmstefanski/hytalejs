@@ -816,6 +816,8 @@ export interface CommandContext {
 export interface ScriptCommandRegistry {
     register(name: string, description: string, callback: (ctx: CommandContext) => void): void;
     register(name: string, description: string, permission: string, callback: (ctx: CommandContext) => void): void;
+    registerWorld(name: string, description: string, callback: (ctx: CommandContext) => void): void;
+    registerWorld(name: string, description: string, permission: string, callback: (ctx: CommandContext) => void): void;
 }
 export interface ScriptTask {
     cancel(): void;

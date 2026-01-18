@@ -23,6 +23,26 @@ commands.register("heal", "Heal yourself", "admin.heal", (ctx) => {
 
 Players need the `admin.heal` permission to use this command.
 
+## World-Thread Commands
+
+Some operations (like large block edits) are significantly faster and safer when they run on the **world thread**. Use `commands.registerWorld(...)` to execute a JS command on the world executor instead of a pooled JS thread.
+
+```typescript
+commands.registerWorld("sphere", "Build a sphere on the world thread", (ctx) => {
+  // Heavy block edits here
+});
+```
+
+### Why This Exists
+
+Hytale’s world state is updated on its own thread. When commands run off-thread, each `setBlock` can incur extra scheduling and synchronization overhead. `registerWorld` runs the JS callback on the world executor, which avoids per-block re-queueing and matches the fastest native command path.
+
+### Caveats
+
+- **Blocks the world thread:** long loops will pause world ticks while the command runs.
+- **Context pool contention:** the JS callback still needs a Graal context; if all contexts are busy, the world thread will wait.
+- **Use sparingly:** prefer batching (`ServerSetBlocks`) for very large edits and keep world-thread commands short where possible.
+
 ## Parsing Arguments
 
 Access the full command input and parse arguments:

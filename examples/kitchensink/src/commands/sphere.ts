@@ -1,5 +1,5 @@
 export function registerSphereCommand(): void {
-  commands.register("sphere", "Create a sphere of blocks around your position", (ctx) => {
+  commands.registerWorld("sphere", "Create a sphere of blocks around your position", (ctx) => {
     const input = ctx.getInput();
     const parts = input.split(" ");
 

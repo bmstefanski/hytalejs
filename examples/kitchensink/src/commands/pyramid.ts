@@ -1,5 +1,5 @@
 export function registerPyramidCommand(): void {
-  commands.register("pyramid", "Create a pyramid at your position", (ctx) => {
+  commands.registerWorld("pyramid", "Create a pyramid at your position", (ctx) => {
     const input = ctx.getInput();
     const parts = input.split(" ");
 

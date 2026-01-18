@@ -1,5 +1,5 @@
 export function registerWallCommand(): void {
-  commands.register("wall", "Create a wall in the direction you are facing", (ctx) => {
+  commands.registerWorld("wall", "Create a wall in the direction you are facing", (ctx) => {
     const input = ctx.getInput();
     const parts = input.split(" ");
 
