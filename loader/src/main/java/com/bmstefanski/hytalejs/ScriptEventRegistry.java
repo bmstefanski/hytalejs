@@ -68,22 +68,28 @@ public class ScriptEventRegistry {
   }
 
   @SuppressWarnings("unchecked")
-  public void registerHandler(String eventType, ScriptValue callback) {
+  public void registerHandler(String eventType, Object callback) {
     String className = EVENT_CLASSES.get(eventType);
     if (className == null) {
       plugin.getLogger().at(Level.WARNING).log("Unknown event type: %s", eventType);
       return;
     }
 
-    if (callback == null || !callback.isExecutable()) {
+    boolean shouldClose = !(callback instanceof ScriptValue);
+    ScriptValue callbackValue = ScriptValueFactory.from(callback);
+    if (callbackValue == null || !callbackValue.isExecutable()) {
       plugin.getLogger().at(Level.WARNING).log("Event callback for '%s' is not executable", eventType);
       return;
     }
 
-    ScriptRuntime runtime = callback.getRuntime();
+    ScriptRuntime runtime = callbackValue.getRuntime();
     try (ScriptValue callbacks = runtime.getGlobal("__eventCallbacks__")) {
       if (callbacks != null) {
-        callbacks.setMember(eventType, callback);
+        callbacks.setMember(eventType, callbackValue);
+      }
+    } finally {
+      if (shouldClose) {
+        callbackValue.close();
       }
     }
     handlerCount++;
