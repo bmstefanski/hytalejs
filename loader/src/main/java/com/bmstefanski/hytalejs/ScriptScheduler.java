@@ -129,6 +129,13 @@ public class ScriptScheduler {
     return task;
   }
 
+  public void cancelAllTasks() {
+    for (ScriptTask task : scheduledTasks.values()) {
+      task.cancel();
+    }
+    scheduledTasks.clear();
+  }
+
   public static class ScriptTask {
     private final ScheduledFuture<?> future;
 

@@ -138,6 +138,10 @@ public class ScriptEventRegistry {
     return handlerCount;
   }
 
+  public void resetHandlerCount() {
+    handlerCount = 0;
+  }
+
   public static boolean isValidEventType(String eventType) {
     return EVENT_CLASSES.containsKey(eventType);
   }

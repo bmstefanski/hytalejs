@@ -45,6 +45,9 @@ public class HytaleJSCommand extends CommandBase {
       case "tasks":
         showTasks(context);
         break;
+      case "reload":
+        doReload(context);
+        break;
       default:
         showHelp(context);
         break;
@@ -66,6 +69,11 @@ public class HytaleJSCommand extends CommandBase {
       .insert(Message.raw("  /hytalejs tasks").color(COLOR_COMMAND).bold(true))
       .insert(Message.raw(" > ").color(COLOR_ACCENT))
       .insert(Message.raw("Show queued operations").color(COLOR_DESC)));
+
+    context.sendMessage(Message.empty()
+      .insert(Message.raw("  /hytalejs reload").color(COLOR_COMMAND).bold(true))
+      .insert(Message.raw(" > ").color(COLOR_ACCENT))
+      .insert(Message.raw("Reload all scripts").color(COLOR_DESC)));
   }
 
   private void showPoolStats(CommandContext context) {
@@ -160,6 +168,24 @@ public class HytaleJSCommand extends CommandBase {
     }
 
     context.sendMessage(Message.raw("-------------------").color(COLOR_ACCENT));
+  }
+
+  private void doReload(CommandContext context) {
+    context.sendMessage(Message.empty()
+      .insert(Message.raw("[*] ").color(COLOR_WARNING))
+      .insert(Message.raw("Reloading scripts...").color(COLOR_VALUE)));
+
+    HytaleJS.ReloadResult result = plugin.reloadScripts();
+
+    if (result.getFailed() == 0) {
+      context.sendMessage(Message.empty()
+        .insert(Message.raw("[OK] ").color(COLOR_SUCCESS))
+        .insert(Message.raw("Reloaded " + result.getLoaded() + " scripts").color(COLOR_SUCCESS).bold(true)));
+    } else {
+      context.sendMessage(Message.empty()
+        .insert(Message.raw("[!] ").color(COLOR_WARNING))
+        .insert(Message.raw("Reloaded " + result.getLoaded() + " scripts (" + result.getFailed() + " failed)").color(COLOR_WARNING).bold(true)));
+    }
   }
 
   private String formatWaitTime(long ms) {

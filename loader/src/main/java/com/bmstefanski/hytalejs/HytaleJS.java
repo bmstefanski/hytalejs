@@ -701,6 +701,30 @@ public class HytaleJS extends JavaPlugin {
     }
   }
 
+  private boolean loadScriptIntoAllContextsSafe(Path scriptPath) {
+    try {
+      String scriptContent = Files.readString(scriptPath);
+      getLogger().at(Level.INFO).log("Loading script: %s", scriptPath.getFileName());
+
+      for (Context ctx : contextPool.getAllContexts()) {
+        ctx.enter();
+        try {
+          ctx.eval("js", scriptContent);
+          Value handlersValue = ctx.getBindings("js").getMember("handlers");
+          eventRegistry.registerFromHandlersArray(handlersValue);
+        } finally {
+          ctx.leave();
+        }
+      }
+
+      getLogger().at(Level.INFO).log("Successfully loaded script: %s", scriptPath.getFileName());
+      return true;
+    } catch (Exception e) {
+      getLogger().at(Level.SEVERE).withCause(e).log("Failed to load script: %s", scriptPath.getFileName());
+      return false;
+    }
+  }
+
   @Override
   protected void start() {
     super.start();
@@ -734,6 +758,39 @@ public class HytaleJS extends JavaPlugin {
     getLogger().at(Level.INFO).log("HytaleJS shutdown");
   }
 
+  public ReloadResult reloadScripts() {
+    scheduler.cancelAllTasks();
+
+    eventRegistry.resetHandlerCount();
+
+    contextPool = new ContextPool(config.getPoolSize(), this::setupBindings);
+
+    eventRegistry.setContextPool(contextPool);
+    commandRegistry.setContextPool(contextPool);
+    scheduler.setContextPool(contextPool);
+
+    int loaded = 0;
+    int failed = 0;
+
+    try (Stream<Path> paths = Files.walk(scriptsDir)) {
+      List<Path> scriptPaths = paths.filter(Files::isRegularFile)
+        .filter(p -> p.toString().endsWith(".js"))
+        .toList();
+
+      for (Path scriptPath : scriptPaths) {
+        if (loadScriptIntoAllContextsSafe(scriptPath)) {
+          loaded++;
+        } else {
+          failed++;
+        }
+      }
+    } catch (IOException e) {
+      getLogger().at(Level.SEVERE).withCause(e).log("Failed to reload scripts");
+    }
+
+    return new ReloadResult(loaded, failed);
+  }
+
   public static class ContextPoolStats {
     private final int total;
     private final int available;
@@ -755,6 +812,24 @@ public class HytaleJS extends JavaPlugin {
 
     public int getBusy() {
       return busy;
+    }
+  }
+
+  public static class ReloadResult {
+    private final int loaded;
+    private final int failed;
+
+    public ReloadResult(int loaded, int failed) {
+      this.loaded = loaded;
+      this.failed = failed;
+    }
+
+    public int getLoaded() {
+      return loaded;
+    }
+
+    public int getFailed() {
+      return failed;
     }
   }
 }

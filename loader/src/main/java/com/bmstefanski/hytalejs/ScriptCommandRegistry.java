@@ -50,8 +50,8 @@ public class ScriptCommandRegistry {
     registeredCommandNames.add(name);
 
     PooledScriptCommand command = permission != null && !permission.isEmpty()
-      ? new PooledScriptCommand(name, description, permission, contextPool)
-      : new PooledScriptCommand(name, description, contextPool);
+      ? new PooledScriptCommand(name, description, permission, () -> this.contextPool)
+      : new PooledScriptCommand(name, description, () -> this.contextPool);
     plugin.getCommandRegistry().registerCommand(command);
     plugin.getLogger().at(Level.INFO).log("Registered command: /%s%s", name,
       permission != null && !permission.isEmpty() ? " (requires: " + permission + ")" : "");
@@ -71,8 +71,8 @@ public class ScriptCommandRegistry {
     registeredCommandNames.add(name);
 
     PooledWorldScriptCommand command = permission != null && !permission.isEmpty()
-      ? new PooledWorldScriptCommand(name, description, permission, contextPool)
-      : new PooledWorldScriptCommand(name, description, contextPool);
+      ? new PooledWorldScriptCommand(name, description, permission, () -> this.contextPool)
+      : new PooledWorldScriptCommand(name, description, () -> this.contextPool);
     plugin.getCommandRegistry().registerCommand(command);
     plugin.getLogger().at(Level.INFO).log("Registered world-thread command: /%s%s", name,
       permission != null && !permission.isEmpty() ? " (requires: " + permission + ")" : "");

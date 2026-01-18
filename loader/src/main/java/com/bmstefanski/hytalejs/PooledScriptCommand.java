@@ -6,22 +6,23 @@ import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.HostAccess;
 
 import javax.annotation.Nonnull;
+import java.util.function.Supplier;
 
 public class PooledScriptCommand extends CommandBase {
   private final String commandName;
-  private final ContextPool contextPool;
+  private final Supplier<ContextPool> contextPoolSupplier;
 
-  public PooledScriptCommand(String name, String description, ContextPool contextPool) {
+  public PooledScriptCommand(String name, String description, Supplier<ContextPool> contextPoolSupplier) {
     super(name, description);
     this.commandName = name;
-    this.contextPool = contextPool;
+    this.contextPoolSupplier = contextPoolSupplier;
     setAllowsExtraArguments(true);
   }
 
-  public PooledScriptCommand(String name, String description, String permission, ContextPool contextPool) {
+  public PooledScriptCommand(String name, String description, String permission, Supplier<ContextPool> contextPoolSupplier) {
     super(name, description);
     this.commandName = name;
-    this.contextPool = contextPool;
+    this.contextPoolSupplier = contextPoolSupplier;
     setAllowsExtraArguments(true);
     if (permission != null && !permission.isEmpty()) {
       requirePermission(permission);
@@ -30,7 +31,7 @@ public class PooledScriptCommand extends CommandBase {
 
   @Override
   protected void executeSync(@Nonnull CommandContext context) {
-    contextPool.executeInContext("command:/" + commandName, ctx -> {
+    contextPoolSupplier.get().executeInContext("command:/" + commandName, ctx -> {
       Value callbacks = ctx.getBindings("js").getMember("__commandCallbacks__");
       Value callback = callbacks.getMember(commandName);
       if (callback != null && callback.canExecute()) {
