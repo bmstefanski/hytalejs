@@ -16,7 +16,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc && cp -r dist ../../docs/types",
+    "build": "rm -rf dist && tsc && cp -r dist/** ../../docs/types",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
