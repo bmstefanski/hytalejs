@@ -2,7 +2,6 @@ package com.bmstefanski.hytalejs;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.annotations.SerializedName;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,7 +15,6 @@ public class HytaleJSConfig {
   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
   private int poolSize = DEFAULT_POOL_SIZE;
-  @SerializedName(value = "runtime", alternate = {"engine"})
   private String runtime = "graal";
   private JavetConfig javet = new JavetConfig();
 
