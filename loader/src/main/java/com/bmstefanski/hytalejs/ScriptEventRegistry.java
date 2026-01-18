@@ -94,7 +94,7 @@ public class ScriptEventRegistry {
 
       Consumer<Object> handler = event -> {
         try {
-          contextPool.executeInContext(ctx -> {
+          contextPool.executeInContext("event:" + eventType, ctx -> {
             Value callbacks = ctx.getBindings("js").getMember("__eventCallbacks__");
             Value cb = callbacks.getMember(eventType);
             if (cb != null && cb.canExecute()) {

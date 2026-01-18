@@ -32,7 +32,7 @@ public class ScriptScheduler {
       () -> {
         try {
           if (contextPool != null) {
-            contextPool.executeInContext((ContextPool.ContextRunnable) ctx -> {
+            contextPool.executeInContext("scheduler:runLater", (ContextPool.ContextRunnable) ctx -> {
               Value callbacks = ctx.getBindings("js").getMember("__schedulerCallbacks__");
               Value cb = callbacks.getMember(key);
               if (cb != null && cb.canExecute()) {
@@ -68,7 +68,7 @@ public class ScriptScheduler {
       () -> {
         try {
           if (contextPool != null) {
-            contextPool.executeInContext((ContextPool.ContextRunnable) ctx -> {
+            contextPool.executeInContext("scheduler:runRepeating", (ContextPool.ContextRunnable) ctx -> {
               Value callbacks = ctx.getBindings("js").getMember("__schedulerCallbacks__");
               Value cb = callbacks.getMember(key);
               if (cb != null && cb.canExecute()) {
@@ -106,7 +106,7 @@ public class ScriptScheduler {
       () -> {
         try {
           if (contextPool != null) {
-            contextPool.executeInContext((ContextPool.ContextRunnable) ctx -> {
+            contextPool.executeInContext("scheduler:runRepeatingWithDelay", (ContextPool.ContextRunnable) ctx -> {
               Value callbacks = ctx.getBindings("js").getMember("__schedulerCallbacks__");
               Value cb = callbacks.getMember(key);
               if (cb != null && cb.canExecute()) {

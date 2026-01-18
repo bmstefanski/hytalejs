@@ -30,7 +30,7 @@ public class PooledScriptCommand extends CommandBase {
 
   @Override
   protected void executeSync(@Nonnull CommandContext context) {
-    contextPool.executeInContext(ctx -> {
+    contextPool.executeInContext("command:/" + commandName, ctx -> {
       Value callbacks = ctx.getBindings("js").getMember("__commandCallbacks__");
       Value callback = callbacks.getMember(commandName);
       if (callback != null && callback.canExecute()) {

@@ -50,6 +50,8 @@ public class HytaleJS extends JavaPlugin {
     commandRegistry.setContextPool(contextPool);
     scheduler.setContextPool(contextPool);
 
+    getCommandRegistry().registerCommand(new HytaleJSCommand(this));
+
     loadScripts();
   }
 
@@ -714,6 +716,13 @@ public class HytaleJS extends JavaPlugin {
       contextPool.getAvailableCount(),
       contextPool.getBusyCount()
     );
+  }
+
+  public List<ContextPool.QueuedOperation> getQueuedOperations() {
+    if (contextPool == null) {
+      return List.of();
+    }
+    return contextPool.getQueuedOperations();
   }
 
   @Override
