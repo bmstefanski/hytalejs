@@ -48,6 +48,8 @@ task.cancel();
 
 Register custom commands via the global `commands`.
 
+Use `commands.registerWorld(...)` for commands that should run on the world thread (e.g., heavy block edits). This avoids per-block scheduling overhead but can stall world ticks if the command runs too long.
+
 <AutoTypeTable path="./types/index.d.ts" name="ScriptCommandRegistry" />
 
 ### CommandContext
@@ -65,6 +67,10 @@ commands.register("hello", "Say hello", (ctx) => {
 
 commands.register("admin", "Admin only", "admin.use", (ctx) => {
   ctx.sendMessage("You have admin access!");
+});
+
+commands.registerWorld("sphere", "Run on world thread", (ctx) => {
+  ctx.sendMessage("This command runs on the world executor.");
 });
 ```
 
