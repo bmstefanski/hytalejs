@@ -60,9 +60,21 @@ public class HytaleJSConfig {
 
   public static class JavetConfig {
     private String runtime = "v8";
+    private boolean download = true;
+    private String downloadBaseUrl = "https://repo1.maven.org/maven2";
 
     public String getRuntime() {
       return runtime;
+    }
+
+    public boolean isDownloadEnabled() {
+      return download;
+    }
+
+    public String getDownloadBaseUrl() {
+      return downloadBaseUrl == null || downloadBaseUrl.isBlank()
+        ? "https://repo1.maven.org/maven2"
+        : downloadBaseUrl;
     }
   }
 }

@@ -62,6 +62,7 @@ public class HytaleJS extends JavaPlugin {
     String engine = config.getEngine() == null ? "graal" : config.getEngine().toLowerCase();
     if (engine.equals("javet")) {
       JavetRuntimePool.RuntimeType runtimeType = parseJavetRuntimeType(config);
+      JavetNativeLibraryManager.prepare(config, getDataDirectory(), getLogger());
       getLogger().at(Level.INFO).log("Initializing Javet runtime pool (%s)", runtimeType.name());
       return new JavetRuntimePool(config.getPoolSize(), runtimeType, this::setupBindings);
     }
