@@ -51,6 +51,8 @@ public class HytaleJS extends JavaPlugin {
     jsContext.getBindings("js").putMember("Message", jsContext.eval("js", "Java.type('com.hypixel.hytale.server.core.Message')"));
     jsContext.getBindings("js").putMember("ItemStack", jsContext.eval("js", "Java.type('com.hypixel.hytale.server.core.inventory.ItemStack')"));
     jsContext.getBindings("js").putMember("Item", jsContext.eval("js", "Java.type('com.hypixel.hytale.server.core.asset.type.item.config.Item')"));
+    jsContext.getBindings("js").putMember("BlockType", jsContext.eval("js", "Java.type('com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType')"));
+    jsContext.getBindings("js").putMember("ChunkUtil", jsContext.eval("js", "Java.type('com.hypixel.hytale.math.util.ChunkUtil')"));
 
     jsContext.getBindings("js").putMember("Vector3i", jsContext.eval("js", "Java.type('com.hypixel.hytale.math.vector.Vector3i')"));
     jsContext.getBindings("js").putMember("Vector3f", jsContext.eval("js", "Java.type('com.hypixel.hytale.math.vector.Vector3f')"));
@@ -79,6 +81,9 @@ public class HytaleJS extends JavaPlugin {
     jsContext.getBindings("js").putMember("PlaySoundEventEntity", jsContext.eval("js", "Java.type('com.hypixel.hytale.protocol.packets.world.PlaySoundEventEntity')"));
     jsContext.getBindings("js").putMember("SpawnParticleSystem", jsContext.eval("js", "Java.type('com.hypixel.hytale.protocol.packets.world.SpawnParticleSystem')"));
     jsContext.getBindings("js").putMember("ParticleSystem", jsContext.eval("js", "Java.type('com.hypixel.hytale.server.core.asset.type.particle.config.ParticleSystem')"));
+
+    jsContext.getBindings("js").putMember("ServerSetBlocks", jsContext.eval("js", "Java.type('com.hypixel.hytale.protocol.packets.world.ServerSetBlocks')"));
+    jsContext.getBindings("js").putMember("SetBlockCmd", jsContext.eval("js", "Java.type('com.hypixel.hytale.protocol.packets.world.SetBlockCmd')"));
 
     jsContext.getBindings("js").putMember("AudioComponent", jsContext.eval("js", "Java.type('com.hypixel.hytale.server.core.modules.entity.component.AudioComponent')"));
     jsContext.getBindings("js").putMember("DisplayNameComponent", jsContext.eval("js", "Java.type('com.hypixel.hytale.server.core.modules.entity.component.DisplayNameComponent')"));

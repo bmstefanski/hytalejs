@@ -16,3 +16,4 @@ export { registerGetBlockCommand } from "./getblock";
 export { registerSphereCommand } from "./sphere";
 export { registerPyramidCommand } from "./pyramid";
 export { registerWallCommand } from "./wall";
+export { registerSquareCommand } from "./square";

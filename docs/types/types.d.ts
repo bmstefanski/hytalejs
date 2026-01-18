@@ -554,6 +554,18 @@ export interface CraftingRecipe {
 export interface BlockType {
     getId(): string;
     getItem(): Item;
+    getBlockIdOrUnknown(blockTypeKey: string, message: string, ...params: unknown[]): number;
+    getAssetMap(): unknown;
+}
+export interface ChunkUtil {
+    xFromIndex(index: number): number;
+    yFromIndex(index: number): number;
+    zFromIndex(index: number): number;
+    minBlock(index: number): number;
+    toSectionIndex(blockCoord: number): number;
+    chunkCoordinate(block: number): number;
+    indexBlock(x: number, y: number, z: number): number;
+    isSameChunkSection(x0: number, y0: number, z0: number, x1: number, y1: number, z1: number): boolean;
 }
 export interface BlockState {
     getBlockPosition(): Vector3i;
@@ -1054,6 +1066,31 @@ export interface SpawnParticleSystem {
     color: Color;
     getId(): number;
     clone(): SpawnParticleSystem;
+}
+export interface SetBlockCmd {
+    new (): SetBlockCmd;
+    new (index: number, blockId: number, filler: number, rotation: number): SetBlockCmd;
+    new (other: SetBlockCmd): SetBlockCmd;
+    index: number;
+    blockId: number;
+    filler: number;
+    rotation: number;
+    serialize(buf: unknown): void;
+    computeSize(): number;
+    clone(): SetBlockCmd;
+}
+export interface ServerSetBlocks {
+    new (): ServerSetBlocks;
+    new (x: number, y: number, z: number, cmds: SetBlockCmd[]): ServerSetBlocks;
+    new (other: ServerSetBlocks): ServerSetBlocks;
+    x: number;
+    y: number;
+    z: number;
+    cmds: SetBlockCmd[];
+    getId(): number;
+    serialize(buf: unknown): void;
+    computeSize(): number;
+    clone(): ServerSetBlocks;
 }
 export interface ModelTransform {
     new (): ModelTransform;
@@ -3339,18 +3376,6 @@ export interface SnapshotBuffer {
 export interface SnapshotSystems {
     new (): SnapshotSystems;
 }
-export interface Source {
-    getDamageCauseIndex(): number;
-    setDamageCauseIndex(index: number): void;
-    getCause(): unknown;
-    getSource(): unknown;
-    setSource(source: unknown): void;
-    getAmount(): number;
-    setAmount(amount: number): void;
-    getInitialAmount(): number;
-    getDeathMessage(): unknown;
-    getMetaStore(): unknown;
-}
 export interface SprintingCondition {
     new (): SprintingCondition;
     new (inverse: boolean): SprintingCondition;
@@ -4786,6 +4811,10 @@ declare global {
     const PlaySoundEventEntity: PlaySoundEventEntity;
     const SpawnParticleSystem: SpawnParticleSystem;
     const ParticleSystem: ParticleSystemClass;
+    const SetBlockCmd: SetBlockCmd;
+    const ServerSetBlocks: ServerSetBlocks;
+    const BlockType: BlockType;
+    const ChunkUtil: ChunkUtil;
     const ModelTransform: ModelTransform;
     const AudioComponent: AudioComponent;
     const DisplayNameComponent: DisplayNameComponent;
@@ -5107,7 +5136,6 @@ declare global {
     const SingleplayerRequestAccessEvent: SingleplayerRequestAccessEvent;
     const SnapshotBuffer: SnapshotBuffer;
     const SnapshotSystems: SnapshotSystems;
-    const Source: Source;
     const SprintingCondition: SprintingCondition;
     const SprintStaminaRegenDelay: SprintStaminaRegenDelay;
     const StabSelector: StabSelector;

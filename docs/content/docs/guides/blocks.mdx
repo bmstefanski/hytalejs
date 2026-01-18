@@ -1,0 +1,179 @@
+---
+title: Block Manipulation
+description: Place, break, and query blocks in the world
+---
+
+Modify the game world by placing, breaking, and reading blocks.
+
+## Reading Blocks
+
+Get the block type at any position:
+
+```typescript
+const world = Universe.get().getDefaultWorld();
+const blockType = world.getBlockType(100, 64, 200);
+
+if (blockType) {
+  ctx.sendMessage("Block: " + blockType.getId());
+}
+```
+
+You can also use a `Vector3i`:
+
+```typescript
+const pos = new Vector3i(100, 64, 200);
+const blockType = world.getBlockType(pos);
+```
+
+## Placing Blocks
+
+Place a single block at coordinates:
+
+```typescript
+const world = Universe.get().getDefaultWorld();
+world.setBlock(100, 64, 200, "Cloth_Block_Wool_black");
+```
+
+With rotation (0-3):
+
+```typescript
+world.setBlock(100, 64, 200, "Cloth_Block_Wool_black", 2);
+```
+
+## Breaking Blocks
+
+Break a block with a harvest level:
+
+```typescript
+const world = Universe.get().getDefaultWorld();
+const success = world.breakBlock(100, 64, 200, 1);
+
+if (success) {
+  ctx.sendMessage("Block broken!");
+}
+```
+
+## Building Shapes
+
+Create a platform at the player's position:
+
+```typescript
+const pos = playerRef.getTransform().getPosition();
+const baseX = Math.floor(pos.getX());
+const baseY = Math.floor(pos.getY()) - 1;
+const baseZ = Math.floor(pos.getZ());
+
+const world = Universe.get().getDefaultWorld();
+const size = 5;
+
+for (let x = 0; x < size; x++) {
+  for (let z = 0; z < size; z++) {
+    world.setBlock(baseX + x, baseY, baseZ + z, "Cloth_Block_Wool_black");
+  }
+}
+```
+
+## Batched Block Updates
+
+For large-scale building, individual `setBlock` calls are slow because each one sends a network packet. Use `ServerSetBlocks` to batch multiple block changes into a single packet.
+
+### How It Works
+
+Hytale divides the world into 32x32x32 block sections. The `ServerSetBlocks` packet sends multiple block changes within a section at once. Use `ChunkUtil` for section calculations:
+
+1. Get section coordinates: `ChunkUtil.chunkCoordinate(blockPos)`
+2. Get block index within section: `ChunkUtil.indexBlock(x, y, z)`
+3. Check if blocks are in the same section: `ChunkUtil.isSameChunkSection(...)`
+4. Send packet to all players
+
+### Getting Block IDs
+
+Convert a block name to its numeric ID:
+
+```typescript
+const blockId = BlockType.getBlockIdOrUnknown(
+  "Cloth_Block_Wool_black",
+  "Unknown block: %s",
+  "Cloth_Block_Wool_black"
+);
+```
+
+### Creating Block Commands
+
+Each block in the batch needs a `SetBlockCmd`:
+
+```typescript
+const index = ChunkUtil.indexBlock(worldX, worldY, worldZ);
+const cmd = new SetBlockCmd(index, blockId, 0, 0);
+```
+
+Parameters: `(index, blockId, filler, rotation)`
+
+### Sending the Packet
+
+```typescript
+const sectionX = ChunkUtil.chunkCoordinate(baseX);
+const sectionY = ChunkUtil.chunkCoordinate(baseY);
+const sectionZ = ChunkUtil.chunkCoordinate(baseZ);
+
+const packet = new ServerSetBlocks(sectionX, sectionY, sectionZ, cmds);
+
+const players = Universe.get().getPlayers();
+for (let i = 0; i < players.length; i++) {
+  players[i].getPacketHandler().write(packet);
+}
+```
+
+### Complete Example
+
+Build a platform using batched updates:
+
+```typescript
+const pos = playerRef.getTransform().getPosition();
+const baseX = Math.floor(pos.getX());
+const baseY = Math.floor(pos.getY()) - 1;
+const baseZ = Math.floor(pos.getZ());
+
+const blockId = BlockType.getBlockIdOrUnknown("Cloth_Block_Wool_black", "Unknown block");
+const sectionX = ChunkUtil.chunkCoordinate(baseX);
+const sectionY = ChunkUtil.chunkCoordinate(baseY);
+const sectionZ = ChunkUtil.chunkCoordinate(baseZ);
+
+const cmds = [];
+const size = 10;
+
+for (let dx = 0; dx < size; dx++) {
+  for (let dz = 0; dz < size; dz++) {
+    const worldX = baseX + dx;
+    const worldZ = baseZ + dz;
+
+    if (!ChunkUtil.isSameChunkSection(baseX, baseY, baseZ, worldX, baseY, worldZ)) {
+      continue;
+    }
+
+    const index = ChunkUtil.indexBlock(worldX, baseY, worldZ);
+    cmds.push(new SetBlockCmd(index, blockId, 0, 0));
+  }
+}
+
+const packet = new ServerSetBlocks(sectionX, sectionY, sectionZ, cmds);
+const players = Universe.get().getPlayers();
+for (let i = 0; i < players.length; i++) {
+  players[i].getPacketHandler().write(packet);
+}
+```
+
+### Limitations
+
+- Maximum 32,768 blocks per packet (one full 32x32x32 section)
+- Blocks must be in the same section
+- For builds spanning multiple sections, send one packet per section
+
+## When to Use Each Approach
+
+| Approach | Use Case |
+|----------|----------|
+| `world.setBlock()` | Small changes, single blocks |
+| `ServerSetBlocks` | Large builds, performance-critical operations |
+
+For most commands placing a few blocks, `world.setBlock()` is simpler and works fine. Use batched updates when building large structures where performance matters.
