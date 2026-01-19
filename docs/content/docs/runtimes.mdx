@@ -26,7 +26,7 @@ Runtime settings live in `config.json` inside your plugin data directory
 ### Options
 
 - `runtime.type`: `"graal"` or `"javet"` (default: `"graal"`).
-- `runtime.poolSize`: Number of JS contexts in the pool (default: `6`).
+- `runtime.poolSize`: Number of runtime instances in the pool (e.g., Graal contexts or V8 runtimes) (default: `6`).
 - `runtime.multithreaded`: Enable/disable multi-context execution.
   - If `false`, the pool is forced to size `1` (single-threaded execution).
 
