@@ -1,0 +1,60 @@
+---
+title: Runtimes
+description: Configure GraalJS and Javet runtimes for HytaleJS
+---
+
+HytaleJS supports two JavaScript runtimes:
+
+- **GraalJS** (default) — more tested and stable, but generally less performant.
+- **Javet (V8)** — faster in many workloads, uses V8 under the hood.
+
+## Configuration
+
+Runtime settings live in `config.json` inside your plugin data directory
+(`mods/bmstefanski_HytaleJS/config.json`).
+
+```json
+{
+  "runtime": {
+    "type": "graal",
+    "poolSize": 6,
+    "multithreaded": true
+  }
+}
+```
+
+### Options
+
+- `runtime.type`: `"graal"` or `"javet"` (default: `"graal"`).
+- `runtime.poolSize`: Number of JS contexts in the pool (default: `6`).
+- `runtime.multithreaded`: Enable/disable multi-context execution.
+  - If `false`, the pool is forced to size `1` (single-threaded execution).
+
+### Javet download settings
+
+When using Javet, native libraries are downloaded at runtime by default.
+
+```json
+{
+  "runtime": {
+    "type": "javet",
+    "poolSize": 6,
+    "multithreaded": true
+  },
+  "javet": {
+    "download": true,
+    "downloadBaseUrl": "https://repo1.maven.org/maven2"
+  }
+}
+```
+
+## Runtime Debug Command
+
+Use `/hytalejs runtime` to print the active runtime, pool size, queue depth,
+and Javet download settings.
+
+## Notes
+
+- Switching runtimes requires a server restart.
+- If you run into runtime-specific issues, try GraalJS first since it’s the
+  most tested option right now.
