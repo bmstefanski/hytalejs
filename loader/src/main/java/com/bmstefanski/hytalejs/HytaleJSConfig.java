@@ -48,7 +48,8 @@ public class HytaleJSConfig {
       }
 
       JsonElement poolSizeElement = root.get("poolSize");
-      if (poolSizeElement != null && poolSizeElement.isJsonPrimitive()) {
+      if (poolSizeElement != null && poolSizeElement.isJsonPrimitive()
+        && (runtimeElement == null || runtimeElement.isJsonPrimitive())) {
         int legacyPoolSize = poolSizeElement.getAsInt();
         config.runtime.setPoolSize(legacyPoolSize);
       }
