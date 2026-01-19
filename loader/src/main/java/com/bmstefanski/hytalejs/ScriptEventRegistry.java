@@ -78,7 +78,14 @@ public class ScriptEventRegistry {
     boolean shouldClose = !(callback instanceof ScriptValue);
     ScriptValue callbackValue = ScriptValueFactory.from(callback);
     if (callbackValue == null || !callbackValue.isExecutable()) {
-      plugin.getLogger().at(Level.WARNING).log("Event callback for '%s' is not executable", eventType);
+      plugin.getLogger().at(Level.SEVERE).log(
+        "Event callback for '%s' is not executable (type: %s)",
+        eventType,
+        ScriptValueFactory.describe(callback)
+      );
+      if (shouldClose && callbackValue != null) {
+        callbackValue.close();
+      }
       return;
     }
 

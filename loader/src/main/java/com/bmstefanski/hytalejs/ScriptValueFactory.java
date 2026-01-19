@@ -21,4 +21,18 @@ public final class ScriptValueFactory {
     }
     return null;
   }
+
+  public static String describe(Object raw) {
+    if (raw == null) {
+      return "null";
+    }
+    if (raw instanceof ScriptValue scriptValue) {
+      Object unwrapped = scriptValue.unwrap();
+      if (unwrapped == null) {
+        return "ScriptValue(null)";
+      }
+      return "ScriptValue(" + unwrapped.getClass().getName() + ")";
+    }
+    return raw.getClass().getName();
+  }
 }

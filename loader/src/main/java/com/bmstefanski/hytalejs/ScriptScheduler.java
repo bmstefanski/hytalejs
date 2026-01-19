@@ -26,7 +26,10 @@ public class ScriptScheduler {
   public ScriptTask runLater(Object callback, long delayMs) {
     ScriptValue callbackValue = ScriptValueFactory.from(callback);
     if (callbackValue == null || !callbackValue.isExecutable()) {
-      LOGGER.log(Level.WARNING, "runLater callback is not executable");
+      LOGGER.log(Level.SEVERE, "runLater callback is not executable (type: {0})", ScriptValueFactory.describe(callback));
+      if (callbackValue != null) {
+        callbackValue.close();
+      }
       return new ScriptTask(null);
     }
 
@@ -72,7 +75,10 @@ public class ScriptScheduler {
   public ScriptTask runRepeating(Object callback, long delayMs, long periodMs) {
     ScriptValue callbackValue = ScriptValueFactory.from(callback);
     if (callbackValue == null || !callbackValue.isExecutable()) {
-      LOGGER.log(Level.WARNING, "runRepeating callback is not executable");
+      LOGGER.log(Level.SEVERE, "runRepeating callback is not executable (type: {0})", ScriptValueFactory.describe(callback));
+      if (callbackValue != null) {
+        callbackValue.close();
+      }
       return new ScriptTask(null);
     }
 
@@ -127,7 +133,10 @@ public class ScriptScheduler {
   public ScriptTask runRepeatingWithDelay(Object callback, long delayMs, long periodMs) {
     ScriptValue callbackValue = ScriptValueFactory.from(callback);
     if (callbackValue == null || !callbackValue.isExecutable()) {
-      LOGGER.log(Level.WARNING, "runRepeatingWithDelay callback is not executable");
+      LOGGER.log(Level.SEVERE, "runRepeatingWithDelay callback is not executable (type: {0})", ScriptValueFactory.describe(callback));
+      if (callbackValue != null) {
+        callbackValue.close();
+      }
       return new ScriptTask(null);
     }
 
