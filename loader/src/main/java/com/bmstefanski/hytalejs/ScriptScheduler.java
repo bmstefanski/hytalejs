@@ -32,6 +32,11 @@ public class ScriptScheduler {
       }
       return new ScriptTask(null);
     }
+    if (runtimePool == null) {
+      LOGGER.log(Level.SEVERE, "runLater callback scheduled without an initialized runtime pool");
+      callbackValue.close();
+      return new ScriptTask(null);
+    }
 
     String key = getCallbackKey(callback) + "_later_" + delayMs + "_" + System.currentTimeMillis();
     try (ScriptValue callbacks = callbackValue.getRuntime().getGlobal("__schedulerCallbacks__")) {
@@ -79,6 +84,11 @@ public class ScriptScheduler {
       if (callbackValue != null) {
         callbackValue.close();
       }
+      return new ScriptTask(null);
+    }
+    if (runtimePool == null) {
+      LOGGER.log(Level.SEVERE, "runRepeating callback scheduled without an initialized runtime pool");
+      callbackValue.close();
       return new ScriptTask(null);
     }
 
@@ -137,6 +147,11 @@ public class ScriptScheduler {
       if (callbackValue != null) {
         callbackValue.close();
       }
+      return new ScriptTask(null);
+    }
+    if (runtimePool == null) {
+      LOGGER.log(Level.SEVERE, "runRepeatingWithDelay callback scheduled without an initialized runtime pool");
+      callbackValue.close();
       return new ScriptTask(null);
     }
 

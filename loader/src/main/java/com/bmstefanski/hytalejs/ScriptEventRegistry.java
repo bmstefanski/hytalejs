@@ -91,9 +91,14 @@ public class ScriptEventRegistry {
 
     ScriptRuntime runtime = callbackValue.getRuntime();
     try (ScriptValue callbacks = runtime.getGlobal("__eventCallbacks__")) {
-      if (callbacks != null) {
-        callbacks.setMember(eventType, callbackValue);
+      if (callbacks == null) {
+        plugin.getLogger().at(Level.WARNING).log(
+          "Event callback map '__eventCallbacks__' is not initialized for '%s'",
+          eventType
+        );
+        return;
       }
+      callbacks.setMember(eventType, callbackValue);
     } finally {
       if (shouldClose) {
         callbackValue.close();
@@ -111,6 +116,10 @@ public class ScriptEventRegistry {
 
       Consumer<Object> handler = event -> {
         try {
+          if (runtimePool == null) {
+            plugin.getLogger().at(Level.WARNING).log("Event handler skipped for '%s' (runtime pool not initialized)", eventType);
+            return;
+          }
           runtimePool.executeInRuntime("event:" + eventType, runtimeContext -> {
             try (ScriptValue callbacks = runtimeContext.getGlobal("__eventCallbacks__")) {
               if (callbacks == null) {
