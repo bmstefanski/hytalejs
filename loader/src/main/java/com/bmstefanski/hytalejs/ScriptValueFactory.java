@@ -19,6 +19,15 @@ public final class ScriptValueFactory {
     if (raw instanceof V8Value v8Value) {
       return new JavetScriptValue(v8Value);
     }
+    try {
+      Value value = Value.asValue(raw);
+      if (value != null) {
+        value.getContext();
+        return new GraalScriptValue(value);
+      }
+    } catch (Exception ignored) {
+      // Value may not be bound to a context; ignore.
+    }
     return null;
   }
 
