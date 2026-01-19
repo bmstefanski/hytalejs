@@ -42,7 +42,12 @@ public class GraalRuntimePool implements ScriptRuntimePool {
     try {
       ScriptRuntime runtime = available.take();
       pendingRequests.remove(currentThread);
-      runtime.enter();
+      try {
+        runtime.enter();
+      } catch (RuntimeException e) {
+        available.offer(runtime);
+        throw e;
+      }
       return runtime;
     } catch (InterruptedException e) {
       pendingRequests.remove(currentThread);

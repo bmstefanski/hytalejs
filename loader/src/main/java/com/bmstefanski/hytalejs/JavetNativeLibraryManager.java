@@ -16,6 +16,7 @@ import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.time.Duration;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.zip.ZipEntry;
@@ -23,6 +24,8 @@ import java.util.zip.ZipFile;
 
 public final class JavetNativeLibraryManager {
   private static final String DEFAULT_MAVEN_BASE_URL = "https://repo1.maven.org/maven2";
+  private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(10);
+  private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(60);
 
   private JavetNativeLibraryManager() {}
 
@@ -112,9 +115,11 @@ public final class JavetNativeLibraryManager {
     Path tempFile = jarDir.resolve(jarName + ".tmp");
     HttpClient client = HttpClient.newBuilder()
       .followRedirects(HttpClient.Redirect.NORMAL)
+      .connectTimeout(CONNECT_TIMEOUT)
       .build();
     HttpRequest request = HttpRequest.newBuilder(URI.create(url))
       .GET()
+      .timeout(REQUEST_TIMEOUT)
       .build();
     try {
       HttpResponse<Path> response = client.send(request, HttpResponse.BodyHandlers.ofFile(tempFile));

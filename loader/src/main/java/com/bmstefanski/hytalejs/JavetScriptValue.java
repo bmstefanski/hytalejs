@@ -56,6 +56,13 @@ public class JavetScriptValue implements ScriptValue {
   public ScriptValue getArrayElement(long index) {
     if (value instanceof V8ValueArray array) {
       try {
+        if (index < 0 || index > Integer.MAX_VALUE) {
+          throw new IndexOutOfBoundsException("Index out of range: " + index);
+        }
+        long length = array.getLength();
+        if (index >= length) {
+          throw new IndexOutOfBoundsException("Index out of range: " + index);
+        }
         V8Value element = array.get((int) index);
         return element == null ? null : new JavetScriptValue(element);
       } catch (JavetException e) {

@@ -12,10 +12,11 @@ import java.util.logging.Logger;
 public class HytaleJSConfig {
   private static final Logger LOGGER = Logger.getLogger("HytaleJS");
   private static final int DEFAULT_POOL_SIZE = 6;
+  private static final String DEFAULT_RUNTIME = "graal";
   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
   private int poolSize = DEFAULT_POOL_SIZE;
-  private String runtime = "graal";
+  private String runtime = DEFAULT_RUNTIME;
   private JavetConfig javet = new JavetConfig();
 
   public static HytaleJSConfig load(Path configPath) {
@@ -51,7 +52,7 @@ public class HytaleJSConfig {
   }
 
   public String getRuntime() {
-    return runtime;
+    return runtime == null || runtime.isBlank() ? DEFAULT_RUNTIME : runtime;
   }
 
   public JavetConfig getJavet() {
