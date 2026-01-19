@@ -42,6 +42,9 @@ public class HytaleJSCommand extends CommandBase {
       case "poolstats":
         showPoolStats(context);
         break;
+      case "runtime":
+        showRuntimeInfo(context);
+        break;
       case "tasks":
         showTasks(context);
         break;
@@ -64,6 +67,11 @@ public class HytaleJSCommand extends CommandBase {
       .insert(Message.raw("  /hytalejs poolstats").color(COLOR_COMMAND).bold(true))
       .insert(Message.raw(" > ").color(COLOR_ACCENT))
       .insert(Message.raw("View context pool statistics").color(COLOR_DESC)));
+
+    context.sendMessage(Message.empty()
+      .insert(Message.raw("  /hytalejs runtime").color(COLOR_COMMAND).bold(true))
+      .insert(Message.raw(" > ").color(COLOR_ACCENT))
+      .insert(Message.raw("Show runtime debug information").color(COLOR_DESC)));
 
     context.sendMessage(Message.empty()
       .insert(Message.raw("  /hytalejs tasks").color(COLOR_COMMAND).bold(true))
@@ -124,6 +132,61 @@ public class HytaleJSCommand extends CommandBase {
       context.sendMessage(Message.empty()
         .insert(Message.raw("  [*] ").color(COLOR_WARNING))
         .insert(Message.raw("High load - " + usagePercent + "% capacity").color(COLOR_WARNING)));
+    }
+
+    context.sendMessage(Message.raw("-------------------").color(COLOR_ACCENT));
+  }
+
+  private void showRuntimeInfo(CommandContext context) {
+    HytaleJS.RuntimeDebugInfo info = plugin.getRuntimeDebugInfo();
+
+    context.sendMessage(Message.empty()
+      .insert(Message.raw("--- ").color(COLOR_ACCENT))
+      .insert(Message.raw("Runtime Debug").color(COLOR_HEADER).bold(true))
+      .insert(Message.raw(" ---").color(COLOR_ACCENT)));
+
+    context.sendMessage(Message.empty()
+      .insert(Message.raw("  Runtime      ").color(COLOR_LABEL))
+      .insert(Message.raw("| ").color(COLOR_ACCENT))
+      .insert(Message.raw(info.getRuntimeName()).color(COLOR_VALUE).bold(true)));
+
+    context.sendMessage(Message.empty()
+      .insert(Message.raw("  Config       ").color(COLOR_LABEL))
+      .insert(Message.raw("| ").color(COLOR_ACCENT))
+      .insert(Message.raw(info.getConfiguredRuntime()).color(COLOR_VALUE).bold(true)));
+
+    context.sendMessage(Message.empty()
+      .insert(Message.raw("  Pool         ").color(COLOR_LABEL))
+      .insert(Message.raw("| ").color(COLOR_ACCENT))
+      .insert(Message.raw(
+        String.format("%d total, %d available, %d busy", info.getTotal(), info.getAvailable(), info.getBusy()))
+        .color(COLOR_VALUE)));
+
+    context.sendMessage(Message.empty()
+      .insert(Message.raw("  Queue        ").color(COLOR_LABEL))
+      .insert(Message.raw("| ").color(COLOR_ACCENT))
+      .insert(Message.raw(info.getQueued() + " pending").color(COLOR_VALUE)));
+
+    context.sendMessage(Message.empty()
+      .insert(Message.raw("  Scripts Dir  ").color(COLOR_LABEL))
+      .insert(Message.raw("| ").color(COLOR_ACCENT))
+      .insert(Message.raw(String.valueOf(info.getScriptsDir())).color(COLOR_VALUE)));
+
+    if ("Javet (V8)".equals(info.getRuntimeName())) {
+      context.sendMessage(Message.empty()
+        .insert(Message.raw("  Javet Lib    ").color(COLOR_LABEL))
+        .insert(Message.raw("| ").color(COLOR_ACCENT))
+        .insert(Message.raw(info.getJavetLibVersion()).color(COLOR_VALUE)));
+
+      context.sendMessage(Message.empty()
+        .insert(Message.raw("  Javet DL     ").color(COLOR_LABEL))
+        .insert(Message.raw("| ").color(COLOR_ACCENT))
+        .insert(Message.raw(info.isJavetDownloadEnabled() ? "enabled" : "disabled").color(COLOR_VALUE)));
+
+      context.sendMessage(Message.empty()
+        .insert(Message.raw("  Javet URL    ").color(COLOR_LABEL))
+        .insert(Message.raw("| ").color(COLOR_ACCENT))
+        .insert(Message.raw(info.getJavetBaseUrl()).color(COLOR_VALUE)));
     }
 
     context.sendMessage(Message.raw("-------------------").color(COLOR_ACCENT));
