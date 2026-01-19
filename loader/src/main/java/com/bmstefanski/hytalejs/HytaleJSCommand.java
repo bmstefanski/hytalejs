@@ -156,6 +156,16 @@ public class HytaleJSCommand extends CommandBase {
       .insert(Message.raw(info.getConfiguredRuntime()).color(COLOR_VALUE).bold(true)));
 
     context.sendMessage(Message.empty()
+      .insert(Message.raw("  Config Pool  ").color(COLOR_LABEL))
+      .insert(Message.raw("| ").color(COLOR_ACCENT))
+      .insert(Message.raw(String.valueOf(info.getConfiguredPoolSize())).color(COLOR_VALUE)));
+
+    context.sendMessage(Message.empty()
+      .insert(Message.raw("  Multithread  ").color(COLOR_LABEL))
+      .insert(Message.raw("| ").color(COLOR_ACCENT))
+      .insert(Message.raw(info.isMultithreaded() ? "enabled" : "disabled").color(COLOR_VALUE)));
+
+    context.sendMessage(Message.empty()
       .insert(Message.raw("  Pool         ").color(COLOR_LABEL))
       .insert(Message.raw("| ").color(COLOR_ACCENT))
       .insert(Message.raw(
