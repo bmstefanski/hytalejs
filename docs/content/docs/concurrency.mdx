@@ -181,6 +181,8 @@ for (let i = 0; i < 100; i++) {
 
 ![](./pool-stats.png)
 
+**`/hytalejs runtime`** - Show runtime debug info (active runtime, pool size, multithreaded status)
+
 **`/hytalejs tasks`** - Show operations waiting in queue
 
 ![](./queued-tasks.png)
@@ -220,15 +222,31 @@ Only Java objects passed through bindings (`Universe`, `HytaleServer`) are share
 
 ## Configuration
 
-Pool size can be configured via `config.json` in your plugin's data directory. The file is created automatically on first run:
+Runtime options can be configured via `config.json` in your plugin's data directory. The file is created automatically on first run:
 
 ```json
 {
-  "poolSize": 6
+  "runtime": {
+    "type": "graal",
+    "poolSize": 6,
+    "multithreaded": true
+  }
 }
 ```
 
-Edit this value and restart the server to apply changes.
+Set `multithreaded: false` to force single-threaded execution (pool size becomes 1).
+
+```json
+{
+  "runtime": {
+    "type": "javet",
+    "poolSize": 6,
+    "multithreaded": false
+  }
+}
+```
+
+Edit the config and restart the server to apply changes.
 
 ## References
 
