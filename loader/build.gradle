@@ -21,6 +21,7 @@ dependencies {
   implementation 'org.graalvm.polyglot:polyglot:24.1.1'
   implementation 'org.graalvm.polyglot:js-community:24.1.1'
   implementation 'com.google.code.gson:gson:2.11.0'
+  implementation 'com.caoccao.javet:javet:5.0.3'
 }
 
 shadowJar {

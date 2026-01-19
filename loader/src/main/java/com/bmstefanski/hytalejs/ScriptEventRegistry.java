@@ -2,7 +2,6 @@ package com.bmstefanski.hytalejs;
 
 import com.hypixel.hytale.event.IEvent;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
-import org.graalvm.polyglot.Value;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,7 +14,7 @@ public class ScriptEventRegistry {
   private final JavaPlugin plugin;
   private final Set<String> registeredEventTypes = new HashSet<>();
   private int handlerCount = 0;
-  private ContextPool contextPool;
+  private ScriptRuntimePool runtimePool;
 
   private static final Map<String, String> EVENT_CLASSES = new HashMap<>();
 
@@ -64,24 +63,47 @@ public class ScriptEventRegistry {
     this.plugin = plugin;
   }
 
-  public void setContextPool(ContextPool contextPool) {
-    this.contextPool = contextPool;
+  public void setRuntimePool(ScriptRuntimePool runtimePool) {
+    this.runtimePool = runtimePool;
   }
 
   @SuppressWarnings("unchecked")
-  public void registerHandler(String eventType, Value callback) {
+  public void registerHandler(String eventType, Object callback) {
     String className = EVENT_CLASSES.get(eventType);
     if (className == null) {
       plugin.getLogger().at(Level.WARNING).log("Unknown event type: %s", eventType);
       return;
     }
 
-    if (!callback.canExecute()) {
-      plugin.getLogger().at(Level.WARNING).log("Event callback for '%s' is not executable", eventType);
+    boolean shouldClose = !(callback instanceof ScriptValue);
+    ScriptValue callbackValue = ScriptValueFactory.from(callback);
+    if (callbackValue == null || !callbackValue.isExecutable()) {
+      plugin.getLogger().at(Level.SEVERE).log(
+        "Event callback for '%s' is not executable (type: %s)",
+        eventType,
+        ScriptValueFactory.describe(callback)
+      );
+      if (shouldClose && callbackValue != null) {
+        callbackValue.close();
+      }
       return;
     }
 
-    callback.getContext().getBindings("js").getMember("__eventCallbacks__").putMember(eventType, callback);
+    ScriptRuntime runtime = callbackValue.getRuntime();
+    try (ScriptValue callbacks = runtime.getGlobal("__eventCallbacks__")) {
+      if (callbacks == null) {
+        plugin.getLogger().at(Level.WARNING).log(
+          "Event callback map '__eventCallbacks__' is not initialized for '%s'",
+          eventType
+        );
+        return;
+      }
+      callbacks.setMember(eventType, callbackValue);
+    } finally {
+      if (shouldClose) {
+        callbackValue.close();
+      }
+    }
     handlerCount++;
 
     if (registeredEventTypes.contains(eventType)) {
@@ -94,11 +116,20 @@ public class ScriptEventRegistry {
 
       Consumer<Object> handler = event -> {
         try {
-          contextPool.executeInContext("event:" + eventType, ctx -> {
-            Value callbacks = ctx.getBindings("js").getMember("__eventCallbacks__");
-            Value cb = callbacks.getMember(eventType);
-            if (cb != null && cb.canExecute()) {
-              cb.execute(event);
+          if (runtimePool == null) {
+            plugin.getLogger().at(Level.WARNING).log("Event handler skipped for '%s' (runtime pool not initialized)", eventType);
+            return;
+          }
+          runtimePool.executeInRuntime("event:" + eventType, runtimeContext -> {
+            try (ScriptValue callbacks = runtimeContext.getGlobal("__eventCallbacks__")) {
+              if (callbacks == null) {
+                return;
+              }
+              try (ScriptValue cb = callbacks.getMember(eventType)) {
+                if (cb != null && cb.isExecutable()) {
+                  cb.executeVoid(event);
+                }
+              }
             }
           });
         } catch (Exception e) {
@@ -118,18 +149,24 @@ public class ScriptEventRegistry {
     }
   }
 
-  public void registerFromHandlersArray(Value handlersArray) {
+  public void registerFromHandlersArray(ScriptValue handlersArray) {
     if (handlersArray == null || !handlersArray.hasArrayElements()) {
       return;
     }
 
     long length = handlersArray.getArraySize();
     for (int i = 0; i < length; i++) {
-      Value handler = handlersArray.getArrayElement(i);
-      if (handler.hasMember("eventType") && handler.hasMember("callback")) {
-        String eventType = handler.getMember("eventType").asString();
-        Value callback = handler.getMember("callback");
-        registerHandler(eventType, callback);
+      try (ScriptValue handler = handlersArray.getArrayElement(i)) {
+        if (handler != null && handler.hasMember("eventType") && handler.hasMember("callback")) {
+          try (ScriptValue eventTypeValue = handler.getMember("eventType");
+               ScriptValue callbackValue = handler.getMember("callback")) {
+            if (eventTypeValue == null || callbackValue == null) {
+              continue;
+            }
+            String eventType = eventTypeValue.asString();
+            registerHandler(eventType, callbackValue);
+          }
+        }
       }
     }
   }

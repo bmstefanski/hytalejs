@@ -7,26 +7,24 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayer
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import org.graalvm.polyglot.Value;
 
 import javax.annotation.Nonnull;
-import java.util.function.Supplier;
 
 public class PooledWorldScriptCommand extends AbstractPlayerCommand {
   private final String commandName;
-  private final Supplier<ContextPool> contextPoolSupplier;
+  private final ScriptRuntimePool runtimePool;
 
-  public PooledWorldScriptCommand(String name, String description, Supplier<ContextPool> contextPoolSupplier) {
+  public PooledWorldScriptCommand(String name, String description, ScriptRuntimePool runtimePool) {
     super(name, description);
     this.commandName = name;
-    this.contextPoolSupplier = contextPoolSupplier;
+    this.runtimePool = runtimePool;
     setAllowsExtraArguments(true);
   }
 
-  public PooledWorldScriptCommand(String name, String description, String permission, Supplier<ContextPool> contextPoolSupplier) {
+  public PooledWorldScriptCommand(String name, String description, String permission, ScriptRuntimePool runtimePool) {
     super(name, description);
     this.commandName = name;
-    this.contextPoolSupplier = contextPoolSupplier;
+    this.runtimePool = runtimePool;
     setAllowsExtraArguments(true);
     if (permission != null && !permission.isEmpty()) {
       requirePermission(permission);
@@ -41,12 +39,17 @@ public class PooledWorldScriptCommand extends AbstractPlayerCommand {
     @Nonnull PlayerRef playerRef,
     @Nonnull World world
   ) {
-    contextPoolSupplier.get().executeInContext("command-world:/" + commandName, ctx -> {
-      Value callbacks = ctx.getBindings("js").getMember("__commandCallbacks__");
-      Value callback = callbacks.getMember(commandName);
-      if (callback != null && callback.canExecute()) {
-        PooledScriptCommand.ScriptCommandContext wrapper = new PooledScriptCommand.ScriptCommandContext(context);
-        callback.execute(wrapper);
+    runtimePool.executeInRuntime("command-world:/" + commandName, runtime -> {
+      try (ScriptValue callbacks = runtime.getGlobal("__commandCallbacks__")) {
+        if (callbacks == null) {
+          return;
+        }
+        try (ScriptValue callback = callbacks.getMember(commandName)) {
+          if (callback != null && callback.isExecutable()) {
+            PooledScriptCommand.ScriptCommandContext wrapper = new PooledScriptCommand.ScriptCommandContext(context);
+            callback.executeVoid(wrapper);
+          }
+        }
       }
     });
   }

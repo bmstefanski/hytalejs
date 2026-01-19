@@ -1,48 +1,68 @@
 package com.bmstefanski.hytalejs;
 
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
-import org.graalvm.polyglot.Value;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Level;
 
 public class ScriptCommandRegistry {
   private final JavaPlugin plugin;
   private final Set<String> registeredCommandNames = new HashSet<>();
-  private ContextPool contextPool;
+  private ScriptRuntimePool runtimePool;
 
   public ScriptCommandRegistry(JavaPlugin plugin) {
     this.plugin = plugin;
   }
 
-  public void setContextPool(ContextPool contextPool) {
-    this.contextPool = contextPool;
+  public void setRuntimePool(ScriptRuntimePool runtimePool) {
+    this.runtimePool = Objects.requireNonNull(runtimePool, "runtimePool");
   }
 
-  public void register(String name, String description, Value callback) {
+  public void register(String name, String description, Object callback) {
     registerWithPermission(name, description, null, callback);
   }
 
-  public void register(String name, String description, String permission, Value callback) {
+  public void register(String name, String description, String permission, Object callback) {
     registerWithPermission(name, description, permission, callback);
   }
 
-  public void registerWorld(String name, String description, Value callback) {
+  public void registerWorld(String name, String description, Object callback) {
     registerWorldWithPermission(name, description, null, callback);
   }
 
-  public void registerWorld(String name, String description, String permission, Value callback) {
+  public void registerWorld(String name, String description, String permission, Object callback) {
     registerWorldWithPermission(name, description, permission, callback);
   }
 
-  private void registerWithPermission(String name, String description, String permission, Value callback) {
-    if (!callback.canExecute()) {
-      plugin.getLogger().at(Level.WARNING).log("Command callback for '%s' is not executable", name);
+  private void registerWithPermission(String name, String description, String permission, Object callback) {
+    if (runtimePool == null) {
+      throw new IllegalStateException("ScriptRuntimePool not initialized; call setRuntimePool() before registering commands");
+    }
+
+    ScriptValue callbackValue = ScriptValueFactory.from(callback);
+    if (callbackValue == null || !callbackValue.isExecutable()) {
+      plugin.getLogger().at(Level.SEVERE).log(
+        "Command callback for '%s' is not executable (type: %s)",
+        name,
+        ScriptValueFactory.describe(callback)
+      );
+      if (callbackValue != null) {
+        callbackValue.close();
+      }
       return;
     }
 
-    callback.getContext().getBindings("js").getMember("__commandCallbacks__").putMember(name, callback);
+    try (ScriptValue callbacks = callbackValue.getRuntime().getGlobal("__commandCallbacks__")) {
+      if (callbacks == null) {
+        plugin.getLogger().at(Level.SEVERE).log("Command callback map '__commandCallbacks__' is not initialized");
+        return;
+      }
+      callbacks.setMember(name, callbackValue);
+    } finally {
+      callbackValue.close();
+    }
 
     if (registeredCommandNames.contains(name)) {
       return;
@@ -50,20 +70,40 @@ public class ScriptCommandRegistry {
     registeredCommandNames.add(name);
 
     PooledScriptCommand command = permission != null && !permission.isEmpty()
-      ? new PooledScriptCommand(name, description, permission, () -> this.contextPool)
-      : new PooledScriptCommand(name, description, () -> this.contextPool);
+      ? new PooledScriptCommand(name, description, permission, runtimePool)
+      : new PooledScriptCommand(name, description, runtimePool);
     plugin.getCommandRegistry().registerCommand(command);
     plugin.getLogger().at(Level.INFO).log("Registered command: /%s%s", name,
       permission != null && !permission.isEmpty() ? " (requires: " + permission + ")" : "");
   }
 
-  private void registerWorldWithPermission(String name, String description, String permission, Value callback) {
-    if (!callback.canExecute()) {
-      plugin.getLogger().at(Level.WARNING).log("Command callback for '%s' is not executable", name);
+  private void registerWorldWithPermission(String name, String description, String permission, Object callback) {
+    if (runtimePool == null) {
+      throw new IllegalStateException("ScriptRuntimePool not initialized; call setRuntimePool() before registering commands");
+    }
+
+    ScriptValue callbackValue = ScriptValueFactory.from(callback);
+    if (callbackValue == null || !callbackValue.isExecutable()) {
+      plugin.getLogger().at(Level.SEVERE).log(
+        "Command callback for '%s' is not executable (type: %s)",
+        name,
+        ScriptValueFactory.describe(callback)
+      );
+      if (callbackValue != null) {
+        callbackValue.close();
+      }
       return;
     }
 
-    callback.getContext().getBindings("js").getMember("__commandCallbacks__").putMember(name, callback);
+    try (ScriptValue callbacks = callbackValue.getRuntime().getGlobal("__commandCallbacks__")) {
+      if (callbacks == null) {
+        plugin.getLogger().at(Level.SEVERE).log("Command callback map '__commandCallbacks__' is not initialized");
+        return;
+      }
+      callbacks.setMember(name, callbackValue);
+    } finally {
+      callbackValue.close();
+    }
 
     if (registeredCommandNames.contains(name)) {
       return;
@@ -71,8 +111,8 @@ public class ScriptCommandRegistry {
     registeredCommandNames.add(name);
 
     PooledWorldScriptCommand command = permission != null && !permission.isEmpty()
-      ? new PooledWorldScriptCommand(name, description, permission, () -> this.contextPool)
-      : new PooledWorldScriptCommand(name, description, () -> this.contextPool);
+      ? new PooledWorldScriptCommand(name, description, permission, runtimePool)
+      : new PooledWorldScriptCommand(name, description, runtimePool);
     plugin.getCommandRegistry().registerCommand(command);
     plugin.getLogger().at(Level.INFO).log("Registered world-thread command: /%s%s", name,
       permission != null && !permission.isEmpty() ? " (requires: " + permission + ")" : "");
