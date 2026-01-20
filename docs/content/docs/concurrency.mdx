@@ -9,13 +9,14 @@ HytaleJS uses a context pool architecture to enable true concurrent JavaScript e
 
 **Concurrency in HytaleJS**
 
-HytaleJS uses a **context pool architecture** to enable true concurrent JavaScript execution. Unlike traditional JavaScript runtimes (Node.js, browsers) that execute operations one at a time on a single thread, HytaleJS maintains a pool of independent GraalJS contexts that can execute JavaScript in parallel across multiple threads.
+HytaleJS uses a **runtime pool architecture** to enable true concurrent JavaScript execution. Unlike traditional JavaScript runtimes (Node.js, browsers) that execute operations one at a time on a single thread, HytaleJS maintains a pool of independent V8 runtimes (via Javet) that can execute JavaScript in parallel across multiple threads.
 
 **Why This Matters**
 
 In a multiplayer Hytale server environment, events fire constantly - players chatting, breaking blocks, triggering interactions. Commands can perform expensive operations like building large structures. A traditional single-threaded JavaScript runtime would execute all operations sequentially, creating a bottleneck.
 
 Consider this scenario:
+
 - Player runs `/sphere 30` (creates ~3,700 blocks, takes ~10 seconds)
 - In a single-threaded model: All other operations wait 10 seconds
 - In HytaleJS's pool model: Other operations continue on separate threads
@@ -26,17 +27,13 @@ Each context runs on its own thread and is isolated - JavaScript global variable
 
 ## Architecture & How It Works
 
-**The Context Pool**
+**The Runtime Pool**
 
-HytaleJS creates a pool of N GraalJS contexts at startup (default: 6, configurable via `config.json`). All contexts share a single GraalJS Engine for compilation cache efficiency but execute independently.
+HytaleJS creates a pool of N V8 runtimes at startup (default: 6, configurable via `config.json`). Each runtime executes independently.
 
 ```
-┌─────────────────────────────────────┐
-│         Shared GraalJS Engine       │
-└─────────────────────────────────────┘
-         │         │         │
-    ┌────▼───┐ ┌──▼────┐ ┌──▼────┐
-    │Context │ │Context│ │Context│  ... (6 total)
+    ┌────────┐ ┌───────┐ ┌───────┐
+    │Runtime │ │Runtime│ │Runtime│  ... (6 total)
     │   1    │ │   2   │ │   3   │
     │ [BUSY] │ │[AVAIL]│ │[AVAIL]│
     └────────┘ └───────┘ └───────┘
@@ -48,15 +45,14 @@ HytaleJS creates a pool of N GraalJS contexts at startup (default: 6, configurab
 
 When an operation needs to run JavaScript:
 
-1. **Acquire**: Thread requests a context from the pool (blocking if all busy)
-2. **Enter**: Thread enters the context (`ctx.enter()`)
-3. **Execute**: JavaScript code runs on that thread
-4. **Leave & Release**: Context is returned to pool (`ctx.leave()`)
+1. **Acquire**: Thread requests a runtime from the pool (blocking if all busy)
+2. **Execute**: JavaScript code runs on that thread
+3. **Release**: Runtime is returned to pool
 
 **Example: Concurrent Operations**
 
 ```
-Time    Context 1           Context 2           Context 3
+Time    Runtime 1           Runtime 2           Runtime 3
 ────────────────────────────────────────────────────────
 0ms     /sphere (acquire)   Available           Available
 10ms    /sphere running...  Chat event (acq.)   Available
@@ -90,17 +86,17 @@ Node.js Event Loop:
 
 When a long synchronous operation runs (e.g., a loop placing 3,700 blocks), the event loop is blocked. No other JavaScript can execute - not event handlers, not timers, not other requests.
 
-**HytaleJS: Multi-Context Pool**
+**HytaleJS: Multi-Runtime Pool**
 
 ```
-HytaleJS Context Pool:
+HytaleJS Runtime Pool:
 ┌─────────────────────────────┐
-│   Context Pool              │
+│   Runtime Pool              │
 │  ┌─────────┐  ┌─────────┐   │
-│  │ Ctx 1   │  │ Ctx 2   │   │◄── All execute in parallel
+│  │ V8 1    │  │ V8 2    │   │◄── All execute in parallel
 │  │/sphere  │  │ Chat    │   │
 │  ├─────────┤  ├─────────┤   │
-│  │ Ctx 3   │  │ Ctx 4   │   │
+│  │ V8 3    │  │ V8 4    │   │
 │  │ Event   │  │Available│   │
 │  └─────────┘  └─────────┘   │
 └─────────────────────────────┘
@@ -108,18 +104,18 @@ HytaleJS Context Pool:
 
 **Key Differences**
 
-| Aspect | Node.js/Browser | HytaleJS |
-|--------|----------------|----------|
-| Execution threads | 1 | N (configurable, default 6) |
-| Long operations | Block everything | Block 1/N contexts |
-| Concurrent requests | Queued sequentially | Execute in parallel |
-| Shared state | All code shares globals | Each context isolated |
+| Aspect              | Node.js/Browser         | HytaleJS                    |
+| ------------------- | ----------------------- | --------------------------- |
+| Execution threads   | 1                       | N (configurable, default 6) |
+| Long operations     | Block everything        | Block 1/N contexts          |
+| Concurrent requests | Queued sequentially     | Execute in parallel         |
+| Shared state        | All code shares globals | Each context isolated       |
 
 ## Understanding Long Tasks
 
 **What is a Long Task?**
 
-A long task is any synchronous operation that holds a context for an extended period. While the operation runs, that context is unavailable for other operations.
+A long task is any synchronous operation that holds a runtime for an extended period. While the operation runs, that runtime is unavailable for other operations.
 
 **Common Long Task Patterns**
 
@@ -128,19 +124,18 @@ A long task is any synchronous operation that holds a context for an extended pe
 The `/sphere` command creates a hollow sphere by iterating through a 3D volume to find blocks at the sphere's surface.
 
 ```typescript
-// Creates ~3,700 blocks for radius 30
 for (let x = -radius; x <= radius; x++) {
   for (let y = -radius; y <= radius; y++) {
     for (let z = -radius; z <= radius; z++) {
       const dist = Math.sqrt(x * x + y * y + z * z);
       if (dist <= radius && dist >= radius - 1) {
         world.setBlock(centerX + x, centerY + y, centerZ + z, blockId);
-        // Context held during entire loop
       }
     }
   }
 }
 ```
+
 For radius 30: ~61³ = 226,981 iterations to find ~3,700 blocks to place.
 
 2. **Heavy Computations** - CPU-intensive calculations that run synchronously
@@ -148,7 +143,6 @@ For radius 30: ~61³ = 226,981 iterations to find ~3,700 blocks to place.
 Mathematical operations or data processing that doesn't interact with the game world but takes significant CPU time.
 
 ```typescript
-// Bad: blocks context for entire calculation
 let result = 0;
 for (let i = 0; i < 1000000; i++) {
   result += Math.sin(i) * Math.cos(i);
@@ -160,7 +154,6 @@ for (let i = 0; i < 1000000; i++) {
 Reading or modifying many blocks in sequence without batching.
 
 ```typescript
-// Each operation holds context
 for (let i = 0; i < 100; i++) {
   world.getBlockType(x, y + i, z);
   world.setBlock(x, y + i, z, blockId);
@@ -169,7 +162,7 @@ for (let i = 0; i < 100; i++) {
 
 **What's NOT a Long Task**
 
-- Scheduler callbacks (they release context between executions)
+- Scheduler callbacks (they release runtime between executions)
 - Event handlers that complete quickly
 - Commands with minimal logic
 
@@ -191,7 +184,7 @@ for (let i = 0; i < 100; i++) {
 
 **When the Pool Gets Exhausted**
 
-If all N contexts are busy, new operations block until a context becomes available. This creates a queue.
+If all N runtimes are busy, new operations block until a runtime becomes available. This creates a queue.
 
 **Example with Pool Size 4:**
 
@@ -204,18 +197,16 @@ Time    Available   Operation
 4s      0          Chat event → QUEUED (waits)
 ```
 
-The queued operation waits until any running operation completes and releases its context.
+The queued operation waits until any running operation completes and releases its runtime.
 
-**Context Isolation**
+**Runtime Isolation**
 
-JavaScript global variables are NOT shared between contexts:
+JavaScript global variables are NOT shared between runtimes:
 
 ```typescript
-// Context 1
 let counter = 0;
 
-// Context 2 executing later
-counter++;  // This is a DIFFERENT counter variable
+counter++;
 ```
 
 Only Java objects passed through bindings (`Universe`, `HytaleServer`) are shared and thread-safe.
@@ -227,7 +218,6 @@ Runtime options can be configured via `config.json` in your plugin's data direct
 ```json
 {
   "runtime": {
-    "type": "graal",
     "poolSize": 6,
     "multithreaded": true
   }
@@ -239,7 +229,6 @@ Set `multithreaded: false` to force single-threaded execution (pool size becomes
 ```json
 {
   "runtime": {
-    "type": "javet",
     "poolSize": 1,
     "multithreaded": false
   }
@@ -250,6 +239,6 @@ Edit the config and restart the server to apply changes.
 
 ## References
 
-- [GraalVM Multithreading Documentation](https://www.graalvm.org/latest/reference-manual/js/Multithreading/)
+- [Javet Documentation](https://www.caoccao.com/Javet/)
 - [Node.js Event Loop](https://nodejs.org/en/learn/asynchronous-work/event-loop-timers-and-nexttick)
 - [Node.js: Don't Block the Event Loop](https://nodejs.org/en/learn/asynchronous-work/dont-block-the-event-loop)

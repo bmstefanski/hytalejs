@@ -151,11 +151,6 @@ public class HytaleJSCommand extends CommandBase {
       .insert(Message.raw(info.getRuntimeName()).color(COLOR_VALUE).bold(true)));
 
     context.sendMessage(Message.empty()
-      .insert(Message.raw("  Config       ").color(COLOR_LABEL))
-      .insert(Message.raw("| ").color(COLOR_ACCENT))
-      .insert(Message.raw(info.getConfiguredRuntime()).color(COLOR_VALUE).bold(true)));
-
-    context.sendMessage(Message.empty()
       .insert(Message.raw("  Config Pool  ").color(COLOR_LABEL))
       .insert(Message.raw("| ").color(COLOR_ACCENT))
       .insert(Message.raw(String.valueOf(info.getConfiguredPoolSize())).color(COLOR_VALUE)));
@@ -182,22 +177,20 @@ public class HytaleJSCommand extends CommandBase {
       .insert(Message.raw("| ").color(COLOR_ACCENT))
       .insert(Message.raw(String.valueOf(info.getScriptsDir())).color(COLOR_VALUE)));
 
-    if ("Javet (V8)".equals(info.getRuntimeName())) {
-      context.sendMessage(Message.empty()
-        .insert(Message.raw("  Javet Lib    ").color(COLOR_LABEL))
-        .insert(Message.raw("| ").color(COLOR_ACCENT))
-        .insert(Message.raw(info.getJavetLibVersion()).color(COLOR_VALUE)));
+    context.sendMessage(Message.empty()
+      .insert(Message.raw("  Javet Lib    ").color(COLOR_LABEL))
+      .insert(Message.raw("| ").color(COLOR_ACCENT))
+      .insert(Message.raw(info.getJavetLibVersion()).color(COLOR_VALUE)));
 
-      context.sendMessage(Message.empty()
-        .insert(Message.raw("  Javet DL     ").color(COLOR_LABEL))
-        .insert(Message.raw("| ").color(COLOR_ACCENT))
-        .insert(Message.raw(info.isJavetDownloadEnabled() ? "enabled" : "disabled").color(COLOR_VALUE)));
+    context.sendMessage(Message.empty()
+      .insert(Message.raw("  Javet DL     ").color(COLOR_LABEL))
+      .insert(Message.raw("| ").color(COLOR_ACCENT))
+      .insert(Message.raw(info.isJavetDownloadEnabled() ? "enabled" : "disabled").color(COLOR_VALUE)));
 
-      context.sendMessage(Message.empty()
-        .insert(Message.raw("  Javet URL    ").color(COLOR_LABEL))
-        .insert(Message.raw("| ").color(COLOR_ACCENT))
-        .insert(Message.raw(info.getJavetBaseUrl()).color(COLOR_VALUE)));
-    }
+    context.sendMessage(Message.empty()
+      .insert(Message.raw("  Javet URL    ").color(COLOR_LABEL))
+      .insert(Message.raw("| ").color(COLOR_ACCENT))
+      .insert(Message.raw(info.getJavetBaseUrl()).color(COLOR_VALUE)));
 
     context.sendMessage(Message.raw("-------------------").color(COLOR_ACCENT));
   }

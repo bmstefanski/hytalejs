@@ -2,11 +2,8 @@ package com.bmstefanski.hytalejs;
 
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
-import com.caoccao.javet.exceptions.JavetException;
-import com.caoccao.javet.interception.jvm.JavetJVMInterceptor;
 import com.caoccao.javet.interop.V8Runtime;
 import com.caoccao.javet.interop.loader.JavetLibLoader;
-import com.caoccao.javet.values.reference.V8ValueGlobalObject;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -59,23 +56,13 @@ public class HytaleJS extends JavaPlugin {
   }
 
   private ScriptRuntimePool createRuntimePool(HytaleJSConfig config) {
-    String runtime = config.getRuntime() == null ? "graal" : config.getRuntime().toLowerCase();
     int poolSize = config.getRuntimePoolSize();
     if (!config.isRuntimeMultithreaded()) {
       getLogger().at(Level.INFO).log("Runtime multithreading disabled; forcing pool size to 1");
     }
-    if (runtime.equals("javet")) {
-      JavetNativeLibraryManager.prepare(config, getDataDirectory(), getLogger());
-      getLogger().at(Level.INFO).log("Initializing Javet runtime pool (V8)");
-      return new JavetRuntimePool(poolSize, this::setupBindings);
-    }
-
-    if (!runtime.equals("graal")) {
-      getLogger().at(Level.WARNING).log("Unknown runtime '%s', defaulting to GraalJS", runtime);
-    }
-
-    getLogger().at(Level.INFO).log("Initializing GraalJS runtime pool");
-    return new GraalRuntimePool(poolSize, this::setupBindings);
+    JavetNativeLibraryManager.prepare(config, getDataDirectory(), getLogger());
+    getLogger().at(Level.INFO).log("Initializing Javet runtime pool (V8)");
+    return new JavetRuntimePool(poolSize, this::setupBindings);
   }
 
   private void setupBindings(ScriptRuntime runtime) {
@@ -89,26 +76,6 @@ public class HytaleJS extends JavaPlugin {
   private void setupJavetInterop(JavetScriptRuntime javetRuntime) {
     V8Runtime runtime = javetRuntime.getRuntime();
     runtime.setConverter(new JavetFunctionConverter());
-
-    try {
-      try (V8ValueGlobalObject global = runtime.getGlobalObject()) {
-        new JavetJVMInterceptor(runtime).register(global);
-      }
-
-      runtime.getExecutor(
-        "globalThis.Java = {" +
-          "type: (className) => {" +
-            "let current = javet.package;" +
-            "for (const part of className.split('.')) {" +
-              "current = current[part];" +
-            "}" +
-            "return current;" +
-          "}" +
-        "};"
-      ).executeVoid();
-    } catch (JavetException e) {
-      throw new RuntimeException("Failed to initialize Javet interop", e);
-    }
   }
 
   private void loadScripts() {
@@ -175,13 +142,7 @@ public class HytaleJS extends JavaPlugin {
   }
 
   public RuntimeDebugInfo getRuntimeDebugInfo() {
-    String configuredRuntime = config == null ? "graal" : config.getRuntime();
-    String runtimeName = "Unknown";
-    if (runtimePool instanceof JavetRuntimePool) {
-      runtimeName = "Javet (V8)";
-    } else if (runtimePool instanceof GraalRuntimePool) {
-      runtimeName = "GraalJS";
-    }
+    String runtimeName = "Javet (V8)";
 
     int total = runtimePool == null ? 0 : runtimePool.getTotalSize();
     int available = runtimePool == null ? 0 : runtimePool.getAvailableCount();
@@ -197,7 +158,6 @@ public class HytaleJS extends JavaPlugin {
 
     return new RuntimeDebugInfo(
       runtimeName,
-      configuredRuntime,
       configuredPoolSize,
       multithreaded,
       total,
@@ -299,7 +259,6 @@ public class HytaleJS extends JavaPlugin {
 
   public static class RuntimeDebugInfo {
     private final String runtimeName;
-    private final String configuredRuntime;
     private final int configuredPoolSize;
     private final boolean multithreaded;
     private final int total;
@@ -313,7 +272,6 @@ public class HytaleJS extends JavaPlugin {
 
     public RuntimeDebugInfo(
       String runtimeName,
-      String configuredRuntime,
       int configuredPoolSize,
       boolean multithreaded,
       int total,
@@ -326,7 +284,6 @@ public class HytaleJS extends JavaPlugin {
       String javetLibVersion
     ) {
       this.runtimeName = runtimeName;
-      this.configuredRuntime = configuredRuntime;
       this.configuredPoolSize = configuredPoolSize;
       this.multithreaded = multithreaded;
       this.total = total;
@@ -341,10 +298,6 @@ public class HytaleJS extends JavaPlugin {
 
     public String getRuntimeName() {
       return runtimeName;
-    }
-
-    public String getConfiguredRuntime() {
-      return configuredRuntime;
     }
 
     public int getConfiguredPoolSize() {

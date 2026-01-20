@@ -15,7 +15,6 @@ import java.util.logging.Logger;
 public class HytaleJSConfig {
   private static final Logger LOGGER = Logger.getLogger("HytaleJS");
   private static final int DEFAULT_POOL_SIZE = 6;
-  private static final String DEFAULT_RUNTIME = "graal";
   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
   private RuntimeConfig runtime = new RuntimeConfig();
@@ -25,8 +24,8 @@ public class HytaleJSConfig {
     if (!Files.exists(configPath)) {
       HytaleJSConfig config = new HytaleJSConfig();
       config.save(configPath);
-      LOGGER.log(Level.INFO,
-        "Created default config.json with poolSize: " + config.getRuntimePoolSize() + ", runtime: " + config.getRuntime());
+        LOGGER.log(Level.INFO,
+        "Created default config.json with poolSize: " + config.getRuntimePoolSize());
       return config;
     }
 
@@ -36,20 +35,15 @@ public class HytaleJSConfig {
       HytaleJSConfig config = new HytaleJSConfig();
 
       JsonElement runtimeElement = root.get("runtime");
-      if (runtimeElement != null) {
-        if (runtimeElement.isJsonPrimitive()) {
-          config.runtime.setType(runtimeElement.getAsString());
-        } else if (runtimeElement.isJsonObject()) {
-          RuntimeConfig runtimeConfig = GSON.fromJson(runtimeElement, RuntimeConfig.class);
-          if (runtimeConfig != null) {
-            config.runtime = runtimeConfig;
-          }
+      if (runtimeElement != null && runtimeElement.isJsonObject()) {
+        RuntimeConfig runtimeConfig = GSON.fromJson(runtimeElement, RuntimeConfig.class);
+        if (runtimeConfig != null) {
+          config.runtime = runtimeConfig;
         }
       }
 
       JsonElement poolSizeElement = root.get("poolSize");
-      if (poolSizeElement != null && poolSizeElement.isJsonPrimitive()
-        && (runtimeElement == null || runtimeElement.isJsonPrimitive())) {
+      if (poolSizeElement != null && poolSizeElement.isJsonPrimitive()) {
         int legacyPoolSize = poolSizeElement.getAsInt();
         config.runtime.setPoolSize(legacyPoolSize);
       }
@@ -63,7 +57,7 @@ public class HytaleJSConfig {
       }
 
       LOGGER.log(Level.INFO,
-        "Loaded config.json with poolSize: " + config.getRuntimePoolSize() + ", runtime: " + config.getRuntime());
+        "Loaded config.json with poolSize: " + config.getRuntimePoolSize());
       return config;
     } catch (Exception e) {
       LOGGER.log(Level.WARNING, "Failed to load config.json, using defaults", e);
@@ -78,10 +72,6 @@ public class HytaleJSConfig {
     } catch (IOException e) {
       LOGGER.log(Level.SEVERE, "Failed to save config.json", e);
     }
-  }
-
-  public String getRuntime() {
-    return runtime == null ? DEFAULT_RUNTIME : runtime.getType();
   }
 
   public int getRuntimePoolSize() {
@@ -105,17 +95,8 @@ public class HytaleJSConfig {
   }
 
   public static class RuntimeConfig {
-    private String type = DEFAULT_RUNTIME;
     private int poolSize = DEFAULT_POOL_SIZE;
     private boolean multithreaded = true;
-
-    public String getType() {
-      return type == null || type.isBlank() ? DEFAULT_RUNTIME : type;
-    }
-
-    public void setType(String type) {
-      this.type = type;
-    }
 
     public int getPoolSize() {
       return poolSize > 0 ? poolSize : DEFAULT_POOL_SIZE;

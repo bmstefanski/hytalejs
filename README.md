@@ -83,7 +83,7 @@ See [`examples/kitchensink`](examples/kitchensink) for a complete working setup 
 
 ## Tech Stack
 
-- **GraalJS** - JavaScript runtime for JVM
+- **Javet (V8)** - JavaScript runtime for JVM
 - **TypeScript** - Type definitions & utilities for Hytale API
 - **esbuild** - Fast bundling for plugins
 

@@ -2,7 +2,6 @@ package com.bmstefanski.hytalejs;
 
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.basecommands.CommandBase;
-import org.graalvm.polyglot.HostAccess;
 
 import javax.annotation.Nonnull;
 
@@ -51,22 +50,18 @@ public class PooledScriptCommand extends CommandBase {
       this.context = context;
     }
 
-    @HostAccess.Export
     public void sendMessage(String message) {
       context.sendMessage(com.hypixel.hytale.server.core.Message.raw(message));
     }
 
-    @HostAccess.Export
     public void sendFormattedMessage(Object message) {
       context.sendMessage((com.hypixel.hytale.server.core.Message) message);
     }
 
-    @HostAccess.Export
     public String getSenderName() {
       return context.sender().getDisplayName();
     }
 
-    @HostAccess.Export
     public String getInput() {
       return context.getInputString();
     }

@@ -561,8 +561,6 @@ public final class ScriptBindings {
     new JavaTypeBinding("WhitelistStatusCommand", "com.hypixel.hytale.server.core.modules.accesscontrol.commands.WhitelistStatusCommand"),
   };
 
-  private static final String JAVA_BINDINGS_SCRIPT = buildBindingsScript();
-
   private ScriptBindings() {}
 
   public static void applyCoreBindings(
@@ -584,18 +582,13 @@ public final class ScriptBindings {
   }
 
   public static void applyJavaTypeBindings(ScriptRuntime runtime) {
-    runtime.eval(JAVA_BINDINGS_SCRIPT);
-  }
-
-  private static String buildBindingsScript() {
-    StringBuilder sb = new StringBuilder();
+    ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
     for (JavaTypeBinding binding : JAVA_TYPE_BINDINGS) {
-      sb.append("globalThis.")
-        .append(binding.name())
-        .append(" = Java.type(\'")
-        .append(binding.className())
-        .append("\');\n");
+      try {
+        Class<?> clazz = Class.forName(binding.className(), true, classLoader);
+        runtime.setGlobal(binding.name(), clazz);
+      } catch (ClassNotFoundException ignored) {
+      }
     }
-    return sb.toString();
   }
 }

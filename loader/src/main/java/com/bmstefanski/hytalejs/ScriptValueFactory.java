@@ -1,6 +1,5 @@
 package com.bmstefanski.hytalejs;
 
-import org.graalvm.polyglot.Value;
 import com.caoccao.javet.values.V8Value;
 
 public final class ScriptValueFactory {
@@ -13,20 +12,8 @@ public final class ScriptValueFactory {
     if (raw instanceof ScriptValue scriptValue) {
       return scriptValue;
     }
-    if (raw instanceof Value value) {
-      return new GraalScriptValue(value);
-    }
     if (raw instanceof V8Value v8Value) {
       return new JavetScriptValue(v8Value);
-    }
-    try {
-      Value value = Value.asValue(raw);
-      if (value != null) {
-        value.getContext();
-        return new GraalScriptValue(value);
-      }
-    } catch (Exception ignored) {
-      // Value may not be bound to a context; ignore.
     }
     return null;
   }

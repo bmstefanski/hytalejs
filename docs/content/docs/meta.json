@@ -1,11 +1,4 @@
 {
   "title": "Documentation",
-  "pages": [
-    "index",
-    "getting-started",
-    "concurrency",
-    "runtimes",
-    "guides",
-    "api"
-  ]
+  "pages": ["index", "getting-started", "concurrency", "guides", "api"]
 }

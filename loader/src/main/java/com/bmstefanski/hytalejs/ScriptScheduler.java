@@ -1,7 +1,6 @@
 package com.bmstefanski.hytalejs;
 
 import com.hypixel.hytale.server.core.HytaleServer;
-import org.graalvm.polyglot.HostAccess;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
@@ -22,7 +21,6 @@ public class ScriptScheduler {
     return "cb_" + System.identityHashCode(callback);
   }
 
-  @HostAccess.Export
   public ScriptTask runLater(Object callback, long delayMs) {
     ScriptValue callbackValue = ScriptValueFactory.from(callback);
     if (callbackValue == null || !callbackValue.isExecutable()) {
@@ -76,7 +74,6 @@ public class ScriptScheduler {
     return new ScriptTask(future);
   }
 
-  @HostAccess.Export
   public ScriptTask runRepeating(Object callback, long delayMs, long periodMs) {
     ScriptValue callbackValue = ScriptValueFactory.from(callback);
     if (callbackValue == null || !callbackValue.isExecutable()) {
@@ -139,7 +136,6 @@ public class ScriptScheduler {
     return task;
   }
 
-  @HostAccess.Export
   public ScriptTask runRepeatingWithDelay(Object callback, long delayMs, long periodMs) {
     ScriptValue callbackValue = ScriptValueFactory.from(callback);
     if (callbackValue == null || !callbackValue.isExecutable()) {
@@ -216,19 +212,16 @@ public class ScriptScheduler {
       this.future = future;
     }
 
-    @HostAccess.Export
     public void cancel() {
       if (future != null) {
         future.cancel(false);
       }
     }
 
-    @HostAccess.Export
     public boolean isCancelled() {
       return future != null && future.isCancelled();
     }
 
-    @HostAccess.Export
     public boolean isDone() {
       return future != null && future.isDone();
     }
