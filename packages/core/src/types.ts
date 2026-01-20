@@ -5574,12 +5574,23 @@ export interface WhitelistStatusCommand {
   new (whitelistProvider: unknown): WhitelistStatusCommand;
 }
 
+export interface JavetCallMetrics {
+  record(label: string, durationNanos: number): void;
+  reset(): void;
+  getReport(): string;
+  getTotalCalls(): number;
+  getTotalTimeMs(): number;
+  getAvgTimeMs(): number;
+  nanoTime(): number;
+}
+
 declare global {
   const Java: JavaInterop;
   const logger: ScriptLogger;
   const plugin: unknown;
   const commands: ScriptCommandRegistry;
   const scheduler: ScriptScheduler;
+  const metrics: JavetCallMetrics;
   const Universe: UniverseStatic;
   const HytaleServer: HytaleServerStatic;
   const Message: MessageStatic;

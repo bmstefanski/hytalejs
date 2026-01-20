@@ -20,7 +20,6 @@ import {
   registerPyramidCommand,
   registerWallCommand,
   registerSquareCommand,
-  registerBenchmarkCommand,
 } from "./commands";
 
 import { startAutoMessages } from "./schedulers/auto-messages";
@@ -51,6 +50,5 @@ registerSphereCommand();
 registerPyramidCommand();
 registerWallCommand();
 registerSquareCommand();
-registerBenchmarkCommand();
 
 startAutoMessages();
