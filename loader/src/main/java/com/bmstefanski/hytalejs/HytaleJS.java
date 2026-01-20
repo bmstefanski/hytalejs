@@ -41,6 +41,7 @@ public class HytaleJS extends JavaPlugin {
     }
 
     eventRegistry = new ScriptEventRegistry(this);
+    eventRegistry.registerEcsSystems();
     commandRegistry = new ScriptCommandRegistry(this);
     scheduler = new ScriptScheduler();
 

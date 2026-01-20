@@ -1,8 +1,4 @@
-import {
-  PlayerConnectHandler,
-  PlayerDisconnectHandler,
-  PlayerChatHandler,
-} from "./events";
+import { PlayerConnectHandler, PlayerDisconnectHandler, PlayerChatHandler, BreakBlockHandler, PlaceBlockHandler, DamageBlockHandler } from "./events";
 
 import {
   registerHelloCommand,
@@ -24,6 +20,7 @@ import {
   registerPyramidCommand,
   registerWallCommand,
   registerSquareCommand,
+  registerBenchmarkCommand,
 } from "./commands";
 
 import { startAutoMessages } from "./schedulers/auto-messages";
@@ -31,6 +28,9 @@ import { startAutoMessages } from "./schedulers/auto-messages";
 new PlayerConnectHandler();
 new PlayerDisconnectHandler();
 new PlayerChatHandler();
+new BreakBlockHandler();
+new PlaceBlockHandler();
+new DamageBlockHandler();
 
 registerHelloCommand();
 registerPingCommand();
@@ -51,5 +51,6 @@ registerSphereCommand();
 registerPyramidCommand();
 registerWallCommand();
 registerSquareCommand();
+registerBenchmarkCommand();
 
 startAutoMessages();

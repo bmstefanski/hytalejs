@@ -1,7 +1,15 @@
 package com.bmstefanski.hytalejs;
 
+import com.hypixel.hytale.component.ArchetypeChunk;
+import com.hypixel.hytale.component.CommandBuffer;
+import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.component.query.Query;
+import com.hypixel.hytale.component.system.EcsEvent;
+import com.hypixel.hytale.component.system.EntityEventSystem;
 import com.hypixel.hytale.event.IEvent;
+import com.hypixel.hytale.server.core.event.events.ecs.*;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,10 +21,12 @@ import java.util.logging.Level;
 public class ScriptEventRegistry {
   private final JavaPlugin plugin;
   private final Set<String> registeredEventTypes = new HashSet<>();
+  private final Map<String, Consumer<Object>> ecsEventHandlers = new HashMap<>();
   private int handlerCount = 0;
   private ScriptRuntimePool runtimePool;
 
   private static final Map<String, String> EVENT_CLASSES = new HashMap<>();
+  private static final Set<String> ECS_EVENTS = new HashSet<>();
 
   static {
     EVENT_CLASSES.put("BootEvent", "com.hypixel.hytale.server.core.event.events.BootEvent");
@@ -57,6 +67,17 @@ public class ScriptEventRegistry {
     EVENT_CLASSES.put("PlayerPermissionChangeEvent", "com.hypixel.hytale.server.core.event.events.permissions.PlayerPermissionChangeEvent");
     EVENT_CLASSES.put("GroupPermissionChangeEvent", "com.hypixel.hytale.server.core.event.events.permissions.GroupPermissionChangeEvent");
     EVENT_CLASSES.put("PlayerGroupEvent", "com.hypixel.hytale.server.core.event.events.permissions.PlayerGroupEvent");
+
+    ECS_EVENTS.add("BreakBlockEvent");
+    ECS_EVENTS.add("PlaceBlockEvent");
+    ECS_EVENTS.add("DamageBlockEvent");
+    ECS_EVENTS.add("UseBlockEvent");
+    ECS_EVENTS.add("DropItemEvent");
+    ECS_EVENTS.add("InteractivelyPickupItemEvent");
+    ECS_EVENTS.add("ChangeGameModeEvent");
+    ECS_EVENTS.add("CraftRecipeEvent");
+    ECS_EVENTS.add("DiscoverZoneEvent");
+    ECS_EVENTS.add("SwitchActiveSlotEvent");
   }
 
   public ScriptEventRegistry(JavaPlugin plugin) {
@@ -65,6 +86,26 @@ public class ScriptEventRegistry {
 
   public void setRuntimePool(ScriptRuntimePool runtimePool) {
     this.runtimePool = runtimePool;
+  }
+
+  public void registerEcsSystems() {
+    plugin.getEntityStoreRegistry().registerSystem(new BreakBlockEventSystem(this));
+    plugin.getEntityStoreRegistry().registerSystem(new PlaceBlockEventSystem(this));
+    plugin.getEntityStoreRegistry().registerSystem(new DamageBlockEventSystem(this));
+    plugin.getEntityStoreRegistry().registerSystem(new UseBlockEventSystem(this));
+    plugin.getEntityStoreRegistry().registerSystem(new DropItemEventSystem(this));
+    plugin.getEntityStoreRegistry().registerSystem(new InteractivelyPickupItemEventSystem(this));
+    plugin.getEntityStoreRegistry().registerSystem(new ChangeGameModeEventSystem(this));
+    plugin.getEntityStoreRegistry().registerSystem(new CraftRecipeEventSystem(this));
+    plugin.getEntityStoreRegistry().registerSystem(new DiscoverZoneEventSystem(this));
+    plugin.getEntityStoreRegistry().registerSystem(new SwitchActiveSlotEventSystem(this));
+  }
+
+  void dispatchEcsEvent(String eventType, Object event) {
+    Consumer<Object> handler = ecsEventHandlers.get(eventType);
+    if (handler != null) {
+      handler.accept(event);
+    }
   }
 
   @SuppressWarnings("unchecked")
@@ -111,42 +152,44 @@ public class ScriptEventRegistry {
     }
     registeredEventTypes.add(eventType);
 
-    try {
-      Class<?> eventClass = Class.forName(className);
-
-      Consumer<Object> handler = event -> {
-        try {
-          if (runtimePool == null) {
-            plugin.getLogger().at(Level.WARNING).log("Event handler skipped for '%s' (runtime pool not initialized)", eventType);
-            return;
-          }
-          runtimePool.executeInRuntime("event:" + eventType, runtimeContext -> {
-            try (ScriptValue callbacks = runtimeContext.getGlobal("__eventCallbacks__")) {
-              if (callbacks == null) {
-                return;
-              }
-              try (ScriptValue cb = callbacks.getMember(eventType)) {
-                if (cb != null && cb.isExecutable()) {
-                  cb.executeVoid(event);
-                }
+    Consumer<Object> handler = event -> {
+      try {
+        if (runtimePool == null) {
+          plugin.getLogger().at(Level.WARNING).log("Event handler skipped for '%s' (runtime pool not initialized)", eventType);
+          return;
+        }
+        runtimePool.executeInRuntime("event:" + eventType, runtimeContext -> {
+          try (ScriptValue callbacks = runtimeContext.getGlobal("__eventCallbacks__")) {
+            if (callbacks == null) {
+              return;
+            }
+            try (ScriptValue cb = callbacks.getMember(eventType)) {
+              if (cb != null && cb.isExecutable()) {
+                cb.executeVoid(event);
               }
             }
-          });
-        } catch (Exception e) {
-          plugin.getLogger().at(Level.SEVERE).withCause(e).log("Error executing handler for %s", eventType);
-        }
-      };
+          }
+        });
+      } catch (Exception e) {
+        plugin.getLogger().at(Level.SEVERE).withCause(e).log("Error executing handler for %s", eventType);
+      }
+    };
 
-      plugin.getEventRegistry().register(
-        (Class<? super IEvent<Void>>) eventClass,
-        (Consumer<IEvent<Void>>) (Consumer<?>) handler
-      );
-
-      plugin.getLogger().at(Level.INFO).log("Registered handler for event: %s", eventType);
-
-    } catch (ClassNotFoundException e) {
-      plugin.getLogger().at(Level.SEVERE).withCause(e).log("Event class not found: %s", className);
+    if (ECS_EVENTS.contains(eventType)) {
+      ecsEventHandlers.put(eventType, handler);
+    } else {
+      try {
+        Class<?> eventClass = Class.forName(className);
+        plugin.getEventRegistry().register(
+          (Class<? super IEvent<Void>>) eventClass,
+          (Consumer<IEvent<Void>>) (Consumer<?>) handler
+        );
+      } catch (ClassNotFoundException e) {
+        plugin.getLogger().at(Level.SEVERE).withCause(e).log("Event class not found: %s", className);
+      }
     }
+
+    plugin.getLogger().at(Level.INFO).log("Registered handler for event: %s", eventType);
   }
 
   public void registerFromHandlersArray(ScriptValue handlersArray) {
@@ -185,5 +228,86 @@ public class ScriptEventRegistry {
 
   public static String[] getAvailableEvents() {
     return EVENT_CLASSES.keySet().toArray(new String[0]);
+  }
+
+  private static abstract class BaseEcsEventSystem<T extends EcsEvent> extends EntityEventSystem<EntityStore, T> {
+    protected final ScriptEventRegistry registry;
+    protected final String eventTypeName;
+
+    BaseEcsEventSystem(Class<T> eventClass, ScriptEventRegistry registry, String eventTypeName) {
+      super(eventClass);
+      this.registry = registry;
+      this.eventTypeName = eventTypeName;
+    }
+
+    @Override
+    public void handle(int index, ArchetypeChunk<EntityStore> chunk, Store<EntityStore> store, CommandBuffer<EntityStore> buffer, T event) {
+      registry.dispatchEcsEvent(eventTypeName, event);
+    }
+
+    @Override
+    public Query<EntityStore> getQuery() {
+      return Query.any();
+    }
+  }
+
+  private static class BreakBlockEventSystem extends BaseEcsEventSystem<BreakBlockEvent> {
+    BreakBlockEventSystem(ScriptEventRegistry registry) {
+      super(BreakBlockEvent.class, registry, "BreakBlockEvent");
+    }
+  }
+
+  private static class PlaceBlockEventSystem extends BaseEcsEventSystem<PlaceBlockEvent> {
+    PlaceBlockEventSystem(ScriptEventRegistry registry) {
+      super(PlaceBlockEvent.class, registry, "PlaceBlockEvent");
+    }
+  }
+
+  private static class DamageBlockEventSystem extends BaseEcsEventSystem<DamageBlockEvent> {
+    DamageBlockEventSystem(ScriptEventRegistry registry) {
+      super(DamageBlockEvent.class, registry, "DamageBlockEvent");
+    }
+  }
+
+  private static class UseBlockEventSystem extends BaseEcsEventSystem<UseBlockEvent> {
+    UseBlockEventSystem(ScriptEventRegistry registry) {
+      super(UseBlockEvent.class, registry, "UseBlockEvent");
+    }
+  }
+
+  private static class DropItemEventSystem extends BaseEcsEventSystem<DropItemEvent> {
+    DropItemEventSystem(ScriptEventRegistry registry) {
+      super(DropItemEvent.class, registry, "DropItemEvent");
+    }
+  }
+
+  private static class InteractivelyPickupItemEventSystem extends BaseEcsEventSystem<InteractivelyPickupItemEvent> {
+    InteractivelyPickupItemEventSystem(ScriptEventRegistry registry) {
+      super(InteractivelyPickupItemEvent.class, registry, "InteractivelyPickupItemEvent");
+    }
+  }
+
+  private static class ChangeGameModeEventSystem extends BaseEcsEventSystem<ChangeGameModeEvent> {
+    ChangeGameModeEventSystem(ScriptEventRegistry registry) {
+      super(ChangeGameModeEvent.class, registry, "ChangeGameModeEvent");
+    }
+  }
+
+  private static class CraftRecipeEventSystem extends BaseEcsEventSystem<CraftRecipeEvent> {
+    CraftRecipeEventSystem(ScriptEventRegistry registry) {
+      super(CraftRecipeEvent.class, registry, "CraftRecipeEvent");
+    }
+  }
+
+  private static class DiscoverZoneEventSystem extends BaseEcsEventSystem<DiscoverZoneEvent> {
+    DiscoverZoneEventSystem(ScriptEventRegistry registry) {
+      super(DiscoverZoneEvent.class, registry, "DiscoverZoneEvent");
+    }
+  }
+
+  private static class SwitchActiveSlotEventSystem extends BaseEcsEventSystem<SwitchActiveSlotEvent> {
+    SwitchActiveSlotEventSystem(ScriptEventRegistry registry) {
+      super(SwitchActiveSlotEvent.class, registry, "SwitchActiveSlotEvent");
+    }
   }
 }
