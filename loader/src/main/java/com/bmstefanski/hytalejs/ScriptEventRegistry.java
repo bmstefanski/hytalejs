@@ -27,6 +27,7 @@ public class ScriptEventRegistry {
 
   private static final Map<String, String> EVENT_CLASSES = new HashMap<>();
   private static final Set<String> ECS_EVENTS = new HashSet<>();
+  private static final Set<String> GLOBAL_EVENTS = new HashSet<>();
 
   static {
     EVENT_CLASSES.put("BootEvent", "com.hypixel.hytale.server.core.event.events.BootEvent");
@@ -78,6 +79,9 @@ public class ScriptEventRegistry {
     ECS_EVENTS.add("CraftRecipeEvent");
     ECS_EVENTS.add("DiscoverZoneEvent");
     ECS_EVENTS.add("SwitchActiveSlotEvent");
+
+    GLOBAL_EVENTS.add("AddPlayerToWorldEvent");
+    GLOBAL_EVENTS.add("DrainPlayerFromWorldEvent");
   }
 
   public ScriptEventRegistry(JavaPlugin plugin) {
@@ -177,6 +181,16 @@ public class ScriptEventRegistry {
 
     if (ECS_EVENTS.contains(eventType)) {
       ecsEventHandlers.put(eventType, handler);
+    } else if (GLOBAL_EVENTS.contains(eventType)) {
+      try {
+        Class<?> eventClass = Class.forName(className);
+        plugin.getEventRegistry().registerGlobal(
+          (Class) eventClass,
+          (Consumer) handler
+        );
+      } catch (ClassNotFoundException e) {
+        plugin.getLogger().at(Level.SEVERE).withCause(e).log("Event class not found: %s", className);
+      }
     } else {
       try {
         Class<?> eventClass = Class.forName(className);
@@ -189,7 +203,7 @@ public class ScriptEventRegistry {
       }
     }
 
-    plugin.getLogger().at(Level.INFO).log("Registered handler for event: %s", eventType);
+    
   }
 
   public void registerFromHandlersArray(ScriptValue handlersArray) {

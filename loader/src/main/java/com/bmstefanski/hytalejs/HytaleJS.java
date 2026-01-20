@@ -5,6 +5,9 @@ import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.caoccao.javet.interop.V8Runtime;
 import com.caoccao.javet.interop.loader.JavetLibLoader;
 
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.hypixel.hytale.server.core.event.events.player.AddPlayerToWorldEvent;
+
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -42,6 +45,7 @@ public class HytaleJS extends JavaPlugin {
 
     eventRegistry = new ScriptEventRegistry(this);
     eventRegistry.registerEcsSystems();
+    configurePlayerMessages();
     commandRegistry = new ScriptCommandRegistry(this);
     scheduler = new ScriptScheduler();
 
@@ -58,11 +62,7 @@ public class HytaleJS extends JavaPlugin {
 
   private ScriptRuntimePool createRuntimePool(HytaleJSConfig config) {
     int poolSize = config.getRuntimePoolSize();
-    if (!config.isRuntimeMultithreaded()) {
-      getLogger().at(Level.INFO).log("Runtime multithreading disabled; forcing pool size to 1");
-    }
     JavetNativeLibraryManager.prepare(config, getDataDirectory(), getLogger());
-    getLogger().at(Level.INFO).log("Initializing Javet runtime pool (V8)");
     return new JavetRuntimePool(poolSize, this::setupBindings);
   }
 
@@ -77,6 +77,27 @@ public class HytaleJS extends JavaPlugin {
   private void setupJavetInterop(JavetScriptRuntime javetRuntime) {
     V8Runtime runtime = javetRuntime.getRuntime();
     runtime.setConverter(new JavetFunctionConverter());
+  }
+
+  @SuppressWarnings("unchecked")
+  private void configurePlayerMessages() {
+    if (config.isDisableJoinMessage()) {
+      getEventRegistry().registerGlobal(AddPlayerToWorldEvent.class, event -> {
+        event.setBroadcastJoinMessage(false);
+      });
+    }
+
+    if (config.isDisableLeaveMessage()) {
+      try {
+        Class<?> originalSystemClass = Class.forName(
+          "com.hypixel.hytale.server.core.modules.entity.player.PlayerSystems$PlayerRemovedSystem"
+        );
+        EntityStore.REGISTRY.unregisterSystem((Class) originalSystemClass);
+        EntityStore.REGISTRY.registerSystem(new CustomPlayerRemovedSystem());
+        CustomPlayerRemovedSystem.setBroadcastLeaveMessage(false);
+      } catch (Exception ignored) {
+      }
+    }
   }
 
   private void loadScripts() {
@@ -96,7 +117,7 @@ public class HytaleJS extends JavaPlugin {
   private boolean loadScriptIntoAllContexts(Path scriptPath) {
     try {
       String scriptContent = Files.readString(scriptPath);
-      getLogger().at(Level.INFO).log("Loading script: %s", scriptPath.getFileName());
+      
 
       for (ScriptRuntime runtime : runtimePool.getAllRuntimes()) {
         runtime.enter();
@@ -110,7 +131,7 @@ public class HytaleJS extends JavaPlugin {
         }
       }
 
-      getLogger().at(Level.INFO).log("Successfully loaded script: %s", scriptPath.getFileName());
+      
       return true;
     } catch (Exception e) {
       getLogger().at(Level.SEVERE).withCause(e).log("Failed to load script: %s", scriptPath.getFileName());
@@ -121,7 +142,6 @@ public class HytaleJS extends JavaPlugin {
   @Override
   protected void start() {
     super.start();
-    getLogger().at(Level.INFO).log("HytaleJS started with %d event handlers", eventRegistry.getHandlerCount());
   }
 
   public ContextPoolStats getContextPoolStats() {
@@ -178,7 +198,6 @@ public class HytaleJS extends JavaPlugin {
     if (runtimePool != null) {
       runtimePool.close();
     }
-    getLogger().at(Level.INFO).log("HytaleJS shutdown");
   }
 
   public ReloadResult reloadScripts() {

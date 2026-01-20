@@ -578,6 +578,7 @@ public final class ScriptBindings {
     runtime.setGlobal("commands", commandRegistry);
     runtime.setGlobal("events", eventRegistry);
     runtime.setGlobal("scheduler", scheduler);
+    runtime.setGlobal("metrics", new JavetCallMetrics());
     applyJavaTypeBindings(runtime);
   }
 

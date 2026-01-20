@@ -6,26 +6,22 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class HytaleJSConfig {
-  private static final Logger LOGGER = Logger.getLogger("HytaleJS");
   private static final int DEFAULT_POOL_SIZE = 6;
   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
   private RuntimeConfig runtime = new RuntimeConfig();
   private JavetConfig javet = new JavetConfig();
+  private boolean disableJoinMessage = true;
+  private boolean disableLeaveMessage = true;
 
   public static HytaleJSConfig load(Path configPath) {
     if (!Files.exists(configPath)) {
       HytaleJSConfig config = new HytaleJSConfig();
       config.save(configPath);
-        LOGGER.log(Level.INFO,
-        "Created default config.json with poolSize: " + config.getRuntimePoolSize());
       return config;
     }
 
@@ -56,11 +52,18 @@ public class HytaleJSConfig {
         }
       }
 
-      LOGGER.log(Level.INFO,
-        "Loaded config.json with poolSize: " + config.getRuntimePoolSize());
+      JsonElement disableJoinElement = root.get("disableJoinMessage");
+      if (disableJoinElement != null && disableJoinElement.isJsonPrimitive()) {
+        config.disableJoinMessage = disableJoinElement.getAsBoolean();
+      }
+
+      JsonElement disableLeaveElement = root.get("disableLeaveMessage");
+      if (disableLeaveElement != null && disableLeaveElement.isJsonPrimitive()) {
+        config.disableLeaveMessage = disableLeaveElement.getAsBoolean();
+      }
+
       return config;
     } catch (Exception e) {
-      LOGGER.log(Level.WARNING, "Failed to load config.json, using defaults", e);
       return new HytaleJSConfig();
     }
   }
@@ -69,8 +72,7 @@ public class HytaleJSConfig {
     try {
       String json = GSON.toJson(this);
       Files.writeString(configPath, json);
-    } catch (IOException e) {
-      LOGGER.log(Level.SEVERE, "Failed to save config.json", e);
+    } catch (Exception ignored) {
     }
   }
 
@@ -92,6 +94,14 @@ public class HytaleJSConfig {
 
   public RuntimeConfig getRuntimeConfig() {
     return runtime;
+  }
+
+  public boolean isDisableJoinMessage() {
+    return disableJoinMessage;
+  }
+
+  public boolean isDisableLeaveMessage() {
+    return disableLeaveMessage;
   }
 
   public static class RuntimeConfig {
