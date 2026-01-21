@@ -75,7 +75,11 @@ public class HytaleJS extends JavaPlugin {
 
   private void setupJavetInterop(JavetScriptRuntime javetRuntime) {
     V8Runtime runtime = javetRuntime.getRuntime();
-    runtime.setConverter(new JavetFunctionConverter());
+    JavetFunctionConverter converter = new JavetFunctionConverter();
+    converter.getConfig().setProxyMapEnabled(true);
+    converter.getConfig().setProxyListEnabled(true);
+    converter.getConfig().setProxySetEnabled(true);
+    runtime.setConverter(converter);
   }
 
   @SuppressWarnings("unchecked")

@@ -6,14 +6,13 @@ export function registerItemsCommand(): void {
 
     const store = Item.getAssetStore().getAssetMap();
     const map = store.getAssetMap();
-    const keys = map.keySet();
-    const iterator = keys.iterator();
+    const keys = Object.keys(map);
 
     let count = 0;
     const maxResults = 20;
 
-    while (iterator.hasNext() && count < maxResults) {
-      const key = iterator.next() as string;
+    for (let i = 0; i < keys.length && count < maxResults; i++) {
+      const key = keys[i];
       if (!filter || key.toLowerCase().includes(filter)) {
         ctx.sendMessage(key);
         count++;
