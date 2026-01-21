@@ -9,22 +9,23 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import javax.annotation.Nonnull;
+import java.util.function.Supplier;
 
 public class WorldScriptCommand extends AbstractPlayerCommand {
   private final String commandName;
-  private final ScriptEventLoop eventLoop;
+  private final Supplier<ScriptEventLoop> eventLoopSupplier;
 
-  public WorldScriptCommand(String name, String description, ScriptEventLoop eventLoop) {
+  public WorldScriptCommand(String name, String description, Supplier<ScriptEventLoop> eventLoopSupplier) {
     super(name, description);
     this.commandName = name;
-    this.eventLoop = eventLoop;
+    this.eventLoopSupplier = eventLoopSupplier;
     setAllowsExtraArguments(true);
   }
 
-  public WorldScriptCommand(String name, String description, String permission, ScriptEventLoop eventLoop) {
+  public WorldScriptCommand(String name, String description, String permission, Supplier<ScriptEventLoop> eventLoopSupplier) {
     super(name, description);
     this.commandName = name;
-    this.eventLoop = eventLoop;
+    this.eventLoopSupplier = eventLoopSupplier;
     setAllowsExtraArguments(true);
     if (permission != null && !permission.isEmpty()) {
       requirePermission(permission);
@@ -39,7 +40,7 @@ public class WorldScriptCommand extends AbstractPlayerCommand {
     @Nonnull PlayerRef playerRef,
     @Nonnull World world
   ) {
-    eventLoop.executeInRuntime("command-world:/" + commandName, runtime -> {
+    eventLoopSupplier.get().executeInRuntime("command-world:/" + commandName, runtime -> {
       try (ScriptValue callbacks = runtime.getGlobal("__commandCallbacks__")) {
         if (callbacks == null) {
           return;

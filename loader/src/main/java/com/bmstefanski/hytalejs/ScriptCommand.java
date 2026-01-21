@@ -4,22 +4,23 @@ import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.basecommands.CommandBase;
 
 import javax.annotation.Nonnull;
+import java.util.function.Supplier;
 
 public class ScriptCommand extends CommandBase {
   private final String commandName;
-  private final ScriptEventLoop eventLoop;
+  private final Supplier<ScriptEventLoop> eventLoopSupplier;
 
-  public ScriptCommand(String name, String description, ScriptEventLoop eventLoop) {
+  public ScriptCommand(String name, String description, Supplier<ScriptEventLoop> eventLoopSupplier) {
     super(name, description);
     this.commandName = name;
-    this.eventLoop = eventLoop;
+    this.eventLoopSupplier = eventLoopSupplier;
     setAllowsExtraArguments(true);
   }
 
-  public ScriptCommand(String name, String description, String permission, ScriptEventLoop eventLoop) {
+  public ScriptCommand(String name, String description, String permission, Supplier<ScriptEventLoop> eventLoopSupplier) {
     super(name, description);
     this.commandName = name;
-    this.eventLoop = eventLoop;
+    this.eventLoopSupplier = eventLoopSupplier;
     setAllowsExtraArguments(true);
     if (permission != null && !permission.isEmpty()) {
       requirePermission(permission);
@@ -28,7 +29,7 @@ public class ScriptCommand extends CommandBase {
 
   @Override
   protected void executeSync(@Nonnull CommandContext context) {
-    eventLoop.executeInRuntime("command:/" + commandName, runtime -> {
+    eventLoopSupplier.get().executeInRuntime("command:/" + commandName, runtime -> {
       try (ScriptValue callbacks = runtime.getGlobal("__commandCallbacks__")) {
         if (callbacks == null) {
           return;

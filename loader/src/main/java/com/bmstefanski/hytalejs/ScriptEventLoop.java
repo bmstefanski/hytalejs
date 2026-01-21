@@ -6,11 +6,7 @@ import com.caoccao.javet.interop.V8Runtime;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -21,14 +17,11 @@ public class ScriptEventLoop implements AutoCloseable {
 
   private final V8Host host;
   private final ScriptRuntime runtime;
-  private final BlockingQueue<ScriptTask<?>> taskQueue;
-  private final Thread loopThread;
-  private final AtomicBoolean running;
+  private final ReentrantLock runtimeLock;
 
   public ScriptEventLoop(Consumer<ScriptRuntime> runtimeInitializer) {
     host = V8Host.getV8Instance();
-    taskQueue = new LinkedBlockingQueue<>();
-    running = new AtomicBoolean(true);
+    runtimeLock = new ReentrantLock();
 
     V8Runtime v8Runtime;
     try {
@@ -39,73 +32,17 @@ public class ScriptEventLoop implements AutoCloseable {
 
     runtime = new JavetScriptRuntime(v8Runtime);
     runtimeInitializer.accept(runtime);
-
-    loopThread = new Thread(this::runLoop, "HytaleJS-EventLoop");
-    loopThread.setDaemon(true);
-    loopThread.start();
-  }
-
-  private void runLoop() {
-    while (running.get()) {
-      try {
-        ScriptTask<?> task = taskQueue.take();
-        if (!running.get()) {
-          task.completeExceptionally(new RuntimeException("Event loop is shutting down"));
-          break;
-        }
-        executeTask(task);
-      } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-        break;
-      }
-    }
-
-    while (!taskQueue.isEmpty()) {
-      ScriptTask<?> task = taskQueue.poll();
-      if (task != null) {
-        task.completeExceptionally(new RuntimeException("Event loop is shutting down"));
-      }
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  private <T> void executeTask(ScriptTask<T> task) {
-    runtime.enter();
-    try {
-      T result = (T) task.getTask().apply(runtime);
-      task.complete(result);
-    } catch (Exception e) {
-      LOGGER.log(Level.SEVERE, "Error executing task: " + task.getOperation(), e);
-      task.completeExceptionally(e);
-    } finally {
-      runtime.leave();
-    }
   }
 
   public <T> T executeInRuntime(String operation, Function<ScriptRuntime, T> task) {
-    if (Thread.currentThread() == loopThread) {
-      runtime.enter();
-      try {
-        return task.apply(runtime);
-      } finally {
-        runtime.leave();
-      }
-    }
-
-    ScriptTask<T> scriptTask = new ScriptTask<>(operation, task);
-    taskQueue.offer(scriptTask);
-
+    runtimeLock.lock();
     try {
-      return scriptTask.getFuture().get();
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-      throw new RuntimeException("Interrupted while waiting for task: " + operation, e);
-    } catch (ExecutionException e) {
-      Throwable cause = e.getCause();
-      if (cause instanceof RuntimeException) {
-        throw (RuntimeException) cause;
-      }
-      throw new RuntimeException("Error executing task: " + operation, cause);
+      return task.apply(runtime);
+    } catch (Exception e) {
+      LOGGER.log(Level.SEVERE, "Error executing task: " + operation, e);
+      throw e;
+    } finally {
+      runtimeLock.unlock();
     }
   }
 
@@ -122,53 +59,17 @@ public class ScriptEventLoop implements AutoCloseable {
 
   @Override
   public void close() {
-    running.set(false);
-    taskQueue.offer(new ScriptTask<>("shutdown", r -> null));
-
+    runtimeLock.lock();
     try {
-      loopThread.join(5000);
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-    }
-
-    if (runtime instanceof JavetScriptRuntime javetRuntime) {
-      try {
-        javetRuntime.getRuntime().close();
-      } catch (JavetException e) {
-        throw new RuntimeException("Failed to close Javet runtime", e);
+      if (runtime instanceof JavetScriptRuntime javetRuntime) {
+        try {
+          javetRuntime.getRuntime().close();
+        } catch (JavetException e) {
+          throw new RuntimeException("Failed to close Javet runtime", e);
+        }
       }
-    }
-  }
-
-  private static class ScriptTask<T> {
-    private final String operation;
-    private final Function<ScriptRuntime, T> task;
-    private final CompletableFuture<T> future;
-
-    ScriptTask(String operation, Function<ScriptRuntime, T> task) {
-      this.operation = operation;
-      this.task = task;
-      this.future = new CompletableFuture<>();
-    }
-
-    String getOperation() {
-      return operation;
-    }
-
-    Function<ScriptRuntime, T> getTask() {
-      return task;
-    }
-
-    CompletableFuture<T> getFuture() {
-      return future;
-    }
-
-    void complete(T result) {
-      future.complete(result);
-    }
-
-    void completeExceptionally(Throwable ex) {
-      future.completeExceptionally(ex);
+    } finally {
+      runtimeLock.unlock();
     }
   }
 }

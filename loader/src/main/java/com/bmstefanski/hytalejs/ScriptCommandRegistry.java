@@ -20,6 +20,10 @@ public class ScriptCommandRegistry {
     this.eventLoop = Objects.requireNonNull(eventLoop, "eventLoop");
   }
 
+  public ScriptEventLoop getEventLoop() {
+    return eventLoop;
+  }
+
   public void register(String name, String description, Object callback) {
     registerWithPermission(name, description, null, callback);
   }
@@ -70,8 +74,8 @@ public class ScriptCommandRegistry {
     registeredCommandNames.add(name);
 
     ScriptCommand command = permission != null && !permission.isEmpty()
-      ? new ScriptCommand(name, description, permission, eventLoop)
-      : new ScriptCommand(name, description, eventLoop);
+      ? new ScriptCommand(name, description, permission, this::getEventLoop)
+      : new ScriptCommand(name, description, this::getEventLoop);
     plugin.getCommandRegistry().registerCommand(command);
   }
 
@@ -109,8 +113,8 @@ public class ScriptCommandRegistry {
     registeredCommandNames.add(name);
 
     WorldScriptCommand command = permission != null && !permission.isEmpty()
-      ? new WorldScriptCommand(name, description, permission, eventLoop)
-      : new WorldScriptCommand(name, description, eventLoop);
+      ? new WorldScriptCommand(name, description, permission, this::getEventLoop)
+      : new WorldScriptCommand(name, description, this::getEventLoop);
     plugin.getCommandRegistry().registerCommand(command);
   }
 }
