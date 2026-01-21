@@ -9,44 +9,8 @@ public interface ScriptRuntimePool extends AutoCloseable {
 
   List<ScriptRuntime> getAllRuntimes();
 
-  int getTotalSize();
-
-  int getAvailableCount();
-
-  int getBusyCount();
-
-  List<QueuedOperation> getQueuedOperations();
-
   @Override
   void close();
-
-  class QueuedOperation {
-    private final String operation;
-    private final long waitTimeMs;
-
-    public QueuedOperation(String operation, long waitTimeMs) {
-      this.operation = operation;
-      this.waitTimeMs = waitTimeMs;
-    }
-
-    public String getOperation() {
-      return operation;
-    }
-
-    public long getWaitTimeMs() {
-      return waitTimeMs;
-    }
-  }
-
-  class PendingRequest {
-    final String operation;
-    final long startTime;
-
-    public PendingRequest(String operation, long startTime) {
-      this.operation = operation;
-      this.startTime = startTime;
-    }
-  }
 
   @FunctionalInterface
   interface ScriptRuntimeTask<T> {

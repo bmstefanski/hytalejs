@@ -10,11 +10,11 @@ import java.util.logging.Level;
 
 public class ScriptScheduler {
   private static final Logger LOGGER = Logger.getLogger("HytaleJS|Scheduler");
-  private ScriptRuntimePool runtimePool;
+  private ScriptEventLoop eventLoop;
   private final ConcurrentHashMap<String, ScriptTask> scheduledTasks = new ConcurrentHashMap<>();
 
-  public void setRuntimePool(ScriptRuntimePool runtimePool) {
-    this.runtimePool = runtimePool;
+  public void setEventLoop(ScriptEventLoop eventLoop) {
+    this.eventLoop = eventLoop;
   }
 
   private String getCallbackKey(Object callback) {
@@ -30,8 +30,8 @@ public class ScriptScheduler {
       }
       return new ScriptTask(null);
     }
-    if (runtimePool == null) {
-      LOGGER.log(Level.SEVERE, "runLater callback scheduled without an initialized runtime pool");
+    if (eventLoop == null) {
+      LOGGER.log(Level.SEVERE, "runLater callback scheduled without an initialized event loop");
       callbackValue.close();
       return new ScriptTask(null);
     }
@@ -48,10 +48,10 @@ public class ScriptScheduler {
     ScheduledFuture<?> future = HytaleServer.SCHEDULED_EXECUTOR.schedule(
       () -> {
         try {
-          if (runtimePool == null) {
+          if (eventLoop == null) {
             return;
           }
-          runtimePool.executeInRuntime("scheduler:runLater", runtime -> {
+          eventLoop.executeInRuntime("scheduler:runLater", runtime -> {
             try (ScriptValue callbacks = runtime.getGlobal("__schedulerCallbacks__")) {
               if (callbacks == null) {
                 return;
@@ -83,8 +83,8 @@ public class ScriptScheduler {
       }
       return new ScriptTask(null);
     }
-    if (runtimePool == null) {
-      LOGGER.log(Level.SEVERE, "runRepeating callback scheduled without an initialized runtime pool");
+    if (eventLoop == null) {
+      LOGGER.log(Level.SEVERE, "runRepeating callback scheduled without an initialized event loop");
       callbackValue.close();
       return new ScriptTask(null);
     }
@@ -108,10 +108,10 @@ public class ScriptScheduler {
     ScheduledFuture<?> future = HytaleServer.SCHEDULED_EXECUTOR.scheduleAtFixedRate(
       () -> {
         try {
-          if (runtimePool == null) {
+          if (eventLoop == null) {
             return;
           }
-          runtimePool.executeInRuntime("scheduler:runRepeating", runtime -> {
+          eventLoop.executeInRuntime("scheduler:runRepeating", runtime -> {
             try (ScriptValue callbacks = runtime.getGlobal("__schedulerCallbacks__")) {
               if (callbacks == null) {
                 return;
@@ -145,8 +145,8 @@ public class ScriptScheduler {
       }
       return new ScriptTask(null);
     }
-    if (runtimePool == null) {
-      LOGGER.log(Level.SEVERE, "runRepeatingWithDelay callback scheduled without an initialized runtime pool");
+    if (eventLoop == null) {
+      LOGGER.log(Level.SEVERE, "runRepeatingWithDelay callback scheduled without an initialized event loop");
       callbackValue.close();
       return new ScriptTask(null);
     }
@@ -170,10 +170,10 @@ public class ScriptScheduler {
     ScheduledFuture<?> future = HytaleServer.SCHEDULED_EXECUTOR.scheduleWithFixedDelay(
       () -> {
         try {
-          if (runtimePool == null) {
+          if (eventLoop == null) {
             return;
           }
-          runtimePool.executeInRuntime("scheduler:runRepeatingWithDelay", runtime -> {
+          eventLoop.executeInRuntime("scheduler:runRepeatingWithDelay", runtime -> {
             try (ScriptValue callbacks = runtime.getGlobal("__schedulerCallbacks__")) {
               if (callbacks == null) {
                 return;

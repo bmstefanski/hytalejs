@@ -17,7 +17,7 @@ import java.util.logging.Level;
 import java.util.stream.Stream;
 
 public class HytaleJS extends JavaPlugin {
-  private ScriptRuntimePool runtimePool;
+  private ScriptEventLoop eventLoop;
   private ScriptEventRegistry eventRegistry;
   private ScriptCommandRegistry commandRegistry;
   private ScriptScheduler scheduler;
@@ -49,21 +49,20 @@ public class HytaleJS extends JavaPlugin {
     commandRegistry = new ScriptCommandRegistry(this);
     scheduler = new ScriptScheduler();
 
-    runtimePool = createRuntimePool(config);
+    eventLoop = createEventLoop(config);
 
-    eventRegistry.setRuntimePool(runtimePool);
-    commandRegistry.setRuntimePool(runtimePool);
-    scheduler.setRuntimePool(runtimePool);
+    eventRegistry.setEventLoop(eventLoop);
+    commandRegistry.setEventLoop(eventLoop);
+    scheduler.setEventLoop(eventLoop);
 
     getCommandRegistry().registerCommand(new HytaleJSCommand(this));
 
     loadScripts();
   }
 
-  private ScriptRuntimePool createRuntimePool(HytaleJSConfig config) {
-    int poolSize = config.getRuntimePoolSize();
+  private ScriptEventLoop createEventLoop(HytaleJSConfig config) {
     JavetNativeLibraryManager.prepare(config, getDataDirectory(), getLogger());
-    return new JavetRuntimePool(poolSize, this::setupBindings);
+    return new ScriptEventLoop(this::setupBindings);
   }
 
   private void setupBindings(ScriptRuntime runtime) {
@@ -107,19 +106,18 @@ public class HytaleJS extends JavaPlugin {
         .toList();
 
       for (Path scriptPath : scriptPaths) {
-        loadScriptIntoAllContexts(scriptPath);
+        loadScriptIntoRuntime(scriptPath);
       }
     } catch (IOException e) {
       getLogger().at(Level.SEVERE).withCause(e).log("Failed to load scripts");
     }
   }
 
-  private boolean loadScriptIntoAllContexts(Path scriptPath) {
+  private boolean loadScriptIntoRuntime(Path scriptPath) {
     try {
       String scriptContent = Files.readString(scriptPath);
       
-
-      for (ScriptRuntime runtime : runtimePool.getAllRuntimes()) {
+      for (ScriptRuntime runtime : eventLoop.getAllRuntimes()) {
         runtime.enter();
         try {
           runtime.eval(scriptContent);
@@ -131,7 +129,6 @@ public class HytaleJS extends JavaPlugin {
         }
       }
 
-      
       return true;
     } catch (Exception e) {
       getLogger().at(Level.SEVERE).withCause(e).log("Failed to load script: %s", scriptPath.getFileName());
@@ -144,47 +141,15 @@ public class HytaleJS extends JavaPlugin {
     super.start();
   }
 
-  public ContextPoolStats getContextPoolStats() {
-    if (runtimePool == null) {
-      return new ContextPoolStats(0, 0, 0);
-    }
-    return new ContextPoolStats(
-      runtimePool.getTotalSize(),
-      runtimePool.getAvailableCount(),
-      runtimePool.getBusyCount()
-    );
-  }
-
-  public List<ScriptRuntimePool.QueuedOperation> getQueuedOperations() {
-    if (runtimePool == null) {
-      return List.of();
-    }
-    return runtimePool.getQueuedOperations();
-  }
-
   public RuntimeDebugInfo getRuntimeDebugInfo() {
     String runtimeName = "Javet (V8)";
-
-    int total = runtimePool == null ? 0 : runtimePool.getTotalSize();
-    int available = runtimePool == null ? 0 : runtimePool.getAvailableCount();
-    int busy = runtimePool == null ? 0 : runtimePool.getBusyCount();
-    int queued = runtimePool == null ? 0 : runtimePool.getQueuedOperations().size();
 
     HytaleJSConfig.JavetConfig javetConfig = config == null ? null : config.getJavet();
     boolean javetDownloadEnabled = javetConfig == null || javetConfig.isDownloadEnabled();
     String javetBaseUrl = javetConfig == null ? "https://repo1.maven.org/maven2" : javetConfig.getDownloadBaseUrl();
 
-    int configuredPoolSize = config == null ? 0 : config.getRuntimePoolSize();
-    boolean multithreaded = config == null || config.isRuntimeMultithreaded();
-
     return new RuntimeDebugInfo(
       runtimeName,
-      configuredPoolSize,
-      multithreaded,
-      total,
-      available,
-      busy,
-      queued,
       scriptsDir,
       javetDownloadEnabled,
       javetBaseUrl,
@@ -195,8 +160,8 @@ public class HytaleJS extends JavaPlugin {
   @Override
   protected void shutdown() {
     super.shutdown();
-    if (runtimePool != null) {
-      runtimePool.close();
+    if (eventLoop != null) {
+      eventLoop.close();
     }
   }
 
@@ -204,14 +169,14 @@ public class HytaleJS extends JavaPlugin {
     scheduler.cancelAllTasks();
     eventRegistry.resetHandlerCount();
 
-    if (runtimePool != null) {
-      runtimePool.close();
+    if (eventLoop != null) {
+      eventLoop.close();
     }
-    runtimePool = createRuntimePool(config);
+    eventLoop = createEventLoop(config);
 
-    eventRegistry.setRuntimePool(runtimePool);
-    commandRegistry.setRuntimePool(runtimePool);
-    scheduler.setRuntimePool(runtimePool);
+    eventRegistry.setEventLoop(eventLoop);
+    commandRegistry.setEventLoop(eventLoop);
+    scheduler.setEventLoop(eventLoop);
 
     int loaded = 0;
     int failed = 0;
@@ -222,7 +187,7 @@ public class HytaleJS extends JavaPlugin {
         .toList();
 
       for (Path scriptPath : scriptPaths) {
-        if (loadScriptIntoAllContexts(scriptPath)) {
+        if (loadScriptIntoRuntime(scriptPath)) {
           loaded++;
         } else {
           failed++;
@@ -233,30 +198,6 @@ public class HytaleJS extends JavaPlugin {
     }
 
     return new ReloadResult(loaded, failed);
-  }
-
-  public static class ContextPoolStats {
-    private final int total;
-    private final int available;
-    private final int busy;
-
-    public ContextPoolStats(int total, int available, int busy) {
-      this.total = total;
-      this.available = available;
-      this.busy = busy;
-    }
-
-    public int getTotal() {
-      return total;
-    }
-
-    public int getAvailable() {
-      return available;
-    }
-
-    public int getBusy() {
-      return busy;
-    }
   }
 
   public static class ReloadResult {
@@ -279,12 +220,6 @@ public class HytaleJS extends JavaPlugin {
 
   public static class RuntimeDebugInfo {
     private final String runtimeName;
-    private final int configuredPoolSize;
-    private final boolean multithreaded;
-    private final int total;
-    private final int available;
-    private final int busy;
-    private final int queued;
     private final Path scriptsDir;
     private final boolean javetDownloadEnabled;
     private final String javetBaseUrl;
@@ -292,24 +227,12 @@ public class HytaleJS extends JavaPlugin {
 
     public RuntimeDebugInfo(
       String runtimeName,
-      int configuredPoolSize,
-      boolean multithreaded,
-      int total,
-      int available,
-      int busy,
-      int queued,
       Path scriptsDir,
       boolean javetDownloadEnabled,
       String javetBaseUrl,
       String javetLibVersion
     ) {
       this.runtimeName = runtimeName;
-      this.configuredPoolSize = configuredPoolSize;
-      this.multithreaded = multithreaded;
-      this.total = total;
-      this.available = available;
-      this.busy = busy;
-      this.queued = queued;
       this.scriptsDir = scriptsDir;
       this.javetDownloadEnabled = javetDownloadEnabled;
       this.javetBaseUrl = javetBaseUrl;
@@ -318,30 +241,6 @@ public class HytaleJS extends JavaPlugin {
 
     public String getRuntimeName() {
       return runtimeName;
-    }
-
-    public int getConfiguredPoolSize() {
-      return configuredPoolSize;
-    }
-
-    public boolean isMultithreaded() {
-      return multithreaded;
-    }
-
-    public int getTotal() {
-      return total;
-    }
-
-    public int getAvailable() {
-      return available;
-    }
-
-    public int getBusy() {
-      return busy;
-    }
-
-    public int getQueued() {
-      return queued;
     }
 
     public Path getScriptsDir() {

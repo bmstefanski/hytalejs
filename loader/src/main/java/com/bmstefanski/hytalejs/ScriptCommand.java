@@ -5,21 +5,21 @@ import com.hypixel.hytale.server.core.command.system.basecommands.CommandBase;
 
 import javax.annotation.Nonnull;
 
-public class PooledScriptCommand extends CommandBase {
+public class ScriptCommand extends CommandBase {
   private final String commandName;
-  private final ScriptRuntimePool runtimePool;
+  private final ScriptEventLoop eventLoop;
 
-  public PooledScriptCommand(String name, String description, ScriptRuntimePool runtimePool) {
+  public ScriptCommand(String name, String description, ScriptEventLoop eventLoop) {
     super(name, description);
     this.commandName = name;
-    this.runtimePool = runtimePool;
+    this.eventLoop = eventLoop;
     setAllowsExtraArguments(true);
   }
 
-  public PooledScriptCommand(String name, String description, String permission, ScriptRuntimePool runtimePool) {
+  public ScriptCommand(String name, String description, String permission, ScriptEventLoop eventLoop) {
     super(name, description);
     this.commandName = name;
-    this.runtimePool = runtimePool;
+    this.eventLoop = eventLoop;
     setAllowsExtraArguments(true);
     if (permission != null && !permission.isEmpty()) {
       requirePermission(permission);
@@ -28,7 +28,7 @@ public class PooledScriptCommand extends CommandBase {
 
   @Override
   protected void executeSync(@Nonnull CommandContext context) {
-    runtimePool.executeInRuntime("command:/" + commandName, runtime -> {
+    eventLoop.executeInRuntime("command:/" + commandName, runtime -> {
       try (ScriptValue callbacks = runtime.getGlobal("__commandCallbacks__")) {
         if (callbacks == null) {
           return;

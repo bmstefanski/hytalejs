@@ -10,14 +10,14 @@ import java.util.logging.Level;
 public class ScriptCommandRegistry {
   private final JavaPlugin plugin;
   private final Set<String> registeredCommandNames = new HashSet<>();
-  private ScriptRuntimePool runtimePool;
+  private ScriptEventLoop eventLoop;
 
   public ScriptCommandRegistry(JavaPlugin plugin) {
     this.plugin = plugin;
   }
 
-  public void setRuntimePool(ScriptRuntimePool runtimePool) {
-    this.runtimePool = Objects.requireNonNull(runtimePool, "runtimePool");
+  public void setEventLoop(ScriptEventLoop eventLoop) {
+    this.eventLoop = Objects.requireNonNull(eventLoop, "eventLoop");
   }
 
   public void register(String name, String description, Object callback) {
@@ -37,8 +37,8 @@ public class ScriptCommandRegistry {
   }
 
   private void registerWithPermission(String name, String description, String permission, Object callback) {
-    if (runtimePool == null) {
-      throw new IllegalStateException("ScriptRuntimePool not initialized; call setRuntimePool() before registering commands");
+    if (eventLoop == null) {
+      throw new IllegalStateException("ScriptEventLoop not initialized; call setEventLoop() before registering commands");
     }
 
     ScriptValue callbackValue = ScriptValueFactory.from(callback);
@@ -69,15 +69,15 @@ public class ScriptCommandRegistry {
     }
     registeredCommandNames.add(name);
 
-    PooledScriptCommand command = permission != null && !permission.isEmpty()
-      ? new PooledScriptCommand(name, description, permission, runtimePool)
-      : new PooledScriptCommand(name, description, runtimePool);
+    ScriptCommand command = permission != null && !permission.isEmpty()
+      ? new ScriptCommand(name, description, permission, eventLoop)
+      : new ScriptCommand(name, description, eventLoop);
     plugin.getCommandRegistry().registerCommand(command);
   }
 
   private void registerWorldWithPermission(String name, String description, String permission, Object callback) {
-    if (runtimePool == null) {
-      throw new IllegalStateException("ScriptRuntimePool not initialized; call setRuntimePool() before registering commands");
+    if (eventLoop == null) {
+      throw new IllegalStateException("ScriptEventLoop not initialized; call setEventLoop() before registering commands");
     }
 
     ScriptValue callbackValue = ScriptValueFactory.from(callback);
@@ -108,9 +108,9 @@ public class ScriptCommandRegistry {
     }
     registeredCommandNames.add(name);
 
-    PooledWorldScriptCommand command = permission != null && !permission.isEmpty()
-      ? new PooledWorldScriptCommand(name, description, permission, runtimePool)
-      : new PooledWorldScriptCommand(name, description, runtimePool);
+    WorldScriptCommand command = permission != null && !permission.isEmpty()
+      ? new WorldScriptCommand(name, description, permission, eventLoop)
+      : new WorldScriptCommand(name, description, eventLoop);
     plugin.getCommandRegistry().registerCommand(command);
   }
 }

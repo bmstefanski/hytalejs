@@ -23,7 +23,7 @@ public class ScriptEventRegistry {
   private final Set<String> registeredEventTypes = new HashSet<>();
   private final Map<String, Consumer<Object>> ecsEventHandlers = new HashMap<>();
   private int handlerCount = 0;
-  private ScriptRuntimePool runtimePool;
+  private ScriptEventLoop eventLoop;
 
   private static final Map<String, String> EVENT_CLASSES = new HashMap<>();
   private static final Set<String> ECS_EVENTS = new HashSet<>();
@@ -88,8 +88,8 @@ public class ScriptEventRegistry {
     this.plugin = plugin;
   }
 
-  public void setRuntimePool(ScriptRuntimePool runtimePool) {
-    this.runtimePool = runtimePool;
+  public void setEventLoop(ScriptEventLoop eventLoop) {
+    this.eventLoop = eventLoop;
   }
 
   public void registerEcsSystems() {
@@ -158,11 +158,11 @@ public class ScriptEventRegistry {
 
     Consumer<Object> handler = event -> {
       try {
-        if (runtimePool == null) {
-          plugin.getLogger().at(Level.WARNING).log("Event handler skipped for '%s' (runtime pool not initialized)", eventType);
+        if (eventLoop == null) {
+          plugin.getLogger().at(Level.WARNING).log("Event handler skipped for '%s' (event loop not initialized)", eventType);
           return;
         }
-        runtimePool.executeInRuntime("event:" + eventType, runtimeContext -> {
+        eventLoop.executeInRuntime("event:" + eventType, runtimeContext -> {
           try (ScriptValue callbacks = runtimeContext.getGlobal("__eventCallbacks__")) {
             if (callbacks == null) {
               return;

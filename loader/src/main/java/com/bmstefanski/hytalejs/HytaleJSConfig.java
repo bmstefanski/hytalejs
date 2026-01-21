@@ -10,10 +10,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class HytaleJSConfig {
-  private static final int DEFAULT_POOL_SIZE = 6;
   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-  private RuntimeConfig runtime = new RuntimeConfig();
   private JavetConfig javet = new JavetConfig();
   private boolean disableJoinMessage = true;
   private boolean disableLeaveMessage = true;
@@ -29,20 +27,6 @@ public class HytaleJSConfig {
       String content = Files.readString(configPath);
       JsonObject root = JsonParser.parseString(content).getAsJsonObject();
       HytaleJSConfig config = new HytaleJSConfig();
-
-      JsonElement runtimeElement = root.get("runtime");
-      if (runtimeElement != null && runtimeElement.isJsonObject()) {
-        RuntimeConfig runtimeConfig = GSON.fromJson(runtimeElement, RuntimeConfig.class);
-        if (runtimeConfig != null) {
-          config.runtime = runtimeConfig;
-        }
-      }
-
-      JsonElement poolSizeElement = root.get("poolSize");
-      if (poolSizeElement != null && poolSizeElement.isJsonPrimitive()) {
-        int legacyPoolSize = poolSizeElement.getAsInt();
-        config.runtime.setPoolSize(legacyPoolSize);
-      }
 
       JsonElement javetElement = root.get("javet");
       if (javetElement != null && javetElement.isJsonObject()) {
@@ -76,24 +60,8 @@ public class HytaleJSConfig {
     }
   }
 
-  public int getRuntimePoolSize() {
-    int size = runtime == null ? DEFAULT_POOL_SIZE : runtime.getPoolSize();
-    if (!isRuntimeMultithreaded()) {
-      return 1;
-    }
-    return size;
-  }
-
-  public boolean isRuntimeMultithreaded() {
-    return runtime == null || runtime.isMultithreaded();
-  }
-
   public JavetConfig getJavet() {
     return javet;
-  }
-
-  public RuntimeConfig getRuntimeConfig() {
-    return runtime;
   }
 
   public boolean isDisableJoinMessage() {
@@ -102,25 +70,6 @@ public class HytaleJSConfig {
 
   public boolean isDisableLeaveMessage() {
     return disableLeaveMessage;
-  }
-
-  public static class RuntimeConfig {
-    private int poolSize = DEFAULT_POOL_SIZE;
-    private boolean multithreaded = true;
-
-    public int getPoolSize() {
-      return poolSize > 0 ? poolSize : DEFAULT_POOL_SIZE;
-    }
-
-    public void setPoolSize(int poolSize) {
-      if (poolSize > 0) {
-        this.poolSize = poolSize;
-      }
-    }
-
-    public boolean isMultithreaded() {
-      return multithreaded;
-    }
   }
 
   public static class JavetConfig {

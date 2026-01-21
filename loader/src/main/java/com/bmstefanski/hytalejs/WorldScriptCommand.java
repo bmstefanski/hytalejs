@@ -10,21 +10,21 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import javax.annotation.Nonnull;
 
-public class PooledWorldScriptCommand extends AbstractPlayerCommand {
+public class WorldScriptCommand extends AbstractPlayerCommand {
   private final String commandName;
-  private final ScriptRuntimePool runtimePool;
+  private final ScriptEventLoop eventLoop;
 
-  public PooledWorldScriptCommand(String name, String description, ScriptRuntimePool runtimePool) {
+  public WorldScriptCommand(String name, String description, ScriptEventLoop eventLoop) {
     super(name, description);
     this.commandName = name;
-    this.runtimePool = runtimePool;
+    this.eventLoop = eventLoop;
     setAllowsExtraArguments(true);
   }
 
-  public PooledWorldScriptCommand(String name, String description, String permission, ScriptRuntimePool runtimePool) {
+  public WorldScriptCommand(String name, String description, String permission, ScriptEventLoop eventLoop) {
     super(name, description);
     this.commandName = name;
-    this.runtimePool = runtimePool;
+    this.eventLoop = eventLoop;
     setAllowsExtraArguments(true);
     if (permission != null && !permission.isEmpty()) {
       requirePermission(permission);
@@ -39,14 +39,14 @@ public class PooledWorldScriptCommand extends AbstractPlayerCommand {
     @Nonnull PlayerRef playerRef,
     @Nonnull World world
   ) {
-    runtimePool.executeInRuntime("command-world:/" + commandName, runtime -> {
+    eventLoop.executeInRuntime("command-world:/" + commandName, runtime -> {
       try (ScriptValue callbacks = runtime.getGlobal("__commandCallbacks__")) {
         if (callbacks == null) {
           return;
         }
         try (ScriptValue callback = callbacks.getMember(commandName)) {
           if (callback != null && callback.isExecutable()) {
-            PooledScriptCommand.ScriptCommandContext wrapper = new PooledScriptCommand.ScriptCommandContext(context);
+            ScriptCommand.ScriptCommandContext wrapper = new ScriptCommand.ScriptCommandContext(context);
             callback.executeVoid(wrapper);
           }
         }
