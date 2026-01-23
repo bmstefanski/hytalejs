@@ -5950,6 +5950,31 @@ export interface ScriptCustomUIPageStatic {
   ): ScriptCustomUIPage;
 }
 
+export type JavaByteArray = unknown;
+export type JavaCompletableFuture<T> = unknown;
+
+export interface CommonAsset {
+  getName(): string;
+  getHash(): string;
+  getBlob(): JavaCompletableFuture<JavaByteArray>;
+}
+
+export interface ByteArrayCommonAsset extends CommonAsset {}
+
+export interface ByteArrayCommonAssetStatic {
+  new (name: string, bytes: JavaByteArray): ByteArrayCommonAsset;
+  new (name: string, content: string): ByteArrayCommonAsset;
+}
+
+export interface CommonAssetModule {
+  addCommonAsset<T extends CommonAsset>(pack: string, asset: T): void;
+  addCommonAsset<T extends CommonAsset>(pack: string, asset: T, log: boolean): void;
+}
+
+export interface CommonAssetModuleStatic {
+  get(): CommonAssetModule;
+}
+
 declare global {
   const Java: JavaInterop;
   const logger: ScriptLogger;
@@ -5988,6 +6013,8 @@ declare global {
   const HudComponent: HudComponentEnum;
   const Page: PageEnum;
   const ScriptCustomUIPage: ScriptCustomUIPageStatic;
+  const ByteArrayCommonAsset: ByteArrayCommonAssetStatic;
+  const CommonAssetModule: CommonAssetModuleStatic;
   const DynamicLight: DynamicLight;
   const PersistentDynamicLight: PersistentDynamicLight;
   const Position: Position;

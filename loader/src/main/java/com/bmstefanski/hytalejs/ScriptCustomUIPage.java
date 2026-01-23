@@ -7,6 +7,7 @@ import com.hypixel.hytale.server.core.entity.entities.player.pages.CustomUIPage;
 import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -92,23 +93,37 @@ public class ScriptCustomUIPage extends CustomUIPage {
     }
 
     public void triggerRebuild() {
-        rebuild();
+        executeOnWorldThread(() -> rebuild());
     }
 
     public void triggerSendUpdate() {
-        sendUpdate();
+        executeOnWorldThread(() -> sendUpdate());
     }
 
     public void triggerSendUpdate(@Nonnull UICommandBuilder commandBuilder) {
-        sendUpdate(commandBuilder);
+        executeOnWorldThread(() -> sendUpdate(commandBuilder));
     }
 
     public void triggerSendUpdate(@Nonnull UICommandBuilder commandBuilder, boolean clear) {
-        sendUpdate(commandBuilder, clear);
+        executeOnWorldThread(() -> sendUpdate(commandBuilder, clear));
     }
 
     public void triggerClose() {
-        close();
+        executeOnWorldThread(() -> close());
+    }
+
+    private void executeOnWorldThread(@Nonnull Runnable action) {
+        Ref<EntityStore> ref = playerRef.getReference();
+        if (ref == null) {
+            return;
+        }
+        Store<EntityStore> store = ref.getStore();
+        World world = store.getExternalData().getWorld();
+        if (world.isInThread()) {
+            action.run();
+        } else {
+            world.execute(action);
+        }
     }
 
     @Nonnull

@@ -620,7 +620,8 @@ public final class ScriptBindings {
       }
     }
     
-    // Directly register HytaleJS classes (they're in our classloader, not the server's)
     runtime.setGlobal("ScriptCustomUIPage", ScriptCustomUIPage.class);
+    runtime.setGlobal("ByteArrayCommonAsset", ByteArrayCommonAsset.class);
+    runtime.setGlobal("CommonAssetModule", com.hypixel.hytale.server.core.asset.common.CommonAssetModule.class);
   }
 }

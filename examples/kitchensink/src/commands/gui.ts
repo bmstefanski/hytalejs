@@ -1,5 +1,65 @@
 import type { Player, PlayerRef, Ref, Store, EntityStore, UICommandBuilder, UIEventBuilder, ScriptCustomUIPage } from "@hytalejs.com/core";
 
+const EXAMPLE_PAGE_UI = `$C = "../Common.ui";
+$Sounds = "../Sounds.ui";
+
+$C.@PageOverlay {
+  LayoutMode: Middle;
+
+  $C.@DecoratedContainer {
+    Anchor: (Width: 400);
+
+    #Title {
+      $C.@Title {
+        @Text = "Example Page";
+      }
+    }
+
+    #Content {
+      Padding: (Vertical: 32, Horizontal: 45);
+
+      Label #title {
+        Style: (RenderBold: true, TextColor: #FFFFFF);
+        Text: "Default Title";
+      }
+
+      Label #message {
+        Anchor: (Top: 20);
+        Style: (TextColor: #94a7bb);
+        Text: "Default Message";
+      }
+
+      Group {
+        LayoutMode: Center;
+        Anchor: (Top: 30);
+
+        $C.@TextButton #CloseButton {
+          @Sounds = $Sounds.@ButtonsCancel;
+          Text: "Close";
+          FlexWeight: 1;
+        }
+      }
+    }
+  }
+}
+
+$C.@BackButton {}
+`;
+
+let assetsRegistered = false;
+
+export function registerGuiAssets(): void {
+  if (assetsRegistered) {
+    return;
+  }
+  assetsRegistered = true;
+
+  const asset = new ByteArrayCommonAsset("UI/Custom/Pages/ExamplePage.ui", EXAMPLE_PAGE_UI);
+  CommonAssetModule.get().addCommonAsset("hytalejs", asset);
+
+  logger.info("Registered custom UI assets");
+}
+
 export function registerGuiCommand(): void {
   commands.register("gui", "Opens an example custom GUI page", (ctx) => {
     const player = ctx.getPlayer();
