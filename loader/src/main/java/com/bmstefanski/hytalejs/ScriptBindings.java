@@ -559,6 +559,34 @@ public final class ScriptBindings {
     new JavaTypeBinding("WhitelistListCommand", "com.hypixel.hytale.server.core.modules.accesscontrol.commands.WhitelistListCommand"),
     new JavaTypeBinding("WhitelistRemoveCommand", "com.hypixel.hytale.server.core.modules.accesscontrol.commands.WhitelistRemoveCommand"),
     new JavaTypeBinding("WhitelistStatusCommand", "com.hypixel.hytale.server.core.modules.accesscontrol.commands.WhitelistStatusCommand"),
+
+    // UI Builders
+    new JavaTypeBinding("UICommandBuilder", "com.hypixel.hytale.server.core.ui.builder.UICommandBuilder"),
+    new JavaTypeBinding("UIEventBuilder", "com.hypixel.hytale.server.core.ui.builder.UIEventBuilder"),
+    new JavaTypeBinding("EventData", "com.hypixel.hytale.server.core.ui.builder.EventData"),
+    new JavaTypeBinding("Value", "com.hypixel.hytale.server.core.ui.Value"),
+
+    // UI Enums
+    new JavaTypeBinding("CustomUIEventBindingType", "com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType"),
+    new JavaTypeBinding("CustomPageLifetime", "com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime"),
+    new JavaTypeBinding("CustomUICommandType", "com.hypixel.hytale.protocol.packets.interface_.CustomUICommandType"),
+    new JavaTypeBinding("HudComponent", "com.hypixel.hytale.protocol.packets.interface_.HudComponent"),
+    new JavaTypeBinding("Page", "com.hypixel.hytale.protocol.packets.interface_.Page"),
+
+    // UI Protocol Packets
+    new JavaTypeBinding("CustomPage", "com.hypixel.hytale.protocol.packets.interface_.CustomPage"),
+    new JavaTypeBinding("CustomHud", "com.hypixel.hytale.protocol.packets.interface_.CustomHud"),
+
+    // UI Data Types
+    new JavaTypeBinding("Area", "com.hypixel.hytale.server.core.ui.Area"),
+    new JavaTypeBinding("Anchor", "com.hypixel.hytale.server.core.ui.Anchor"),
+    new JavaTypeBinding("ItemGridSlot", "com.hypixel.hytale.server.core.ui.ItemGridSlot"),
+    new JavaTypeBinding("LocalizableString", "com.hypixel.hytale.server.core.ui.LocalizableString"),
+    new JavaTypeBinding("PatchStyle", "com.hypixel.hytale.server.core.ui.PatchStyle"),
+    new JavaTypeBinding("DropdownEntryInfo", "com.hypixel.hytale.server.core.ui.DropdownEntryInfo"),
+
+    // HytaleJS Custom UI Helper
+    new JavaTypeBinding("ScriptCustomUIPage", "com.bmstefanski.hytalejs.ScriptCustomUIPage"),
   };
 
   private ScriptBindings() {}
@@ -591,5 +619,8 @@ public final class ScriptBindings {
       } catch (ClassNotFoundException ignored) {
       }
     }
+    
+    // Directly register HytaleJS classes (they're in our classloader, not the server's)
+    runtime.setGlobal("ScriptCustomUIPage", ScriptCustomUIPage.class);
   }
 }

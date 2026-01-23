@@ -1,9 +1,14 @@
 package com.bmstefanski.hytalejs;
 
+import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
+import com.hypixel.hytale.server.core.command.system.CommandSender;
 import com.hypixel.hytale.server.core.command.system.basecommands.CommandBase;
+import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
 public class ScriptCommand extends CommandBase {
@@ -65,6 +70,31 @@ public class ScriptCommand extends CommandBase {
 
     public String getInput() {
       return context.getInputString();
+    }
+
+    public boolean isPlayer() {
+      return context.isPlayer();
+    }
+
+    @Nonnull
+    public CommandSender getSender() {
+      return context.sender();
+    }
+
+    @Nullable
+    public Player getPlayer() {
+      if (context.isPlayer()) {
+        return context.senderAs(Player.class);
+      }
+      return null;
+    }
+
+    @Nullable
+    public Ref<EntityStore> getPlayerRef() {
+      if (context.isPlayer()) {
+        return context.senderAsPlayerRef();
+      }
+      return null;
     }
   }
 }

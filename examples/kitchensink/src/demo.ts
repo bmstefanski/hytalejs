@@ -21,6 +21,9 @@ import {
   registerWallCommand,
   registerSquareCommand,
   registerLongTaskCommand,
+  registerGuiCommand,
+  registerSimpleGuiCommand,
+  registerUpdatingGuiCommand,
 } from "./commands";
 
 import { startAutoMessages } from "./schedulers/auto-messages";
@@ -52,5 +55,8 @@ registerPyramidCommand();
 registerWallCommand();
 registerSquareCommand();
 registerLongTaskCommand();
+registerGuiCommand();
+registerSimpleGuiCommand();
+registerUpdatingGuiCommand();
 
 startAutoMessages();

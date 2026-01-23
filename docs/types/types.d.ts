@@ -258,6 +258,8 @@ export interface Player {
     getUuid(): {
         toString(): string;
     };
+    getPageManager(): PageManager;
+    getHudManager(): HudManager;
 }
 export interface PlayerCameraAddSystem {
     getQuery(): unknown;
@@ -578,8 +580,10 @@ export interface BlockState {
 export interface Holder {
     getComponent(arg0: ComponentType): unknown;
 }
-export interface Ref {
+export interface Ref<T = unknown> {
     isValid(): boolean;
+    getStore(): Store<T>;
+    getIndex(): number;
 }
 export interface Vector3i {
     new (): Vector3i;
@@ -808,10 +812,20 @@ export interface ScriptLogger {
     severe(message: string): void;
     fine(message: string): void;
 }
+export interface CommandSender {
+    getDisplayName(): string;
+    getUuid(): unknown;
+    sendMessage(message: Message): void;
+}
 export interface CommandContext {
     sendMessage(message: string): void;
+    sendFormattedMessage(message: Message): void;
     getSenderName(): string;
     getInput(): string;
+    isPlayer(): boolean;
+    getSender(): CommandSender;
+    getPlayer(): Player | null;
+    getPlayerRef(): Ref<EntityStore> | null;
 }
 export interface ScriptCommandRegistry {
     register(name: string, description: string, callback: (ctx: CommandContext) => void): void;
@@ -1001,6 +1015,7 @@ export interface PlayerRef {
     referToServer(host: string, port: number): void;
     referToServer(host: string, port: number, data: unknown[]): void;
     sendMessage(message: Message): void;
+    getReference(): Ref<EntityStore> | null;
 }
 export interface DynamicLight {
     new (): DynamicLight;
@@ -4789,6 +4804,292 @@ export interface JavetCallMetrics {
     getAvgTimeMs(): number;
     nanoTime(): number;
 }
+export interface EntityStore {
+    getWorld(): World;
+    getStore(): Store<EntityStore>;
+    getRefFromUUID(uuid: {
+        toString(): string;
+    }): Ref<EntityStore> | null;
+    getRefFromNetworkId(networkId: number): Ref<EntityStore> | null;
+}
+export interface Store<T> {
+    getExternalData(): T;
+    getEntityCount(): number;
+    getComponent<C>(ref: Ref<T>, componentType: ComponentType): C | null;
+    ensureAndGetComponent<C>(ref: Ref<T>, componentType: ComponentType): C;
+    addComponent<C>(ref: Ref<T>, componentType: ComponentType): C;
+    addComponent<C>(ref: Ref<T>, componentType: ComponentType, component: C): void;
+    putComponent<C>(ref: Ref<T>, componentType: ComponentType, component: C): void;
+    removeComponent<C>(ref: Ref<T>, componentType: ComponentType): void;
+    getArchetype(ref: Ref<T>): unknown;
+}
+export interface Area {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}
+export interface Anchor {
+    width: number | null;
+    height: number | null;
+    top: number | null;
+    bottom: number | null;
+    left: number | null;
+    right: number | null;
+    full: number | null;
+    horizontal: number | null;
+    vertical: number | null;
+}
+export interface LocalizableString {
+    key: string;
+    params: JavaMap<string, string> | null;
+}
+export interface PatchStyle {
+    texturePath: string;
+    border: number | null;
+    horizontalBorder: number | null;
+    verticalBorder: number | null;
+}
+export interface ItemGridSlot {
+    slotIndex: number;
+    itemStack: ItemStack | null;
+}
+export interface DropdownEntryInfo {
+    label: string;
+    value: string;
+}
+export interface CustomUIEventBindingType {
+    getValue(): number;
+    name(): string;
+}
+export interface CustomUIEventBindingTypeEnum {
+    Activating: CustomUIEventBindingType;
+    RightClicking: CustomUIEventBindingType;
+    DoubleClicking: CustomUIEventBindingType;
+    MouseEntered: CustomUIEventBindingType;
+    MouseExited: CustomUIEventBindingType;
+    ValueChanged: CustomUIEventBindingType;
+    ElementReordered: CustomUIEventBindingType;
+    Validating: CustomUIEventBindingType;
+    Dismissing: CustomUIEventBindingType;
+    FocusGained: CustomUIEventBindingType;
+    FocusLost: CustomUIEventBindingType;
+    KeyDown: CustomUIEventBindingType;
+    MouseButtonReleased: CustomUIEventBindingType;
+    SlotClicking: CustomUIEventBindingType;
+    SlotDoubleClicking: CustomUIEventBindingType;
+    SlotMouseEntered: CustomUIEventBindingType;
+    SlotMouseExited: CustomUIEventBindingType;
+    DragCancelled: CustomUIEventBindingType;
+    Dropped: CustomUIEventBindingType;
+    SlotMouseDragCompleted: CustomUIEventBindingType;
+    SlotMouseDragExited: CustomUIEventBindingType;
+    SlotClickReleaseWhileDragging: CustomUIEventBindingType;
+    SlotClickPressWhileDragging: CustomUIEventBindingType;
+    SelectedTabChanged: CustomUIEventBindingType;
+    VALUES: CustomUIEventBindingType[];
+    fromValue(value: number): CustomUIEventBindingType;
+}
+export interface CustomPageLifetime {
+    getValue(): number;
+    name(): string;
+}
+export interface CustomPageLifetimeEnum {
+    CantClose: CustomPageLifetime;
+    CanDismiss: CustomPageLifetime;
+    CanDismissOrCloseThroughInteraction: CustomPageLifetime;
+    VALUES: CustomPageLifetime[];
+    fromValue(value: number): CustomPageLifetime;
+}
+export interface CustomUICommandType {
+    getValue(): number;
+    name(): string;
+}
+export interface CustomUICommandTypeEnum {
+    Clear: CustomUICommandType;
+    Remove: CustomUICommandType;
+    Append: CustomUICommandType;
+    AppendInline: CustomUICommandType;
+    InsertBefore: CustomUICommandType;
+    InsertBeforeInline: CustomUICommandType;
+    Set: CustomUICommandType;
+    VALUES: CustomUICommandType[];
+    fromValue(value: number): CustomUICommandType;
+}
+export interface HudComponent {
+    getValue(): number;
+    name(): string;
+}
+export interface HudComponentEnum {
+    Hotbar: HudComponent;
+    StatusIcons: HudComponent;
+    Reticle: HudComponent;
+    Chat: HudComponent;
+    Requests: HudComponent;
+    Notifications: HudComponent;
+    KillFeed: HudComponent;
+    InputBindings: HudComponent;
+    PlayerList: HudComponent;
+    EventTitle: HudComponent;
+    Compass: HudComponent;
+    ObjectivePanel: HudComponent;
+    PortalPanel: HudComponent;
+    BuilderToolsLegend: HudComponent;
+    Speedometer: HudComponent;
+    UtilitySlotSelector: HudComponent;
+    BlockVariantSelector: HudComponent;
+    BuilderToolsMaterialSlotSelector: HudComponent;
+    Stamina: HudComponent;
+    AmmoIndicator: HudComponent;
+    Health: HudComponent;
+    Mana: HudComponent;
+    Oxygen: HudComponent;
+    Sleep: HudComponent;
+    VALUES: HudComponent[];
+    fromValue(value: number): HudComponent;
+}
+export interface Page {
+    getValue(): number;
+    name(): string;
+}
+export interface PageEnum {
+    None: Page;
+    Inventory: Page;
+    Crafting: Page;
+    Map: Page;
+    Container: Page;
+    Respawn: Page;
+    Shop: Page;
+    VALUES: Page[];
+    fromValue(value: number): Page;
+}
+export interface Value<T> {
+    getValue(): T | null;
+    getDocumentPath(): string | null;
+    getValueName(): string | null;
+}
+export interface ValueStatic {
+    ref<T>(document: string, value: string): Value<T>;
+    of<T>(value: T): Value<T>;
+}
+export interface EventData {
+    events(): JavaMap<string, string>;
+    append(key: string, value: string): EventData;
+    append<T extends string>(key: string, enumValue: {
+        name(): T;
+    }): EventData;
+    put(key: string, value: string): EventData;
+}
+export interface EventDataStatic {
+    new (): EventData;
+    of(key: string, value: string): EventData;
+}
+export interface UICommandBuilder {
+    clear(selector: string): UICommandBuilder;
+    remove(selector: string): UICommandBuilder;
+    append(documentPath: string): UICommandBuilder;
+    append(selector: string, documentPath: string): UICommandBuilder;
+    appendInline(selector: string, document: string): UICommandBuilder;
+    insertBefore(selector: string, documentPath: string): UICommandBuilder;
+    insertBeforeInline(selector: string, document: string): UICommandBuilder;
+    set<T>(selector: string, ref: Value<T>): UICommandBuilder;
+    set(selector: string, value: string): UICommandBuilder;
+    set(selector: string, value: Message): UICommandBuilder;
+    set(selector: string, value: boolean): UICommandBuilder;
+    set(selector: string, value: number): UICommandBuilder;
+    setNull(selector: string): UICommandBuilder;
+    setObject(selector: string, data: Area | ItemGridSlot | ItemStack | LocalizableString | PatchStyle | DropdownEntryInfo | Anchor): UICommandBuilder;
+    set<T>(selector: string, data: T[]): UICommandBuilder;
+    set<T>(selector: string, data: JavaList<T>): UICommandBuilder;
+    getCommands(): CustomUICommand[];
+}
+export interface UICommandBuilderStatic {
+    new (): UICommandBuilder;
+    EMPTY_COMMAND_ARRAY: CustomUICommand[];
+}
+export interface UIEventBuilder {
+    addEventBinding(type: CustomUIEventBindingType, selector: string): UIEventBuilder;
+    addEventBinding(type: CustomUIEventBindingType, selector: string, locksInterface: boolean): UIEventBuilder;
+    addEventBinding(type: CustomUIEventBindingType, selector: string, data: EventData): UIEventBuilder;
+    addEventBinding(type: CustomUIEventBindingType, selector: string, data: EventData | null, locksInterface: boolean): UIEventBuilder;
+    getEvents(): CustomUIEventBinding[];
+}
+export interface UIEventBuilderStatic {
+    new (): UIEventBuilder;
+    EMPTY_EVENT_BINDING_ARRAY: CustomUIEventBinding[];
+}
+export interface CustomUICommand {
+    type: CustomUICommandType;
+    selector: string | null;
+    value: string | null;
+    documentPath: string | null;
+}
+export interface CustomUIEventBinding {
+    type: CustomUIEventBindingType;
+    selector: string | null;
+    data: string | null;
+    locksInterface: boolean;
+}
+export interface CustomPage {
+    name: string;
+    open: boolean;
+    clear: boolean;
+    lifetime: CustomPageLifetime;
+    commands: CustomUICommand[];
+    events: CustomUIEventBinding[];
+}
+export interface CustomHud {
+    clear: boolean;
+    commands: CustomUICommand[] | null;
+}
+export interface CustomUIPage {
+    getLifetime(): CustomPageLifetime;
+    setLifetime(lifetime: CustomPageLifetime): void;
+    build(ref: Ref<EntityStore>, commandBuilder: UICommandBuilder, eventBuilder: UIEventBuilder, store: Store<EntityStore>): void;
+    handleDataEvent(ref: Ref<EntityStore>, store: Store<EntityStore>, rawData: string): void;
+    onDismiss(ref: Ref<EntityStore>, store: Store<EntityStore>): void;
+}
+export interface CustomUIHud {
+    build(commandBuilder: UICommandBuilder): void;
+    show(): void;
+    update(clear: boolean, commandBuilder: UICommandBuilder): void;
+    getPlayerRef(): PlayerRef;
+}
+export interface PageManager {
+    getCustomPage(): CustomUIPage | null;
+    setPage(ref: Ref<EntityStore>, store: Store<EntityStore>, page: Page): void;
+    setPage(ref: Ref<EntityStore>, store: Store<EntityStore>, page: Page, canCloseThroughInteraction: boolean): void;
+    openCustomPage(ref: Ref<EntityStore>, store: Store<EntityStore>, page: CustomUIPage): void;
+    updateCustomPage(page: CustomPage): void;
+}
+export interface HudManager {
+    getCustomHud(): CustomUIHud | null;
+    getVisibleHudComponents(): JavaSet<HudComponent>;
+    setVisibleHudComponents(ref: PlayerRef, ...hudComponents: HudComponent[]): void;
+    showHudComponents(ref: PlayerRef, ...hudComponents: HudComponent[]): void;
+    hideHudComponents(ref: PlayerRef, ...hudComponents: HudComponent[]): void;
+    setCustomHud(ref: PlayerRef, hud: CustomUIHud | null): void;
+    resetHud(ref: PlayerRef): void;
+    resetUserInterface(ref: PlayerRef): void;
+}
+export type ScriptCustomUIPageBuildCallback = (ref: Ref<EntityStore>, commandBuilder: UICommandBuilder, eventBuilder: UIEventBuilder, store: Store<EntityStore>) => void;
+export type ScriptCustomUIPageEventCallback = (ref: Ref<EntityStore>, store: Store<EntityStore>, rawData: string) => void;
+export type ScriptCustomUIPageDismissCallback = (ref: Ref<EntityStore>, store: Store<EntityStore>) => void;
+export interface ScriptCustomUIPage extends CustomUIPage {
+    triggerRebuild(): void;
+    triggerSendUpdate(): void;
+    triggerSendUpdate(commandBuilder: UICommandBuilder): void;
+    triggerSendUpdate(commandBuilder: UICommandBuilder, clear: boolean): void;
+    triggerClose(): void;
+    getPlayerRef(): PlayerRef;
+    getPageLifetime(): CustomPageLifetime;
+    setPageLifetime(lifetime: CustomPageLifetime): void;
+}
+export interface ScriptCustomUIPageStatic {
+    new (playerRef: PlayerRef, lifetime: CustomPageLifetime, buildCallback: ScriptCustomUIPageBuildCallback): ScriptCustomUIPage;
+    new (playerRef: PlayerRef, lifetime: CustomPageLifetime, buildCallback: ScriptCustomUIPageBuildCallback, eventCallback: ScriptCustomUIPageEventCallback | null): ScriptCustomUIPage;
+    new (playerRef: PlayerRef, lifetime: CustomPageLifetime, buildCallback: ScriptCustomUIPageBuildCallback, eventCallback: ScriptCustomUIPageEventCallback | null, dismissCallback: ScriptCustomUIPageDismissCallback | null): ScriptCustomUIPage;
+}
 declare global {
     const Java: JavaInterop;
     const logger: ScriptLogger;
@@ -4815,6 +5116,16 @@ declare global {
     const SoundEvent: SoundEventClass;
     const SoundCategory: SoundCategoryEnum;
     const PlaySoundEvent2D: PlaySoundEvent2D;
+    const UICommandBuilder: UICommandBuilderStatic;
+    const UIEventBuilder: UIEventBuilderStatic;
+    const EventData: EventDataStatic;
+    const Value: ValueStatic;
+    const CustomUIEventBindingType: CustomUIEventBindingTypeEnum;
+    const CustomPageLifetime: CustomPageLifetimeEnum;
+    const CustomUICommandType: CustomUICommandTypeEnum;
+    const HudComponent: HudComponentEnum;
+    const Page: PageEnum;
+    const ScriptCustomUIPage: ScriptCustomUIPageStatic;
     const DynamicLight: DynamicLight;
     const PersistentDynamicLight: PersistentDynamicLight;
     const Position: Position;

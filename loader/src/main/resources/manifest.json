@@ -9,5 +9,6 @@
       "Name": "bmstefanski"
     }
   ],
-  "Website": "https://github.com/bmstefanski/HytaleJS"
+  "Website": "https://github.com/bmstefanski/HytaleJS",
+  "IncludesAssetPack": true
 }
