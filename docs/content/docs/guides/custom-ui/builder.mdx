@@ -1,0 +1,387 @@
+---
+title: UIBuilder
+description: Programmatically generate .ui files with TypeScript
+---
+
+The `UIBuilder` provides a fluent TypeScript API for generating Hytale UI DSL files programmatically. Instead of writing raw DSL strings, you can use type-safe builder methods with full IDE autocompletion.
+
+## Quick Start
+
+```typescript
+import { UIBuilder, group, label, slot } from "@hytalejs.com/core";
+
+const ui = new UIBuilder()
+  .import("C", "../Common.ui")
+  .root(
+    group({ id: "MyPanel" })
+      .anchor({ width: 300, height: 200 })
+      .background({ color: "#1a2530", opacity: 0.9 })
+      .padding({ full: 16 })
+      .children(
+        label({ id: "Title", text: "Hello World" })
+          .style({ fontSize: 24, textColor: "#FFFFFF", renderBold: true })
+      )
+  )
+  .build();
+```
+
+This generates:
+
+```
+$C = "../Common.ui";
+
+Group #MyPanel {
+  Anchor: (Width: 300, Height: 200);
+  Background: (Color: #1a2530(0.9));
+  Padding: (Full: 16);
+  Label #Title {
+    Text: "Hello World";
+    Style: (FontSize: 24, TextColor: #FFFFFF, RenderBold: true);
+  }
+}
+```
+
+## UIBuilder Class
+
+The main class for constructing UI documents.
+
+### Methods
+
+| Method | Description |
+|--------|-------------|
+| `import(alias, path)` | Add an import statement |
+| `root(element)` | Set single root element |
+| `roots(...elements)` | Set multiple root elements |
+| `build()` | Generate the DSL string |
+
+```typescript
+const ui = new UIBuilder()
+  .import("C", "../Common.ui")
+  .import("Sounds", "../Sounds.ui")
+  .roots(
+    group().template("$C.@PageOverlay").children(...),
+    group().template("$C.@BackButton")
+  )
+  .build();
+```
+
+## Element Functions
+
+Create UI elements using factory functions:
+
+### Basic Elements
+
+| Function | Description |
+|----------|-------------|
+| `group(props?)` | Container element |
+| `label(props?)` | Text display |
+| `textButton(props?)` | Button with text |
+| `button(props?)` | Icon button |
+| `textField(props?)` | Text input |
+| `sprite(props?)` | Image display |
+| `checkbox(props?)` | Boolean toggle |
+| `slider(props?)` | Numeric slider |
+| `progressBar(props?)` | Progress indicator |
+
+### Special Elements
+
+| Function | Description |
+|----------|-------------|
+| `slot(id)` | Template slot reference (`#id`) |
+| `backButton()` | Back button element |
+| `timerLabel(props?)` | Timer display |
+| `dropdownBox(props?)` | Dropdown selector |
+| `itemSlot(props?)` | Inventory slot |
+| `itemGrid(props?)` | Inventory grid |
+
+### Element Props
+
+All element functions accept optional props:
+
+```typescript
+interface ElementProps {
+  id?: string;
+  text?: string;
+  placeholder?: string;
+  texturePath?: string;
+  value?: boolean | number;
+  min?: number;
+  max?: number;
+}
+```
+
+Examples:
+
+```typescript
+group({ id: "Container" })
+label({ id: "Title", text: "Welcome" })
+slider({ id: "Volume", min: 0, max: 100, value: 50 })
+checkbox({ id: "Enabled", value: true })
+textField({ id: "Name", placeholder: "Enter name..." })
+```
+
+## Element Methods
+
+All elements support these chainable methods:
+
+### Layout & Positioning
+
+```typescript
+element
+  .anchor({ width: 200, height: 100, top: 10, right: 20 })
+  .layoutMode("Top")
+  .padding({ full: 16 })
+  .flexWeight(1)
+  .visible(true)
+```
+
+#### Anchor Props
+
+| Property | Description |
+|----------|-------------|
+| `width`, `height` | Fixed dimensions |
+| `top`, `bottom`, `left`, `right` | Position offsets |
+| `full` | Shorthand for all sides |
+| `horizontal`, `vertical` | Shorthand for left/right and top/bottom |
+| `minWidth`, `maxWidth` | Size constraints |
+
+#### Layout Modes
+
+| Mode | Description |
+|------|-------------|
+| `"Top"` | Stack children from top |
+| `"Left"` | Stack children from left |
+| `"Center"` | Center children horizontally |
+| `"Middle"` | Center children vertically |
+| `"CenterMiddle"` | Center both axes |
+| `"Full"` | Children fill container |
+
+### Styling
+
+```typescript
+element
+  .background({ color: "#1a2530", opacity: 0.85 })
+  .style({
+    fontSize: 16,
+    textColor: "#FFFFFF",
+    renderBold: true,
+    horizontalAlignment: "Center"
+  })
+```
+
+#### Background Props
+
+| Property | Description |
+|----------|-------------|
+| `color` | Hex color (e.g., `"#1a2530"`) |
+| `opacity` | 0-1 transparency |
+| `texturePath` | Image path |
+| `border` | 9-patch border size |
+
+#### Style Props
+
+| Property | Description |
+|----------|-------------|
+| `fontSize` | Font size in pixels |
+| `textColor` | Text color |
+| `renderBold` | Bold text |
+| `renderUppercase` | Uppercase transform |
+| `horizontalAlignment` | `"Start"`, `"Center"`, `"End"` |
+| `verticalAlignment` | `"Top"`, `"Center"`, `"Bottom"` |
+| `wrap` | Text wrapping |
+
+### Content
+
+```typescript
+label({ id: "Title" })
+  .text("Hello World")
+
+textField({ id: "Input" })
+  .raw("PlaceholderText", '"Enter text..."')
+```
+
+### Templates
+
+```typescript
+group()
+  .template("$C.@PageOverlay")
+  .param("Text", '"My Title"')
+  .param("Sounds", "$Sounds.@ButtonsCancel")
+```
+
+### Children
+
+```typescript
+group({ id: "Container" })
+  .children(
+    label({ text: "First" }),
+    label({ text: "Second" }),
+    group({ id: "Nested" }).children(...)
+  )
+```
+
+## Template Slots
+
+When using templates like `@DecoratedContainer`, use `slot()` for slot references:
+
+```typescript
+group()
+  .template("$C.@DecoratedContainer")
+  .anchor({ width: 400 })
+  .children(
+    slot("Title").children(
+      group().template("$C.@Title").param("Text", '"My Page"')
+    ),
+    slot("Content")
+      .padding({ vertical: 32, horizontal: 45 })
+      .children(
+        label({ id: "message", text: "Content here" })
+      )
+  )
+```
+
+This generates:
+
+```
+$C.@DecoratedContainer {
+  Anchor: (Width: 400);
+  #Title {
+    $C.@Title {
+      @Text = "My Page";
+    }
+  }
+  #Content {
+    Padding: (Vertical: 32, Horizontal: 45);
+    Label #message {
+      Text: "Content here";
+    }
+  }
+}
+```
+
+Note: Use `slot("Title")` instead of `group({ id: "Title" })` for template slots. Using `group` would generate `Group #Title` instead of `#Title`, which breaks the template slot binding.
+
+## Complete Example: Custom Page
+
+```typescript
+import { UIBuilder, group, label, slot } from "@hytalejs.com/core";
+
+const EXAMPLE_PAGE = new UIBuilder()
+  .import("C", "../Common.ui")
+  .import("Sounds", "../Sounds.ui")
+  .roots(
+    group()
+      .template("$C.@PageOverlay")
+      .layoutMode("Middle")
+      .children(
+        group()
+          .template("$C.@DecoratedContainer")
+          .anchor({ width: 400 })
+          .children(
+            slot("Title").children(
+              group().template("$C.@Title").param("Text", '"Example Page"')
+            ),
+            slot("Content")
+              .padding({ vertical: 32, horizontal: 45 })
+              .children(
+                label({ id: "title" })
+                  .style({ renderBold: true, textColor: "#FFFFFF" })
+                  .text("Welcome!"),
+                label({ id: "message" })
+                  .anchor({ top: 20 })
+                  .style({ textColor: "#94a7bb" })
+                  .text("This is an example page."),
+                group()
+                  .layoutMode("Center")
+                  .anchor({ top: 30 })
+                  .children(
+                    group({ id: "CloseButton" })
+                      .template("$C.@TextButton")
+                      .param("Sounds", "$Sounds.@ButtonsCancel")
+                      .text("Close")
+                      .flexWeight(1)
+                  )
+              )
+          )
+      ),
+    group().template("$C.@BackButton")
+  )
+  .build();
+
+const asset = new ByteArrayCommonAsset("UI/Custom/Pages/Example.ui", EXAMPLE_PAGE);
+CommonAssetModule.get().addCommonAsset("myplugin", asset);
+```
+
+## Complete Example: HUD Scoreboard
+
+```typescript
+import { UIBuilder, group, label } from "@hytalejs.com/core";
+
+const SCOREBOARD_HUD = new UIBuilder()
+  .import("C", "../Common.ui")
+  .root(
+    group({ id: "Scoreboard" })
+      .anchor({ right: 20, top: 100, width: 200, height: 170 })
+      .layoutMode("Top")
+      .background({ color: "#0a0e14", opacity: 0.85 })
+      .padding({ full: 12 })
+      .children(
+        label({ id: "Title" })
+          .style({
+            fontSize: 24,
+            textColor: "#f5c542",
+            renderBold: true,
+            renderUppercase: true,
+            horizontalAlignment: "Center"
+          })
+          .anchor({ height: 30 })
+          .text("My Server"),
+        group({ id: "Separator" })
+          .anchor({ height: 1, top: 8 })
+          .background({ color: "#2b3542" }),
+        group({ id: "PlayerRow" })
+          .layoutMode("Left")
+          .anchor({ height: 22, top: 10 })
+          .children(
+            label({ id: "PlayerLabel" })
+              .style({ fontSize: 13, textColor: "#8a9aab", verticalAlignment: "Center" })
+              .anchor({ width: 80 })
+              .text("Player:"),
+            label({ id: "PlayerValue" })
+              .style({ fontSize: 13, textColor: "#ffffff", verticalAlignment: "Center", renderBold: true })
+              .flexWeight(1)
+              .text("Unknown")
+          ),
+        group({ id: "OnlineRow" })
+          .layoutMode("Left")
+          .anchor({ height: 22, top: 4 })
+          .children(
+            label({ id: "OnlineLabel" })
+              .style({ fontSize: 13, textColor: "#8a9aab", verticalAlignment: "Center" })
+              .anchor({ width: 80 })
+              .text("Online:"),
+            label({ id: "OnlineValue" })
+              .style({ fontSize: 13, textColor: "#5cb85c", verticalAlignment: "Center", renderBold: true })
+              .flexWeight(1)
+              .text("0")
+          )
+      )
+  )
+  .build();
+```
+
+## Why Use UIBuilder?
+
+| Raw DSL String | UIBuilder |
+|---------------|-----------|
+| No type checking | Full TypeScript types |
+| No autocompletion | IDE suggestions |
+| Easy syntax errors | Compile-time validation |
+| String concatenation | Fluent method chaining |
+| Hard to refactor | Easy to compose and reuse |
+
+The builder is especially useful for:
+- Dynamic UI generation based on runtime data
+- Reusable UI component functions
+- Complex nested structures
+- Teams unfamiliar with the DSL syntax

@@ -1,0 +1,135 @@
+---
+title: Custom UI System
+description: Create custom GUI pages using Hytale's UI DSL
+---
+
+The Custom UI system allows you to create rich, interactive GUI pages that display to players. UI definitions are written in Hytale's proprietary DSL (Domain Specific Language) and can be registered programmatically or loaded from asset files.
+
+## Quick Start
+
+### 1. Define Your UI
+
+Create a UI definition string using the Hytale UI DSL:
+
+```
+$C = "../Common.ui";
+
+$C.@PageOverlay {
+  LayoutMode: Middle;
+
+  $C.@DecoratedContainer {
+    Anchor: (Width: 400);
+
+    #Title {
+      $C.@Title {
+        @Text = "My Custom Page";
+      }
+    }
+
+    #Content {
+      Padding: (Vertical: 32, Horizontal: 45);
+
+      Label #title {
+        Style: (RenderBold: true, TextColor: #FFFFFF);
+        Text: "Hello World";
+      }
+
+      Group {
+        LayoutMode: Center;
+        Anchor: (Top: 30);
+
+        $C.@TextButton #CloseButton {
+          Text: "Close";
+        }
+      }
+    }
+  }
+}
+
+$C.@BackButton {}
+```
+
+### 2. Register the Asset
+
+Register your UI file programmatically so it's available to clients:
+
+```typescript
+const UI_CONTENT = `...`; // Your UI DSL string
+
+const asset = new ByteArrayCommonAsset("UI/Custom/Pages/MyPage.ui", UI_CONTENT);
+CommonAssetModule.get().addCommonAsset("myplugin", asset);
+```
+
+### 3. Display the Page
+
+Use `ScriptCustomUIPage` to show your UI to a player:
+
+```typescript
+import type { PlayerRef, Ref, Store, EntityStore, UICommandBuilder, UIEventBuilder, ScriptCustomUIPage } from "@hytalejs.com/core";
+
+const playerRef: PlayerRef = player.getPlayerRef();
+
+const page = new ScriptCustomUIPage(
+  playerRef,
+  CustomPageLifetime.CanDismiss,
+  
+  (ref: Ref<EntityStore>, cmd: UICommandBuilder, events: UIEventBuilder, store: Store<EntityStore>) => {
+    cmd.append("Pages/MyPage.ui");
+    cmd.set("#title.Text", "Welcome, " + player.getDisplayName() + "!");
+    events.addEventBinding(CustomUIEventBindingType.Activating, "#CloseButton", EventData.of("action", "close"), false);
+  },
+  
+  (ref: Ref<EntityStore>, store: Store<EntityStore>, rawData: string) => {
+    const data = JSON.parse(rawData);
+    if (data.action === "close") {
+      page.triggerClose();
+    }
+  }
+);
+
+const pageManager = player.getPageManager();
+const ref = playerRef.getReference();
+if (ref) {
+  pageManager.openCustomPage(ref, ref.getStore(), page);
+}
+```
+
+## Key Concepts
+
+### UI Files Location
+
+UI files must be placed in `Common/UI/Custom/` within an asset pack. The path you use in `cmd.append()` is relative to this directory.
+
+### The Build Callback
+
+The build callback is called when the UI needs to be constructed or rebuilt. Use it to:
+- Append UI templates with `cmd.append("path/to/file.ui")`
+- Set property values with `cmd.set("#selector.Property", value)`
+- Register event bindings with `events.addEventBinding(...)`
+
+### Selectors
+
+Selectors target elements in your UI by their ID (prefixed with `#`):
+- `#title` - Element with id "title"
+- `#title.Text` - The "Text" property of element "title"
+- `#Container #Button` - Nested element selection
+
+### Dynamic Updates
+
+After the page is open, you can update it dynamically:
+
+```typescript
+const updateCmd = new UICommandBuilder();
+updateCmd.set("#counter.Text", "Count: " + value);
+page.triggerSendUpdate(updateCmd);
+```
+
+## Documentation Sections
+
+- [Syntax Reference](/docs/guides/custom-ui/syntax) - Variables, imports, comments, and spread operator
+- [Elements](/docs/guides/custom-ui/elements) - All available UI element types
+- [Styles](/docs/guides/custom-ui/styles) - Style types and properties
+- [Layout](/docs/guides/custom-ui/layout) - Layout modes and anchoring system
+- [Events](/docs/guides/custom-ui/events) - Event binding and handling
+- [Custom HUD](/docs/guides/custom-ui/hud) - Creating always-visible HUD overlays
+- [UIBuilder](/docs/guides/custom-ui/builder) - Programmatically generate .ui files with TypeScript
