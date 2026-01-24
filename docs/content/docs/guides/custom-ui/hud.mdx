@@ -1,0 +1,277 @@
+---
+title: Custom HUD
+description: Creating always-visible HUD overlays for players
+---
+
+While pages are modal UI screens that block gameplay, HUDs are always-visible overlays that display information during normal gameplay. Common uses include scoreboards, minimaps, status indicators, and notifications.
+
+## ScriptCustomUIHud
+
+HytaleJS provides `ScriptCustomUIHud` for creating custom HUD elements from TypeScript.
+
+```typescript
+const hud = new ScriptCustomUIHud(
+  playerRef,
+  (cmd: UICommandBuilder) => {
+    cmd.append("Hud/MyHud.ui");
+    cmd.set("#PlayerName.Text", playerRef.getUsername());
+  }
+);
+
+const hudManager = player.getHudManager();
+hudManager.setCustomHud(playerRef, hud);
+hud.triggerShow();
+```
+
+### Constructor
+
+```typescript
+new ScriptCustomUIHud(
+  playerRef: PlayerRef,
+  buildCallback: (cmd: UICommandBuilder) => void
+): ScriptCustomUIHud
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `playerRef` | PlayerRef | The player to show the HUD to |
+| `buildCallback` | Function | Called to build the initial HUD content |
+
+### Methods
+
+| Method | Description |
+|--------|-------------|
+| `triggerShow()` | Displays the HUD to the player |
+| `triggerUpdate(cmd)` | Updates the HUD with new commands |
+| `triggerUpdate(cmd, clear)` | Updates with optional clear flag |
+| `getPlayerRef()` | Returns the associated PlayerRef |
+
+## Creating a HUD
+
+### 1. Define the UI Template
+
+Create a `.ui` file for your HUD layout:
+
+```
+$C = "../Common.ui";
+
+Group #MyHud {
+  Anchor: (Right: 20, Top: 100, Width: 200, Height: 150);
+  LayoutMode: Top;
+  Background: (Color: #0a0e14(0.85));
+  Padding: (Full: 12);
+
+  Label #Title {
+    Style: (FontSize: 20, TextColor: #f5c542, RenderBold: true, HorizontalAlignment: Center);
+    Anchor: (Height: 25);
+    Text: "My Server";
+  }
+
+  Label #Info {
+    Style: (FontSize: 14, TextColor: #ffffff, HorizontalAlignment: Center);
+    Anchor: (Height: 20, Top: 10);
+    Text: "Welcome!";
+  }
+}
+```
+
+### 2. Register the Asset
+
+```typescript
+let assetsRegistered = false;
+
+function registerHudAssets(): void {
+  if (assetsRegistered) return;
+  assetsRegistered = true;
+
+  const asset = new ByteArrayCommonAsset("UI/Custom/Hud/MyHud.ui", HUD_UI_CONTENT);
+  CommonAssetModule.get().addCommonAsset("myplugin", asset);
+}
+```
+
+### 3. Show the HUD
+
+```typescript
+function showHud(player: Player): ScriptCustomUIHud {
+  const playerRef = player.getPlayerRef();
+
+  const hud = new ScriptCustomUIHud(playerRef, (cmd) => {
+    cmd.append("Hud/MyHud.ui");
+    cmd.set("#Info.Text", "Hello, " + playerRef.getUsername() + "!");
+  });
+
+  const hudManager = player.getHudManager();
+  hudManager.setCustomHud(playerRef, hud);
+  hud.triggerShow();
+
+  return hud;
+}
+```
+
+### 4. Update the HUD
+
+```typescript
+function updateHud(hud: ScriptCustomUIHud, newInfo: string): void {
+  const cmd = new UICommandBuilder();
+  cmd.set("#Info.Text", newInfo);
+  hud.triggerUpdate(cmd);
+}
+```
+
+### 5. Hide the HUD
+
+```typescript
+function hideHud(player: Player): void {
+  const playerRef = player.getPlayerRef();
+  const hudManager = player.getHudManager();
+  hudManager.setCustomHud(playerRef, null);
+}
+```
+
+## Complete Example: Scoreboard
+
+```typescript
+import type { Player, PlayerRef, UICommandBuilder, ScriptCustomUIHud } from "@hytalejs.com/core";
+
+const SCOREBOARD_UI = `$C = "../Common.ui";
+
+Group #Scoreboard {
+  Anchor: (Right: 20, Top: 100, Width: 200, Height: 180);
+  LayoutMode: Top;
+  Background: (Color: #0a0e14(0.85));
+  Padding: (Full: 12);
+
+  Label #Title {
+    Style: (FontSize: 24, TextColor: #f5c542, RenderBold: true, HorizontalAlignment: Center);
+    Anchor: (Height: 30);
+    Text: "Server Name";
+  }
+
+  Group #Separator {
+    Anchor: (Height: 1, Top: 8);
+    Background: (Color: #2b3542);
+  }
+
+  Group #PlayerRow {
+    LayoutMode: Left;
+    Anchor: (Height: 22, Top: 10);
+
+    Label { Style: (FontSize: 13, TextColor: #8a9aab); Anchor: (Width: 80); Text: "Player:"; }
+    Label #PlayerValue { Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true); FlexWeight: 1; Text: ""; }
+  }
+
+  Group #OnlineRow {
+    LayoutMode: Left;
+    Anchor: (Height: 22, Top: 4);
+
+    Label { Style: (FontSize: 13, TextColor: #8a9aab); Anchor: (Width: 80); Text: "Online:"; }
+    Label #OnlineValue { Style: (FontSize: 13, TextColor: #5cb85c, RenderBold: true); FlexWeight: 1; Text: "0"; }
+  }
+
+  Group #KillsRow {
+    LayoutMode: Left;
+    Anchor: (Height: 22, Top: 4);
+
+    Label { Style: (FontSize: 13, TextColor: #8a9aab); Anchor: (Width: 80); Text: "Kills:"; }
+    Label #KillsValue { Style: (FontSize: 13, TextColor: #5cb85c, RenderBold: true); FlexWeight: 1; Text: "0"; }
+  }
+}
+`;
+
+const playerHuds = new Map<string, ScriptCustomUIHud>();
+
+export function registerScoreboardAssets(): void {
+  const asset = new ByteArrayCommonAsset("UI/Custom/Hud/Scoreboard.ui", SCOREBOARD_UI);
+  CommonAssetModule.get().addCommonAsset("myplugin", asset);
+}
+
+export function showScoreboard(player: Player, kills: number): ScriptCustomUIHud {
+  const playerRef = player.getPlayerRef();
+  const uuid = player.getUuid().toString();
+
+  const hud = new ScriptCustomUIHud(playerRef, (cmd) => {
+    cmd.append("Hud/Scoreboard.ui");
+    cmd.set("#PlayerValue.Text", playerRef.getUsername());
+    cmd.set("#OnlineValue.Text", Universe.get().getPlayerCount().toString());
+    cmd.set("#KillsValue.Text", kills.toString());
+  });
+
+  player.getHudManager().setCustomHud(playerRef, hud);
+  hud.triggerShow();
+
+  playerHuds.set(uuid, hud);
+  return hud;
+}
+
+export function updateScoreboard(player: Player, kills: number): void {
+  const uuid = player.getUuid().toString();
+  const hud = playerHuds.get(uuid);
+  if (!hud) return;
+
+  const cmd = new UICommandBuilder();
+  cmd.set("#OnlineValue.Text", Universe.get().getPlayerCount().toString());
+  cmd.set("#KillsValue.Text", kills.toString());
+  hud.triggerUpdate(cmd);
+}
+
+export function hideScoreboard(player: Player): void {
+  const playerRef = player.getPlayerRef();
+  const uuid = player.getUuid().toString();
+
+  player.getHudManager().setCustomHud(playerRef, null);
+  playerHuds.delete(uuid);
+}
+```
+
+## Showing HUD on Player Join
+
+```typescript
+import { EventListener, type PlayerConnectEvent } from "@hytalejs.com/core";
+import { showScoreboard } from "./scoreboard";
+
+export class PlayerConnectHandler {
+  @EventListener("PlayerConnectEvent")
+  onPlayerJoin(event: PlayerConnectEvent): void {
+    const player = event.getPlayer();
+    showScoreboard(player, 0);
+  }
+}
+```
+
+## HUD vs Page
+
+| Feature | HUD | Page |
+|---------|-----|------|
+| Blocks gameplay | No | Yes |
+| Mouse cursor | Hidden | Visible |
+| Player can move | Yes | No |
+| Event callbacks | No | Yes |
+| Use case | Status display | Menus, dialogs |
+
+## HUD Positioning Tips
+
+Position HUDs to avoid overlapping with native UI elements:
+
+```
+Group #TopRight {
+  Anchor: (Right: 20, Top: 100, Width: 200, Height: 150);
+}
+
+Group #TopLeft {
+  Anchor: (Left: 20, Top: 100, Width: 200, Height: 150);
+}
+
+Group #BottomRight {
+  Anchor: (Right: 20, Bottom: 100, Width: 200, Height: 150);
+}
+
+Group #CenterTop {
+  Anchor: (Top: 50, Width: 300, Height: 50);
+  LayoutMode: Center;
+}
+```
+
+Avoid:
+- Top center (game messages)
+- Bottom center (hotbar, health)
+- Far corners (minimap, other native HUD)

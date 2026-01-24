@@ -1,0 +1,501 @@
+---
+title: UI Events
+description: Event binding types and handling user interactions
+---
+
+The Custom UI system supports 24 different event types that allow you to respond to user interactions. Events are bound using the `UIEventBuilder` and handled in your event callback.
+
+## Event Binding
+
+Events are registered in your build callback using `UIEventBuilder`:
+
+```typescript
+const page = new ScriptCustomUIPage(
+  playerRef,
+  CustomPageLifetime.CanDismiss,
+  
+  (ref, cmd, events, store) => {
+    cmd.append("Pages/MyPage.ui");
+    
+    events.addEventBinding(
+      CustomUIEventBindingType.Activating,
+      "#MyButton",
+      EventData.of("action", "clicked"),
+      false
+    );
+  },
+  
+  (ref, store, rawData) => {
+    const data = JSON.parse(rawData);
+    if (data.action === "clicked") {
+      console.log("Button was clicked!");
+    }
+  }
+);
+```
+
+### addEventBinding Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `type` | CustomUIEventBindingType | The event type to listen for |
+| `selector` | String | CSS-like selector for the target element |
+| `data` | EventData | Data to include in the event payload |
+| `stopPropagation` | Boolean | Whether to stop event bubbling |
+
+## Event Types
+
+### Click Events
+
+#### Activating
+Triggered when an element is clicked/activated (left mouse button).
+
+```typescript
+events.addEventBinding(
+  CustomUIEventBindingType.Activating,
+  "#SubmitButton",
+  EventData.of("action", "submit"),
+  false
+);
+```
+
+**Used with:** Button, TextButton, ItemSlotButton, CheckBox, and other interactive elements.
+
+#### RightClicking
+Triggered on right mouse button click.
+
+```typescript
+events.addEventBinding(
+  CustomUIEventBindingType.RightClicking,
+  "#ItemSlot",
+  EventData.of("action", "context-menu"),
+  false
+);
+```
+
+**Used with:** Elements that need context menu or alternate action support.
+
+#### DoubleClicking
+Triggered on double-click.
+
+```typescript
+events.addEventBinding(
+  CustomUIEventBindingType.DoubleClicking,
+  "#ListItem",
+  EventData.of("action", "open"),
+  false
+);
+```
+
+### Mouse Events
+
+#### MouseEntered
+Triggered when the mouse cursor enters an element's bounds.
+
+```typescript
+events.addEventBinding(
+  CustomUIEventBindingType.MouseEntered,
+  "#HoverZone",
+  EventData.of("action", "hover-start"),
+  false
+);
+```
+
+#### MouseExited
+Triggered when the mouse cursor leaves an element's bounds.
+
+```typescript
+events.addEventBinding(
+  CustomUIEventBindingType.MouseExited,
+  "#HoverZone",
+  EventData.of("action", "hover-end"),
+  false
+);
+```
+
+#### MouseButtonReleased
+Triggered when a mouse button is released over an element.
+
+```typescript
+events.addEventBinding(
+  CustomUIEventBindingType.MouseButtonReleased,
+  "#DragTarget",
+  EventData.of("action", "drop"),
+  false
+);
+```
+
+### Value Events
+
+#### ValueChanged
+Triggered when an input element's value changes.
+
+```typescript
+events.addEventBinding(
+  CustomUIEventBindingType.ValueChanged,
+  "#NameInput",
+  EventData.of("field", "name"),
+  false
+);
+```
+
+**Used with:** TextField, NumberField, CheckBox, Slider, DropdownBox, ColorPicker.
+
+The event payload includes the new value:
+```typescript
+(ref, store, rawData) => {
+  const data = JSON.parse(rawData);
+  console.log("Field:", data.field, "New value:", data.value);
+}
+```
+
+#### Validating
+Triggered to validate input before acceptance.
+
+```typescript
+events.addEventBinding(
+  CustomUIEventBindingType.Validating,
+  "#EmailInput",
+  EventData.of("validate", "email"),
+  false
+);
+```
+
+### Focus Events
+
+#### FocusGained
+Triggered when an element receives focus.
+
+```typescript
+events.addEventBinding(
+  CustomUIEventBindingType.FocusGained,
+  "#SearchInput",
+  EventData.of("action", "focus"),
+  false
+);
+```
+
+#### FocusLost
+Triggered when an element loses focus.
+
+```typescript
+events.addEventBinding(
+  CustomUIEventBindingType.FocusLost,
+  "#SearchInput",
+  EventData.of("action", "blur"),
+  false
+);
+```
+
+### Keyboard Events
+
+#### KeyDown
+Triggered when a key is pressed while an element has focus.
+
+```typescript
+events.addEventBinding(
+  CustomUIEventBindingType.KeyDown,
+  "#ChatInput",
+  EventData.of("action", "keypress"),
+  false
+);
+```
+
+### Navigation Events
+
+#### Dismissing
+Triggered when the UI page is being closed/dismissed.
+
+```typescript
+events.addEventBinding(
+  CustomUIEventBindingType.Dismissing,
+  "#Page",
+  EventData.of("action", "close"),
+  false
+);
+```
+
+#### SelectedTabChanged
+Triggered when a tab navigation selection changes.
+
+```typescript
+events.addEventBinding(
+  CustomUIEventBindingType.SelectedTabChanged,
+  "#TabNav",
+  EventData.of("action", "tab-change"),
+  false
+);
+```
+
+### Reordering Events
+
+#### ElementReordered
+Triggered when an element is reordered (in sortable lists).
+
+```typescript
+events.addEventBinding(
+  CustomUIEventBindingType.ElementReordered,
+  "#SortableList",
+  EventData.of("action", "reorder"),
+  false
+);
+```
+
+### Slot Events
+
+These events are specific to item slot interactions in inventory-like interfaces.
+
+#### SlotClicking
+Triggered when clicking on an item slot.
+
+```typescript
+events.addEventBinding(
+  CustomUIEventBindingType.SlotClicking,
+  "#InventorySlot",
+  EventData.of("slot", "inventory", "index", "0"),
+  false
+);
+```
+
+#### SlotDoubleClicking
+Triggered on double-clicking an item slot.
+
+```typescript
+events.addEventBinding(
+  CustomUIEventBindingType.SlotDoubleClicking,
+  "#InventorySlot",
+  EventData.of("action", "use-item"),
+  false
+);
+```
+
+#### SlotMouseEntered
+Triggered when hovering over an item slot.
+
+```typescript
+events.addEventBinding(
+  CustomUIEventBindingType.SlotMouseEntered,
+  "#InventorySlot",
+  EventData.of("action", "show-tooltip"),
+  false
+);
+```
+
+#### SlotMouseExited
+Triggered when leaving an item slot hover.
+
+```typescript
+events.addEventBinding(
+  CustomUIEventBindingType.SlotMouseExited,
+  "#InventorySlot",
+  EventData.of("action", "hide-tooltip"),
+  false
+);
+```
+
+### Drag Events
+
+#### DragCancelled
+Triggered when a drag operation is cancelled.
+
+```typescript
+events.addEventBinding(
+  CustomUIEventBindingType.DragCancelled,
+  "#DraggableItem",
+  EventData.of("action", "drag-cancel"),
+  false
+);
+```
+
+#### Dropped
+Triggered when a dragged item is dropped.
+
+```typescript
+events.addEventBinding(
+  CustomUIEventBindingType.Dropped,
+  "#DropZone",
+  EventData.of("action", "item-dropped"),
+  false
+);
+```
+
+#### SlotMouseDragCompleted
+Triggered when a slot drag operation completes.
+
+```typescript
+events.addEventBinding(
+  CustomUIEventBindingType.SlotMouseDragCompleted,
+  "#InventorySlot",
+  EventData.of("action", "drag-complete"),
+  false
+);
+```
+
+#### SlotMouseDragExited
+Triggered when dragging exits a slot area.
+
+```typescript
+events.addEventBinding(
+  CustomUIEventBindingType.SlotMouseDragExited,
+  "#InventorySlot",
+  EventData.of("action", "drag-exit"),
+  false
+);
+```
+
+#### SlotClickReleaseWhileDragging
+Triggered when releasing click while dragging over a slot.
+
+```typescript
+events.addEventBinding(
+  CustomUIEventBindingType.SlotClickReleaseWhileDragging,
+  "#InventorySlot",
+  EventData.of("action", "drag-drop"),
+  false
+);
+```
+
+#### SlotClickPressWhileDragging
+Triggered when clicking while dragging over a slot.
+
+```typescript
+events.addEventBinding(
+  CustomUIEventBindingType.SlotClickPressWhileDragging,
+  "#InventorySlot",
+  EventData.of("action", "drag-swap"),
+  false
+);
+```
+
+## EventData
+
+`EventData` is used to attach custom data to events. The data is serialized to JSON and passed to your event handler.
+
+### Creating EventData
+
+```typescript
+EventData.of("key1", "value1", "key2", "value2");
+
+EventData.of(
+  "action", "submit",
+  "formId", "registration",
+  "timestamp", Date.now().toString()
+);
+```
+
+### Accessing Event Data
+
+In your event handler, parse the raw data string:
+
+```typescript
+(ref, store, rawData) => {
+  const data = JSON.parse(rawData);
+  
+  console.log(data.action);
+  console.log(data.formId);
+  
+  if (data.value !== undefined) {
+    console.log("Input value:", data.value);
+  }
+}
+```
+
+## Complete Example
+
+```typescript
+const page = new ScriptCustomUIPage(
+  playerRef,
+  CustomPageLifetime.CanDismiss,
+  
+  (ref, cmd, events, store) => {
+    cmd.append("Pages/SettingsPage.ui");
+    
+    events.addEventBinding(
+      CustomUIEventBindingType.Activating,
+      "#SaveButton",
+      EventData.of("action", "save"),
+      false
+    );
+    
+    events.addEventBinding(
+      CustomUIEventBindingType.Activating,
+      "#CancelButton",
+      EventData.of("action", "cancel"),
+      false
+    );
+    
+    events.addEventBinding(
+      CustomUIEventBindingType.ValueChanged,
+      "#VolumeSlider",
+      EventData.of("setting", "volume"),
+      false
+    );
+    
+    events.addEventBinding(
+      CustomUIEventBindingType.ValueChanged,
+      "#MuteCheckbox",
+      EventData.of("setting", "mute"),
+      false
+    );
+    
+    events.addEventBinding(
+      CustomUIEventBindingType.SelectedTabChanged,
+      "#CategoryTabs",
+      EventData.of("action", "tab-change"),
+      false
+    );
+  },
+  
+  (ref, store, rawData) => {
+    const data = JSON.parse(rawData);
+    
+    switch (data.action) {
+      case "save":
+        saveSettings();
+        page.triggerClose();
+        break;
+        
+      case "cancel":
+        page.triggerClose();
+        break;
+        
+      case "tab-change":
+        loadTabContent(data.tabIndex);
+        break;
+    }
+    
+    if (data.setting) {
+      updateSetting(data.setting, data.value);
+    }
+  }
+);
+```
+
+## Event Summary Table
+
+| Event Type | Description | Common Elements |
+|------------|-------------|-----------------|
+| `Activating` | Left click/activate | Button, TextButton, CheckBox |
+| `RightClicking` | Right click | Any interactive element |
+| `DoubleClicking` | Double click | List items, slots |
+| `MouseEntered` | Hover start | Any element |
+| `MouseExited` | Hover end | Any element |
+| `MouseButtonReleased` | Mouse up | Drag targets |
+| `ValueChanged` | Input value change | TextField, Slider, CheckBox |
+| `Validating` | Input validation | TextField, NumberField |
+| `FocusGained` | Element focused | Input elements |
+| `FocusLost` | Element unfocused | Input elements |
+| `KeyDown` | Key pressed | Input elements |
+| `Dismissing` | Page closing | Page root |
+| `SelectedTabChanged` | Tab selection | Tab navigation |
+| `ElementReordered` | Element reordered | Sortable lists |
+| `SlotClicking` | Slot clicked | ItemSlot, ItemGrid |
+| `SlotDoubleClicking` | Slot double-clicked | ItemSlot, ItemGrid |
+| `SlotMouseEntered` | Slot hover start | ItemSlot, ItemGrid |
+| `SlotMouseExited` | Slot hover end | ItemSlot, ItemGrid |
+| `DragCancelled` | Drag cancelled | Draggable elements |
+| `Dropped` | Item dropped | Drop zones |
+| `SlotMouseDragCompleted` | Slot drag complete | ItemSlot |
+| `SlotMouseDragExited` | Drag exits slot | ItemSlot |
+| `SlotClickReleaseWhileDragging` | Release while dragging | ItemSlot |
+| `SlotClickPressWhileDragging` | Click while dragging | ItemSlot |

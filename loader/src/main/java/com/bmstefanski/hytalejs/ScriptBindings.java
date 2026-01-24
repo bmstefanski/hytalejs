@@ -585,8 +585,9 @@ public final class ScriptBindings {
     new JavaTypeBinding("PatchStyle", "com.hypixel.hytale.server.core.ui.PatchStyle"),
     new JavaTypeBinding("DropdownEntryInfo", "com.hypixel.hytale.server.core.ui.DropdownEntryInfo"),
 
-    // HytaleJS Custom UI Helper
+    // HytaleJS Custom UI Helpers
     new JavaTypeBinding("ScriptCustomUIPage", "com.bmstefanski.hytalejs.ScriptCustomUIPage"),
+    new JavaTypeBinding("ScriptCustomUIHud", "com.bmstefanski.hytalejs.ScriptCustomUIHud"),
   };
 
   private ScriptBindings() {}
@@ -621,6 +622,7 @@ public final class ScriptBindings {
     }
     
     runtime.setGlobal("ScriptCustomUIPage", ScriptCustomUIPage.class);
+    runtime.setGlobal("ScriptCustomUIHud", ScriptCustomUIHud.class);
     runtime.setGlobal("ByteArrayCommonAsset", ByteArrayCommonAsset.class);
     runtime.setGlobal("CommonAssetModule", com.hypixel.hytale.server.core.asset.common.CommonAssetModule.class);
   }

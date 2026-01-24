@@ -1,0 +1,431 @@
+---
+title: UI Elements
+description: All available UI element types and their properties
+---
+
+This document lists all UI element types available in Hytale's UI DSL, derived from analysis of the game's asset files and decompiled code.
+
+## Layout Elements
+
+### Group
+
+The fundamental container element. Groups can contain other elements and control their layout.
+
+```
+Group #MyContainer {
+  Anchor: (Width: 400, Height: 300);
+  LayoutMode: Top;
+  Padding: (Horizontal: 16, Vertical: 8);
+  Background: (Color: #1a2530);
+  Visible: true;
+  
+  // Child elements
+}
+```
+
+**Common Properties:**
+| Property | Type | Description |
+|----------|------|-------------|
+| `Anchor` | Anchor | Positioning and sizing |
+| `LayoutMode` | Enum | How children are arranged |
+| `Padding` | Padding | Internal spacing |
+| `Background` | PatchStyle/Color | Background appearance |
+| `Visible` | Boolean | Visibility state |
+| `FlexWeight` | Number | Flex layout weight |
+
+## Text Elements
+
+### Label
+
+Displays text content.
+
+```
+Label #Title {
+  Text: "Hello World";
+  Style: (
+    FontSize: 24,
+    TextColor: #FFFFFF,
+    RenderBold: true,
+    HorizontalAlignment: Center
+  );
+  Anchor: (Height: 40);
+}
+```
+
+**Properties:**
+| Property | Type | Description |
+|----------|------|-------------|
+| `Text` | String | Text content (can be localized with `%`) |
+| `Style` | LabelStyle | Text styling |
+| `Anchor` | Anchor | Positioning |
+| `MaskTexturePath` | String | Texture mask for effects |
+
+### TimerLabel
+
+Specialized label for displaying time values.
+
+```
+TimerLabel #Countdown {
+  Style: (FontSize: 20, TextColor: #FFFFFF);
+  Anchor: (Height: 30);
+}
+```
+
+## Button Elements
+
+### Button
+
+A basic clickable button without text.
+
+```
+Button #IconButton {
+  Anchor: (Width: 44, Height: 44);
+  Style: (
+    Default: (Background: "icon.png"),
+    Hovered: (Background: "icon_hover.png"),
+    Pressed: (Background: "icon_pressed.png"),
+    Disabled: (Background: "icon_disabled.png"),
+    Sounds: $Sounds.@ButtonsLight
+  );
+}
+```
+
+**Properties:**
+| Property | Type | Description |
+|----------|------|-------------|
+| `Style` | ButtonStyle | Button appearance states |
+| `Anchor` | Anchor | Positioning and sizing |
+| `Visible` | Boolean | Visibility |
+| `Enabled` | Boolean | Interactive state |
+
+### TextButton
+
+A button with text label.
+
+```
+TextButton #SubmitButton {
+  Anchor: (Width: 200, Height: 44);
+  Text: "Submit";
+  Style: (
+    Default: (Background: ..., LabelStyle: ...),
+    Hovered: (Background: ..., LabelStyle: ...),
+    Pressed: (Background: ..., LabelStyle: ...),
+    Disabled: (Background: ..., LabelStyle: ...),
+    Sounds: $Sounds.@ButtonsLight
+  );
+  Padding: (Horizontal: 24);
+}
+```
+
+**Properties:**
+| Property | Type | Description |
+|----------|------|-------------|
+| `Text` | String | Button label |
+| `Style` | TextButtonStyle | Appearance states |
+| `Padding` | Padding | Internal spacing |
+
+### BackButton
+
+Standard back/close navigation button. Usually placed at bottom-left of pages.
+
+```
+BackButton {}
+```
+
+### ItemSlotButton
+
+A button styled as an item slot, useful for inventory-like interfaces.
+
+```
+ItemSlotButton #TradeButton {
+  Anchor: (Full: 0);
+  Style: (
+    Default: (Background: #252f3a),
+    Hovered: (Background: #c9a050),
+    Pressed: (Background: #a08040),
+    Disabled: (Background: #1a1e24),
+    Sounds: $C.@ButtonSounds
+  );
+  
+  // Can contain child elements
+}
+```
+
+## Input Elements
+
+### TextField
+
+Single-line text input.
+
+```
+TextField #NameInput {
+  Anchor: (Height: 35, Width: 300);
+  Style: (FontSize: 16);
+  PlaceholderText: "Enter name...";
+  PlaceholderStyle: (TextColor: #666666);
+  MaxLength: 100;
+  Padding: (Horizontal: 12);
+}
+```
+
+**Properties:**
+| Property | Type | Description |
+|----------|------|-------------|
+| `Style` | InputFieldStyle | Text styling |
+| `PlaceholderText` | String | Placeholder text |
+| `PlaceholderStyle` | LabelStyle | Placeholder styling |
+| `MaxLength` | Integer | Maximum characters |
+| `Background` | PatchStyle | Input background |
+| `Value` | String | Current value |
+
+### MultilineTextField
+
+Multi-line text input area.
+
+```
+MultilineTextField #Description {
+  Anchor: (Height: 100);
+  Style: $C.@DefaultInputFieldStyle;
+  PlaceholderStyle: $C.@DefaultInputFieldPlaceholderStyle;
+  Background: $C.@InputBoxBackground;
+  AutoGrow: false;
+  Padding: (Horizontal: 10, Vertical: 8);
+}
+```
+
+### CompactTextField
+
+A text field that expands when focused.
+
+```
+CompactTextField #SearchInput {
+  Anchor: (Height: 30);
+  CollapsedWidth: 34;
+  ExpandedWidth: 200;
+  PlaceholderText: %server.customUI.searchPlaceholder;
+  Style: (FontSize: 16);
+  PlaceholderStyle: (TextColor: #3d5a85, RenderUppercase: true, FontSize: 14);
+  Padding: (Horizontal: 12, Left: 34);
+  Decoration: (
+    Default: (
+      Icon: (Texture: "Common/SearchIcon.png", Width: 16, Height: 16, Offset: 9),
+      ClearButtonStyle: @ClearButtonStyle
+    )
+  );
+}
+```
+
+### NumberField
+
+Numeric input with optional constraints.
+
+```
+NumberField #Amount {
+  Anchor: (Width: 60);
+  Format: (
+    MaxDecimalPlaces: 0,
+    Step: 1,
+    Min: 0,
+    Max: 100
+  );
+}
+```
+
+### CheckBox
+
+Boolean toggle input.
+
+```
+CheckBox #EnableOption {
+  Anchor: (Width: 26, Height: 26);
+  Value: true;
+  Style: $C.@DefaultCheckBoxStyle;
+}
+```
+
+### Slider
+
+Range input slider.
+
+```
+Slider #VolumeSlider {
+  Anchor: (Width: 200, Height: 20);
+  Style: $C.@DefaultSliderStyle;
+  Value: 0.5;
+  Min: 0;
+  Max: 1;
+}
+```
+
+### FloatSlider
+
+Slider specifically for floating-point values.
+
+```
+FloatSlider #OpacitySlider {
+  Anchor: (Width: 200);
+  Min: 0.0;
+  Max: 1.0;
+  Step: 0.01;
+}
+```
+
+### DropdownBox
+
+Selection dropdown.
+
+```
+DropdownBox #CategorySelect {
+  Anchor: (Width: 330, Height: 32);
+  Style: $C.@DefaultDropdownBoxStyle;
+}
+```
+
+Entries are typically populated from server code using `UICommandBuilder`.
+
+### ColorPicker
+
+Color selection input.
+
+```
+ColorPicker #TintColor {
+  Anchor: (Width: 200, Height: 32);
+  Style: $C.@DefaultColorPickerStyle;
+}
+```
+
+### ColorPickerDropdownBox
+
+Dropdown with color picker.
+
+```
+ColorPickerDropdownBox #ColorSelect {
+  Style: $C.@DefaultColorPickerDropdownBoxStyle;
+}
+```
+
+## Display Elements
+
+### Sprite
+
+Displays an image, optionally animated.
+
+```
+Sprite #LoadingSpinner {
+  Anchor: (Width: 32, Height: 32);
+  TexturePath: "Common/Spinner.png";
+  Frame: (Width: 32, Height: 32, PerRow: 8, Count: 72);
+  FramesPerSecond: 30;
+}
+```
+
+**Properties:**
+| Property | Type | Description |
+|----------|------|-------------|
+| `TexturePath` | String | Image path |
+| `Frame` | Frame | Animation frame info |
+| `FramesPerSecond` | Number | Animation speed |
+
+### AssetImage
+
+Displays an asset-based image.
+
+```
+AssetImage #Preview {
+  Anchor: (Width: 128, Height: 128);
+  AssetPath: "textures/items/sword.png";
+}
+```
+
+### ItemSlot
+
+Displays an item with optional quality background.
+
+```
+ItemSlot #OutputSlot {
+  Anchor: (Full: 0);
+  ShowQualityBackground: true;
+}
+```
+
+### ItemIcon
+
+Displays just an item's icon.
+
+```
+ItemIcon #WeaponIcon {
+  Anchor: (Width: 48, Height: 48);
+}
+```
+
+### ItemGrid
+
+Grid of item slots.
+
+```
+ItemGrid #InventoryGrid {
+  Anchor: (Width: 400, Height: 200);
+  Columns: 8;
+  Rows: 4;
+  SlotSize: 48;
+}
+```
+
+### ProgressBar
+
+Progress indicator.
+
+```
+ProgressBar #LoadingBar {
+  Anchor: (Width: 300, Height: 20);
+  Style: (
+    Background: "ProgressBar.png",
+    Fill: "ProgressBarFill.png"
+  );
+  Value: 0.5;
+}
+```
+
+## Common Properties
+
+These properties are available on most elements:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `Anchor` | Anchor | Position and size |
+| `Visible` | Boolean | Show/hide element |
+| `Padding` | Padding | Internal spacing |
+| `Background` | PatchStyle/String/Color | Background appearance |
+| `LayoutMode` | Enum | Child element layout |
+| `FlexWeight` | Number | Flex layout weight |
+| `Tooltip` | String | Hover tooltip text |
+| `TooltipStyle` | TextTooltipStyle | Tooltip appearance |
+
+## Using Common.ui Templates
+
+The `Common.ui` file provides pre-styled templates for common UI patterns:
+
+```
+$C = "../Common.ui";
+
+// Pre-styled containers
+$C.@PageOverlay { }
+$C.@Container { }
+$C.@DecoratedContainer { }
+
+// Pre-styled buttons
+$C.@TextButton #Button { @Text = "Click"; }
+$C.@SecondaryTextButton #Alt { @Text = "Cancel"; }
+$C.@CancelTextButton #Delete { @Text = "Delete"; }
+
+// Pre-styled inputs
+$C.@TextField #Input { }
+$C.@NumberField #Amount { }
+$C.@CheckBox #Toggle { }
+$C.@DropdownBox #Select { }
+
+// Utility elements
+$C.@DefaultSpinner {}
+$C.@BackButton {}
+$C.@ContentSeparator {}
+```

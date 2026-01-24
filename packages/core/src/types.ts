@@ -527,6 +527,7 @@ export interface World {
   getPlayers(): Player[];
   getPlayerCount(): number;
   getPlayerRefs(): PlayerRef[];
+  getTps(): number;
   sendMessage(arg0: Message): void;
   getBlockType(arg0: Vector3i): BlockType;
   getBlockType(arg0: number, arg1: number, arg2: number): BlockType;
@@ -5950,6 +5951,19 @@ export interface ScriptCustomUIPageStatic {
   ): ScriptCustomUIPage;
 }
 
+export type ScriptCustomUIHudBuildCallback = (commandBuilder: UICommandBuilder) => void;
+
+export interface ScriptCustomUIHud extends CustomUIHud {
+  triggerShow(): void;
+  triggerUpdate(commandBuilder: UICommandBuilder): void;
+  triggerUpdate(commandBuilder: UICommandBuilder, clear: boolean): void;
+  getPlayerRef(): PlayerRef;
+}
+
+export interface ScriptCustomUIHudStatic {
+  new (playerRef: PlayerRef, buildCallback: ScriptCustomUIHudBuildCallback): ScriptCustomUIHud;
+}
+
 export type JavaByteArray = unknown;
 export type JavaCompletableFuture<T> = unknown;
 
@@ -6013,6 +6027,7 @@ declare global {
   const HudComponent: HudComponentEnum;
   const Page: PageEnum;
   const ScriptCustomUIPage: ScriptCustomUIPageStatic;
+  const ScriptCustomUIHud: ScriptCustomUIHudStatic;
   const ByteArrayCommonAsset: ByteArrayCommonAssetStatic;
   const CommonAssetModule: CommonAssetModuleStatic;
   const DynamicLight: DynamicLight;

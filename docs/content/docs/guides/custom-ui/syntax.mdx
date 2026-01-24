@@ -1,0 +1,305 @@
+---
+title: UI DSL Syntax
+description: Complete syntax reference for Hytale's UI DSL
+---
+
+This document covers the complete syntax of Hytale's UI Domain Specific Language (DSL).
+
+## Comments
+
+Single-line comments use `//`:
+
+```
+// This is a comment
+Group {
+  // Comments can appear inside elements
+  Anchor: (Width: 100);
+}
+```
+
+## Imports
+
+Import other UI files using the `$` prefix:
+
+```
+$C = "../Common.ui";
+$Sounds = "../Sounds.ui";
+$Browser = "PrefabBrowser.ui";
+```
+
+Paths are relative to the current file's location. Common imports include:
+- `Common.ui` - Standard UI components, styles, and templates
+- `Sounds.ui` - Sound definitions for UI interactions
+
+### Using Imports
+
+Reference imported values with dot notation:
+
+```
+$C.@PageOverlay {}
+$C.@TextButton #MyButton {
+  Text: "Click Me";
+}
+$Sounds.@ButtonsLight
+```
+
+## Variables and Templates
+
+### Local Variables
+
+Define local variables with `@`:
+
+```
+@ButtonHeight = 44;
+@PrimaryColor = #4a90d9;
+@DefaultPadding = 16;
+```
+
+Variables can hold:
+- Numbers: `@Height = 100;`
+- Strings: `@Title = "Hello";`
+- Colors: `@Color = #FF5500;`
+- Complex values: `@Style = (FontSize: 16, TextColor: #FFFFFF);`
+
+### Templates (Macros)
+
+Templates define reusable element structures:
+
+```
+@InputLabel = Label {
+  Anchor: (Left: 6, Right: 16, Width: 250);
+  Style: (...$C.@DefaultLabelStyle, VerticalAlignment: Center, Wrap: true);
+};
+```
+
+Use templates by referencing them:
+
+```
+@InputLabel {
+  Text: "Username:";
+}
+```
+
+### Parameterized Templates
+
+Templates can have parameters with default values:
+
+```
+@TextButton = TextButton {
+  @Anchor = Anchor();
+  @Sounds = ();
+  
+  Style: (
+    ...@DefaultTextButtonStyle,
+    Sounds: (...$Sounds.@ButtonsLight, ...@Sounds)
+  );
+  Anchor: (...@Anchor, Height: @DefaultButtonHeight);
+  Text: @Text;
+};
+```
+
+Override parameters when using the template:
+
+```
+@TextButton #MyButton {
+  @Anchor = (Width: 200);
+  @Text = "Submit";
+}
+```
+
+## Elements
+
+Elements are the building blocks of UI:
+
+```
+ElementType #ElementId {
+  Property1: value;
+  Property2: value;
+  
+  ChildElement {
+    // nested content
+  }
+}
+```
+
+### Element IDs
+
+IDs are optional and prefixed with `#`:
+
+```
+Group #MainContainer {
+  Label #Title {
+    Text: "Hello";
+  }
+}
+```
+
+IDs are used for:
+- Targeting elements with selectors
+- Dynamic updates from server code
+
+## Property Values
+
+### Primitive Values
+
+```
+Text: "Hello World";      // String
+Visible: true;            // Boolean
+FontSize: 16;             // Integer
+Opacity: 0.5;             // Float
+FlexWeight: 1;            // Number
+```
+
+### Colors
+
+Colors use hex notation with optional opacity:
+
+```
+TextColor: #FFFFFF;           // White, full opacity
+Background: #000000(0.5);     // Black, 50% opacity
+OutlineColor: #FF5500(0.8);   // Orange, 80% opacity
+```
+
+### Structured Values
+
+Use parentheses for structured values:
+
+```
+Anchor: (Width: 100, Height: 50, Top: 10);
+Style: (FontSize: 16, TextColor: #FFFFFF, RenderBold: true);
+Padding: (Horizontal: 10, Vertical: 5);
+```
+
+### Localization
+
+Reference translated strings with `%`:
+
+```
+Text: %server.customUI.respawnPage.title;
+PlaceholderText: %server.customUI.searchPlaceholder;
+```
+
+### References
+
+Reference values from other documents:
+
+```
+Style: Value.ref("Pages/BasicTextButton.ui", "SelectedLabelStyle");
+```
+
+In the DSL, this is written as:
+
+```
+Style: $Other.@SelectedLabelStyle;
+```
+
+## Spread Operator
+
+The `...` operator merges properties from another value:
+
+```
+@BaseStyle = (FontSize: 16, TextColor: #FFFFFF);
+
+@BoldStyle = (...@BaseStyle, RenderBold: true);
+// Result: (FontSize: 16, TextColor: #FFFFFF, RenderBold: true)
+```
+
+Spread can be used in:
+- Style definitions
+- Anchor definitions
+- Any structured value
+
+```
+Style: (
+  ...$C.@DefaultLabelStyle,
+  TextColor: #FF0000,       // Override specific property
+  RenderBold: true          // Add new property
+);
+```
+
+## Type Constructors
+
+Some values require explicit type constructors:
+
+```
+Background: PatchStyle(TexturePath: "Common/Button.png", Border: 12);
+Style: LabelStyle(FontSize: 16, TextColor: #FFFFFF);
+Anchor: Anchor(Width: 100, Height: 50);
+Padding: Padding(Horizontal: 10, Vertical: 5);
+```
+
+### Available Constructors
+
+| Constructor | Purpose |
+|-------------|---------|
+| `PatchStyle(...)` | 9-patch texture background |
+| `LabelStyle(...)` | Text styling |
+| `ButtonStyle(...)` | Button state styles |
+| `TextButtonStyle(...)` | Text button state styles |
+| `ScrollbarStyle(...)` | Scrollbar appearance |
+| `SliderStyle(...)` | Slider appearance |
+| `DropdownBoxStyle(...)` | Dropdown styling |
+| `CheckBoxStyle(...)` | Checkbox appearance |
+| `TabNavigationStyle(...)` | Tab navigation |
+| `TabStateStyle(...)` | Tab state appearance |
+| `TextTooltipStyle(...)` | Tooltip styling |
+
+## File Structure
+
+A typical UI file structure:
+
+```
+// Imports
+$C = "../Common.ui";
+$Sounds = "../Sounds.ui";
+
+// Local variables and templates
+@MyStyle = (FontSize: 18, TextColor: #FFFFFF);
+
+@MyButton = TextButton {
+  @Text = "";
+  Style: @MyStyle;
+  Text: @Text;
+};
+
+// Root element(s)
+$C.@PageOverlay {
+  // Page content
+  Group #Content {
+    @MyButton #SubmitButton {
+      @Text = "Submit";
+    }
+  }
+}
+```
+
+## Sound Definitions
+
+Sound definitions in `Sounds.ui`:
+
+```
+@ButtonsLightActivate = "Sounds/ButtonsLightActivate.ogg";
+@ButtonsLightHover = "Sounds/ButtonsLightHover.ogg";
+
+@ButtonsLight = (
+  Activate: (
+    SoundPath: @ButtonsLightActivate,
+    MinPitch: -0.4,
+    MaxPitch: 0.4,
+    Volume: 4
+  ),
+  MouseHover: (
+    SoundPath: @ButtonsLightHover,
+    Volume: 6
+  )
+);
+```
+
+Reference sounds in button styles:
+
+```
+Style: (
+  ...$C.@DefaultButtonStyle,
+  Sounds: $Sounds.@ButtonsLight
+);
+```

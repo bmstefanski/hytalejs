@@ -1,0 +1,417 @@
+---
+title: Layout System
+description: Layout modes, anchoring, and positioning in UI elements
+---
+
+Hytale's UI system uses a combination of anchoring and layout modes to position and size elements. Understanding these systems is essential for building complex UIs.
+
+## Layout Modes
+
+The `LayoutMode` property on container elements (primarily `Group`) determines how child elements are arranged.
+
+### Top
+
+Children stack vertically from top to bottom. Most common layout mode.
+
+```
+Group {
+  LayoutMode: Top;
+  
+  Label { Text: "First"; }
+  Label { Text: "Second"; }
+  Label { Text: "Third"; }
+}
+```
+
+### TopScrolling
+
+Like `Top`, but enables vertical scrolling when content exceeds container height.
+
+```
+Group {
+  LayoutMode: TopScrolling;
+  ScrollbarStyle: $C.@DefaultScrollbarStyle;
+  Anchor: (Height: 200);
+  
+  Label { Text: "Item 1"; Anchor: (Height: 30); }
+  Label { Text: "Item 2"; Anchor: (Height: 30); }
+  Label { Text: "Item 3"; Anchor: (Height: 30); }
+}
+```
+
+### Left
+
+Children stack horizontally from left to right.
+
+```
+Group {
+  LayoutMode: Left;
+  Anchor: (Height: 44);
+  
+  Button #Icon1 { Anchor: (Width: 44, Height: 44); }
+  Button #Icon2 { Anchor: (Width: 44, Height: 44); }
+  Button #Icon3 { Anchor: (Width: 44, Height: 44); }
+}
+```
+
+### Right
+
+Children stack horizontally from right to left.
+
+```
+Group {
+  LayoutMode: Right;
+  
+  TextButton #Cancel { Text: "Cancel"; }
+  TextButton #Save { Text: "Save"; }
+}
+```
+
+### Center
+
+Children are centered horizontally within the container.
+
+```
+Group {
+  LayoutMode: Center;
+  
+  TextButton #Action { Text: "Click Me"; }
+}
+```
+
+### Middle
+
+Children are centered vertically within the container. Often used as the root layout.
+
+```
+Group {
+  LayoutMode: Middle;
+  
+  Group #DialogBox {
+    Anchor: (Width: 400, Height: 300);
+  }
+}
+```
+
+### CenterMiddle
+
+Centers children both horizontally and vertically.
+
+```
+Group {
+  LayoutMode: CenterMiddle;
+  
+  $C.@DefaultSpinner {}
+}
+```
+
+### Full
+
+Children fill the entire container space.
+
+```
+Group {
+  LayoutMode: Full;
+  
+  Sprite #Background {
+    TexturePath: "Common/Background.png";
+  }
+}
+```
+
+### LeftCenterWrap
+
+Children flow left to right and wrap to next line when full.
+
+```
+Group {
+  LayoutMode: LeftCenterWrap;
+  Anchor: (Width: 300);
+  
+  Button { Anchor: (Width: 64, Height: 64); }
+  Button { Anchor: (Width: 64, Height: 64); }
+  Button { Anchor: (Width: 64, Height: 64); }
+  Button { Anchor: (Width: 64, Height: 64); }
+  Button { Anchor: (Width: 64, Height: 64); }
+}
+```
+
+## Anchor System
+
+The `Anchor` property controls element positioning and sizing. It uses a constraint-based system where you specify distances from container edges and/or explicit dimensions.
+
+### Basic Positioning
+
+```
+Anchor: (
+  Left: 10,
+  Right: 10,
+  Top: 10,
+  Bottom: 10
+);
+```
+
+| Property | Description |
+|----------|-------------|
+| `Left` | Distance from container's left edge |
+| `Right` | Distance from container's right edge |
+| `Top` | Distance from container's top edge |
+| `Bottom` | Distance from container's bottom edge |
+
+### Explicit Dimensions
+
+```
+Anchor: (Width: 200, Height: 50);
+```
+
+| Property | Description |
+|----------|-------------|
+| `Width` | Explicit width in pixels |
+| `Height` | Explicit height in pixels |
+| `MinWidth` | Minimum width constraint |
+| `MaxWidth` | Maximum width constraint |
+
+### Shorthand Properties
+
+```
+Anchor: (Full: 10);
+
+Anchor: (Horizontal: 20, Vertical: 10);
+```
+
+| Property | Equivalent To |
+|----------|---------------|
+| `Full` | Left, Right, Top, Bottom all set to same value |
+| `Horizontal` | Left and Right set to same value |
+| `Vertical` | Top and Bottom set to same value |
+
+### Common Anchor Patterns
+
+**Fill container with padding:**
+```
+Anchor: (Full: 10);
+```
+
+**Fixed size, centered (when parent has Center/Middle layout):**
+```
+Anchor: (Width: 300, Height: 200);
+```
+
+**Full width, fixed height, at top:**
+```
+Anchor: (Top: 0, Height: 50);
+```
+
+**Full width, fixed height, at bottom:**
+```
+Anchor: (Bottom: 0, Height: 50);
+```
+
+**Fixed width, full height, on left:**
+```
+Anchor: (Left: 0, Width: 200);
+```
+
+**Offset from edges:**
+```
+Anchor: (Top: 10, Right: 10, Width: 100, Height: 100);
+```
+
+**Negative values for overflow:**
+```
+Anchor: (Top: -16, Right: -16, Width: 32, Height: 32);
+```
+
+## Padding System
+
+The `Padding` property adds internal spacing within containers.
+
+```
+Padding: (
+  Left: 10,
+  Right: 10,
+  Top: 20,
+  Bottom: 20
+);
+```
+
+### Padding Properties
+
+| Property | Description |
+|----------|-------------|
+| `Left` | Left padding |
+| `Right` | Right padding |
+| `Top` | Top padding |
+| `Bottom` | Bottom padding |
+| `Full` | All sides |
+| `Horizontal` | Left and right |
+| `Vertical` | Top and bottom |
+
+### Example
+
+```
+Group {
+  LayoutMode: Top;
+  Padding: (Full: 16);
+  
+  Label { Text: "Content with 16px padding all around"; }
+}
+```
+
+## FlexWeight
+
+For flex layouts, `FlexWeight` determines how elements share available space.
+
+```
+Group {
+  LayoutMode: Left;
+  Anchor: (Height: 50);
+  
+  Label #Left {
+    FlexWeight: 1;
+    Text: "Left (1/3)";
+  }
+  
+  Group #Spacer {
+    FlexWeight: 2;
+  }
+  
+  Label #Right {
+    FlexWeight: 1;
+    Text: "Right (1/3)";
+  }
+}
+```
+
+Elements with higher FlexWeight values receive proportionally more space.
+
+## Combining Anchor with Variables
+
+Use variables for reusable anchor configurations:
+
+```
+@ButtonAnchor = Anchor(Height: 44);
+@FullWidthAnchor = Anchor(Horizontal: 0);
+
+TextButton #SaveButton {
+  Anchor: (...@ButtonAnchor, ...@FullWidthAnchor);
+  Text: "Save";
+}
+```
+
+## Complex Layout Example
+
+```
+$C = "../Common.ui";
+
+Group #MainLayout {
+  LayoutMode: Top;
+  Anchor: (Full: 0);
+  
+  Group #Header {
+    LayoutMode: Left;
+    Anchor: (Height: 60);
+    Padding: (Horizontal: 20);
+    Background: (Color: #1a2530);
+    
+    Label #Title {
+      FlexWeight: 1;
+      Text: "Dashboard";
+      Style: (FontSize: 24, VerticalAlignment: Center);
+    }
+    
+    Group #Actions {
+      LayoutMode: Right;
+      Anchor: (Width: 200);
+      
+      $C.@SecondaryButton #Settings {
+        Anchor: (Width: 44, Height: 44);
+      }
+    }
+  }
+  
+  Group #Content {
+    LayoutMode: Left;
+    FlexWeight: 1;
+    
+    Group #Sidebar {
+      Anchor: (Width: 250);
+      LayoutMode: TopScrolling;
+      Background: (Color: #0f1620);
+    }
+    
+    Group #Main {
+      FlexWeight: 1;
+      LayoutMode: Top;
+      Padding: (Full: 20);
+    }
+  }
+  
+  Group #Footer {
+    LayoutMode: Center;
+    Anchor: (Height: 50);
+    Background: (Color: #1a2530);
+    
+    Label {
+      Text: "Footer Content";
+      Style: (VerticalAlignment: Center);
+    }
+  }
+}
+```
+
+## Responsive Patterns
+
+### Centered Dialog
+
+```
+$C.@PageOverlay {
+  LayoutMode: Middle;
+  
+  Group #Dialog {
+    Anchor: (Width: 500);
+    LayoutMode: Top;
+    Background: $C.@Panel;
+  }
+}
+```
+
+### Side Panel
+
+```
+Group {
+  LayoutMode: Left;
+  
+  Group #Panel {
+    Anchor: (Width: 300);
+    LayoutMode: TopScrolling;
+  }
+  
+  Group #Content {
+    FlexWeight: 1;
+    LayoutMode: Top;
+  }
+}
+```
+
+### Bottom Action Bar
+
+```
+Group {
+  LayoutMode: Top;
+  
+  Group #Content {
+    FlexWeight: 1;
+  }
+  
+  Group #ActionBar {
+    LayoutMode: Right;
+    Anchor: (Height: 60);
+    Padding: (Full: 10);
+    
+    $C.@TextButton #Cancel { @Text = "Cancel"; }
+    Group { Anchor: (Width: 10); }
+    $C.@TextButton #Save { @Text = "Save"; }
+  }
+}
+```

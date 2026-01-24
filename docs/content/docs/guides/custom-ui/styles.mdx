@@ -1,0 +1,411 @@
+---
+title: UI Styles
+description: Style types and properties for UI elements
+---
+
+Styles in Hytale's UI DSL define the visual appearance of elements. They support state-based variations (Default, Hovered, Pressed, Disabled) and can be combined using the spread operator.
+
+## PatchStyle
+
+The most fundamental style type. Used for 9-patch textures that scale without distorting borders.
+
+```
+@MyBackground = PatchStyle(
+  TexturePath: "Common/ContainerPatch.png",
+  Border: 20,
+  Color: #FFFFFF
+);
+
+@WideBorder = PatchStyle(
+  TexturePath: "Common/ButtonWide.png",
+  HorizontalBorder: 80,
+  VerticalBorder: 12
+);
+```
+
+**Properties:**
+| Property | Type | Description |
+|----------|------|-------------|
+| `TexturePath` | String | Path to texture file |
+| `Border` | Integer | Uniform border size for 9-patch |
+| `HorizontalBorder` | Integer | Left/right border size |
+| `VerticalBorder` | Integer | Top/bottom border size |
+| `Color` | Color | Tint color with optional opacity |
+| `Area` | Area | Source rectangle (X, Y, Width, Height) |
+
+You can also use inline syntax for simple backgrounds:
+
+```
+Background: (TexturePath: "Common/Panel.png", Border: 16);
+Background: (Color: #1a2530);
+Background: "Common/Icon.png";
+```
+
+## LabelStyle
+
+Controls text rendering appearance.
+
+```
+@TitleStyle = LabelStyle(
+  FontSize: 24,
+  TextColor: #FFFFFF,
+  RenderBold: true,
+  RenderUppercase: true,
+  HorizontalAlignment: Center,
+  VerticalAlignment: Center,
+  LetterSpacing: 2
+);
+
+@BodyStyle = LabelStyle(
+  FontSize: 16,
+  TextColor: #96a9be,
+  Wrap: true,
+  FontName: "Secondary"
+);
+```
+
+**Properties:**
+| Property | Type | Description |
+|----------|------|-------------|
+| `FontSize` | Integer | Font size in pixels |
+| `TextColor` | Color | Text color |
+| `RenderBold` | Boolean | Bold rendering |
+| `RenderUppercase` | Boolean | Force uppercase |
+| `HorizontalAlignment` | Enum | Start, Center, End |
+| `VerticalAlignment` | Enum | Top, Center, Bottom |
+| `LetterSpacing` | Integer | Space between characters |
+| `Wrap` | Boolean | Enable text wrapping |
+| `FontName` | String | "Default" or "Secondary" |
+
+## ButtonStyle
+
+Defines button appearance across interaction states. Used for icon buttons.
+
+```
+@IconButtonStyle = ButtonStyle(
+  Default: (Background: "Common/Buttons/Primary_Square.png"),
+  Hovered: (Background: "Common/Buttons/Primary_Square_Hovered.png"),
+  Pressed: (Background: "Common/Buttons/Primary_Square_Pressed.png"),
+  Disabled: (Background: "Common/Buttons/Disabled.png"),
+  Sounds: $Sounds.@ButtonsLight
+);
+```
+
+**State Properties:**
+| State | Description |
+|-------|-------------|
+| `Default` | Normal appearance |
+| `Hovered` | Mouse over appearance |
+| `Pressed` | Click/active appearance |
+| `Disabled` | Inactive appearance |
+
+**Each state contains:**
+| Property | Type | Description |
+|----------|------|-------------|
+| `Background` | PatchStyle/String | Background appearance |
+
+**Additional Properties:**
+| Property | Type | Description |
+|----------|------|-------------|
+| `Sounds` | SoundStyle | Interaction sounds |
+
+## TextButtonStyle
+
+Extended button style with text label styling per state.
+
+```
+@PrimaryButtonStyle = TextButtonStyle(
+  Default: (
+    Background: PatchStyle(TexturePath: "Common/Buttons/Primary.png", Border: 12),
+    LabelStyle: (FontSize: 17, TextColor: #bfcdd5, RenderBold: true, RenderUppercase: true)
+  ),
+  Hovered: (
+    Background: PatchStyle(TexturePath: "Common/Buttons/Primary_Hovered.png", Border: 12),
+    LabelStyle: (FontSize: 17, TextColor: #bfcdd5, RenderBold: true, RenderUppercase: true)
+  ),
+  Pressed: (
+    Background: PatchStyle(TexturePath: "Common/Buttons/Primary_Pressed.png", Border: 12),
+    LabelStyle: (FontSize: 17, TextColor: #bfcdd5, RenderBold: true, RenderUppercase: true)
+  ),
+  Disabled: (
+    Background: PatchStyle(TexturePath: "Common/Buttons/Disabled.png", Border: 12),
+    LabelStyle: (FontSize: 17, TextColor: #797b7c, RenderBold: true, RenderUppercase: true)
+  ),
+  Sounds: $Sounds.@ButtonsLight
+);
+```
+
+**Each state contains:**
+| Property | Type | Description |
+|----------|------|-------------|
+| `Background` | PatchStyle | Button background |
+| `LabelStyle` | LabelStyle | Text appearance |
+
+## CheckBoxStyle
+
+Defines checkbox appearance for checked and unchecked states.
+
+```
+@CustomCheckBoxStyle = CheckBoxStyle(
+  Unchecked: (
+    DefaultBackground: (Color: #00000000),
+    HoveredBackground: (Color: #00000000),
+    PressedBackground: (Color: #00000000),
+    DisabledBackground: (Color: #424242),
+    ChangedSound: (SoundPath: "sounds/untick.ogg", Volume: 6)
+  ),
+  Checked: (
+    DefaultBackground: (TexturePath: "Common/Checkmark.png"),
+    HoveredBackground: (TexturePath: "Common/Checkmark.png"),
+    PressedBackground: (TexturePath: "Common/Checkmark.png"),
+    ChangedSound: (SoundPath: "sounds/tick.ogg", Volume: 6)
+  )
+);
+```
+
+## SliderStyle
+
+Defines slider track and handle appearance.
+
+```
+@CustomSliderStyle = SliderStyle(
+  Background: (TexturePath: "Common/SliderBackground.png", Border: 2),
+  Handle: "Common/SliderHandle.png",
+  HandleWidth: 16,
+  HandleHeight: 16,
+  Sounds: (
+    MouseHover: (SoundPath: "sounds/hover.ogg", Volume: 6)
+  )
+);
+```
+
+**Properties:**
+| Property | Type | Description |
+|----------|------|-------------|
+| `Background` | PatchStyle | Track background |
+| `Handle` | String | Handle texture path |
+| `HandleWidth` | Integer | Handle width in pixels |
+| `HandleHeight` | Integer | Handle height in pixels |
+| `Sounds` | SoundStyle | Interaction sounds |
+
+## ScrollbarStyle
+
+Defines scrollbar appearance.
+
+```
+@CustomScrollbarStyle = ScrollbarStyle(
+  Spacing: 6,
+  Size: 6,
+  Background: (TexturePath: "Common/Scrollbar.png", Border: 3),
+  Handle: (TexturePath: "Common/ScrollbarHandle.png", Border: 3),
+  HoveredHandle: (TexturePath: "Common/ScrollbarHandleHovered.png", Border: 3),
+  DraggedHandle: (TexturePath: "Common/ScrollbarHandleDragged.png", Border: 3),
+  OnlyVisibleWhenHovered: false
+);
+```
+
+**Properties:**
+| Property | Type | Description |
+|----------|------|-------------|
+| `Spacing` | Integer | Space from content edge |
+| `Size` | Integer | Scrollbar width/height |
+| `Background` | PatchStyle | Track background |
+| `Handle` | PatchStyle | Default handle |
+| `HoveredHandle` | PatchStyle | Hovered handle |
+| `DraggedHandle` | PatchStyle | Dragging handle |
+| `OnlyVisibleWhenHovered` | Boolean | Auto-hide scrollbar |
+
+## DropdownBoxStyle
+
+Comprehensive style for dropdown selections.
+
+```
+@CustomDropdownStyle = DropdownBoxStyle(
+  DefaultBackground: (TexturePath: "Common/Dropdown.png", Border: 16),
+  HoveredBackground: (TexturePath: "Common/DropdownHovered.png", Border: 16),
+  PressedBackground: (TexturePath: "Common/DropdownPressed.png", Border: 16),
+  DefaultArrowTexturePath: "Common/DropdownCaret.png",
+  HoveredArrowTexturePath: "Common/DropdownCaret.png",
+  PressedArrowTexturePath: "Common/DropdownPressedCaret.png",
+  ArrowWidth: 13,
+  ArrowHeight: 18,
+  LabelStyle: (TextColor: #96a9be, RenderUppercase: true, FontSize: 13),
+  EntryLabelStyle: (TextColor: #b7cedd),
+  SelectedEntryLabelStyle: (TextColor: #b7cedd, RenderBold: true),
+  NoItemsLabelStyle: (TextColor: #b7cedd(0.5)),
+  HorizontalPadding: 8,
+  PanelScrollbarStyle: @DefaultScrollbarStyle,
+  PanelBackground: (TexturePath: "Common/DropdownBox.png", Border: 16),
+  PanelPadding: 6,
+  PanelAlign: Right,
+  PanelOffset: 7,
+  EntryHeight: 31,
+  EntriesInViewport: 10,
+  HorizontalEntryPadding: 7,
+  HoveredEntryBackground: (Color: #0a0f17),
+  PressedEntryBackground: (Color: #0f1621),
+  Sounds: $Sounds.@DropdownBox,
+  EntrySounds: $Sounds.@ButtonsLight,
+  FocusOutlineSize: 1,
+  FocusOutlineColor: #ffffff(0.4)
+);
+```
+
+## InputFieldStyle
+
+Style for text input fields.
+
+```
+@CustomInputStyle = InputFieldStyle(
+  TextColor: #FFFFFF,
+  FontSize: 16
+);
+
+@PlaceholderStyle = InputFieldStyle(
+  TextColor: #6e7da1
+);
+```
+
+## TabNavigationStyle
+
+Defines tabbed navigation appearance.
+
+```
+@TabStyle = TabStateStyle(
+  Background: "Common/Tab.png",
+  Overlay: "Common/TabOverlay.png",
+  IconAnchor: (Width: 44, Height: 44),
+  Anchor: (Width: 82, Height: 62, Right: 5, Bottom: -14),
+  IconOpacity: 1.0
+);
+
+@NavigationStyle = TabNavigationStyle(
+  TabStyle: (
+    Default: @TabStyle,
+    Hovered: (...@TabStyle, Anchor: (...@TabAnchor, Bottom: -5)),
+    Pressed: (...@TabStyle, Anchor: (...@TabAnchor, Bottom: -8))
+  ),
+  SelectedTabStyle: (
+    Default: (...@TabStyle, Overlay: "Common/TabSelectedOverlay.png")
+  ),
+  SeparatorAnchor: (Width: 5, Height: 34),
+  SeparatorBackground: "Common/HeaderTabSeparator.png"
+);
+```
+
+## ColorPickerStyle
+
+Style for color picker elements.
+
+```
+@CustomColorPickerStyle = ColorPickerStyle(
+  OpacitySelectorBackground: "Common/ColorPickerOpacitySelectorBackground.png",
+  ButtonBackground: "Common/ColorPickerButton.png",
+  ButtonFill: "Common/ColorPickerFill.png",
+  TextFieldDecoration: (
+    Default: (
+      Background: #000000(0.5)
+    )
+  ),
+  TextFieldPadding: (Left: 7),
+  TextFieldHeight: 32
+);
+```
+
+## TextTooltipStyle
+
+Style for hover tooltips.
+
+```
+@CustomTooltipStyle = TextTooltipStyle(
+  Background: (TexturePath: "Common/TooltipDefaultBackground.png", Border: 24),
+  MaxWidth: 400,
+  LabelStyle: (Wrap: true, FontSize: 16),
+  Padding: 24
+);
+```
+
+## PopupMenuLayerStyle
+
+Style for context menus and popups.
+
+```
+@CustomPopupStyle = PopupMenuLayerStyle(
+  Background: (TexturePath: "Common/Popup.png", Border: 16),
+  Padding: 2,
+  BaseHeight: 5,
+  MaxWidth: 200,
+  TitleStyle: (RenderBold: true, RenderUppercase: true, FontSize: 13, TextColor: #ccb588),
+  TitleBackground: (TexturePath: "Common/PopupTitle.png"),
+  RowHeight: 25,
+  ItemLabelStyle: (RenderBold: true, RenderUppercase: true, FontSize: 11, TextColor: #96a9be(0.8)),
+  ItemPadding: (Vertical: 5, Horizontal: 8),
+  ItemBackground: (TexturePath: "Common/PopupItem.png"),
+  ItemIconSize: 16,
+  HoveredItemBackground: (TexturePath: "Common/HoveredPopupItem.png"),
+  PressedItemBackground: (TexturePath: "Common/PressedPopupItem.png"),
+  ItemSounds: $Sounds.@ButtonsLight
+);
+```
+
+## Using Common.ui Styles
+
+Common.ui provides pre-defined styles ready to use:
+
+```
+$C = "../Common.ui";
+
+TextButton #MyButton {
+  Style: $C.@DefaultTextButtonStyle;
+}
+
+TextField #MyInput {
+  Style: $C.@DefaultInputFieldStyle;
+  PlaceholderStyle: $C.@DefaultInputFieldPlaceholderStyle;
+}
+
+CheckBox #MyCheckbox {
+  Style: $C.@DefaultCheckBoxStyle;
+}
+
+Slider #MySlider {
+  Style: $C.@DefaultSliderStyle;
+}
+
+DropdownBox #MyDropdown {
+  Style: $C.@DefaultDropdownBoxStyle;
+}
+```
+
+## Extending Styles with Spread
+
+Use the spread operator to extend existing styles:
+
+```
+@CustomButtonLabel = LabelStyle(
+  ...$C.@DefaultButtonLabelStyle,
+  TextColor: #FF0000,
+  FontSize: 20
+);
+
+@CustomScrollbar = ScrollbarStyle(
+  ...$C.@DefaultScrollbarStyle,
+  Spacing: 12,
+  Size: 10
+);
+```
+
+## Sound Styles
+
+Sounds can be attached to interactive elements:
+
+```
+@ButtonSounds = (
+  Activating: (SoundPath: "sounds/click.ogg", Volume: 6),
+  MouseHover: (SoundPath: "sounds/hover.ogg", Volume: 4)
+);
+
+@SliderSounds = (
+  MouseHover: (SoundPath: "sounds/tick.ogg", Volume: 6)
+);
+```

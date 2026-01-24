@@ -1,4 +1,5 @@
 import { type PlayerConnectEvent, EventListener, Colors } from "@hytalejs.com/core";
+import { showScoreboardHud } from "../hud/scoreboard";
 
 export class PlayerConnectHandler {
   @EventListener("PlayerConnectEvent")
@@ -12,5 +13,7 @@ export class PlayerConnectHandler {
         .bold(true),
     );
     player.sendMessage(Message.raw("Players online: " + Universe.get().getPlayerCount()).color(Colors.GOLD));
+
+    showScoreboardHud(player);
   }
 }

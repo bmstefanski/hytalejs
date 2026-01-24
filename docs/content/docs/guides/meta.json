@@ -1,4 +1,4 @@
 {
   "title": "Guides",
-  "pages": ["events", "commands", "messages", "scheduler", "sounds", "particles", "blocks"]
+  "pages": ["events", "commands", "messages", "scheduler", "sounds", "particles", "blocks", "custom-ui"]
 }
