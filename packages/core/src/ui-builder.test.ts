@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { UIBuilder, group, label, textButton, button, textField, sprite, checkbox, slider, progressBar } from "./ui-builder";
+import { UIBuilder, group, label, textButton, button, textField, sprite, checkbox, slider, progressBar, slot } from "./ui-builder";
 
 describe("UIBuilder", () => {
   describe("basic elements", () => {
@@ -419,6 +419,36 @@ describe("UIBuilder", () => {
       const ui = group().template("$C.@Title").param("Text", '"Example Page"').param("Color", "#FFFFFF").build();
       expect(ui).toContain('@Text = "Example Page";');
       expect(ui).toContain("@Color = #FFFFFF;");
+    });
+  });
+
+  describe("slot references", () => {
+    it("should create a slot reference with just #id", () => {
+      const ui = slot("Title")
+        .children(label({ text: "Hello" }))
+        .build();
+      expect(ui).toBe('#Title {\n  Label {\n    Text: "Hello";\n  }\n}');
+    });
+
+    it("should work with template slots in decorated container", () => {
+      const ui = new UIBuilder()
+        .import("C", "../Common.ui")
+        .root(
+          group()
+            .template("$C.@DecoratedContainer")
+            .children(
+              slot("Title").children(group().template("$C.@Title").param("Text", '"My Page"')),
+              slot("Content")
+                .padding({ full: 20 })
+                .children(label({ text: "Content here" })),
+            ),
+        )
+        .build();
+      expect(ui).toContain("#Title {");
+      expect(ui).toContain("#Content {");
+      expect(ui).toContain("Padding: (Full: 20)");
+      expect(ui).not.toContain("Group #Title");
+      expect(ui).not.toContain("Group #Content");
     });
   });
 });

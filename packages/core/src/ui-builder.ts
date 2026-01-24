@@ -143,6 +143,7 @@ export class UIElement {
   protected _elementType: string;
   protected _id?: string;
   protected _template?: string;
+  protected _isSlot: boolean = false;
   protected _text?: string;
   protected _placeholder?: string;
   protected _texturePath?: string;
@@ -238,7 +239,14 @@ export class UIElement {
     const childIndent = "  ".repeat(indent + 1);
     const lines: string[] = [];
 
-    const elementHeader = this._template ? `${this._template}${this._id ? ` #${this._id}` : ""}` : `${this._elementType}${this._id ? ` #${this._id}` : ""}`;
+    let elementHeader: string;
+    if (this._isSlot && this._id) {
+      elementHeader = `#${this._id}`;
+    } else if (this._template) {
+      elementHeader = `${this._template}${this._id ? ` #${this._id}` : ""}`;
+    } else {
+      elementHeader = `${this._elementType}${this._id ? ` #${this._id}` : ""}`;
+    }
 
     lines.push(`${indentStr}${elementHeader} {`);
 
@@ -353,6 +361,17 @@ export class UIBuilder {
 
 export function group(props?: ElementProps): UIElement {
   return new UIElement("Group", props);
+}
+
+class SlotElement extends UIElement {
+  constructor(id: string) {
+    super("", { id });
+    this._isSlot = true;
+  }
+}
+
+export function slot(id: string): UIElement {
+  return new SlotElement(id);
 }
 
 export function label(props?: ElementProps): UIElement {

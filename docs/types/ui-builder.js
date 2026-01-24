@@ -106,6 +106,7 @@ export class UIElement {
     _elementType;
     _id;
     _template;
+    _isSlot = false;
     _text;
     _placeholder;
     _texturePath;
@@ -186,7 +187,16 @@ export class UIElement {
         const indentStr = "  ".repeat(indent);
         const childIndent = "  ".repeat(indent + 1);
         const lines = [];
-        const elementHeader = this._template ? `${this._template}${this._id ? ` #${this._id}` : ""}` : `${this._elementType}${this._id ? ` #${this._id}` : ""}`;
+        let elementHeader;
+        if (this._isSlot && this._id) {
+            elementHeader = `#${this._id}`;
+        }
+        else if (this._template) {
+            elementHeader = `${this._template}${this._id ? ` #${this._id}` : ""}`;
+        }
+        else {
+            elementHeader = `${this._elementType}${this._id ? ` #${this._id}` : ""}`;
+        }
         lines.push(`${indentStr}${elementHeader} {`);
         for (const [paramName, paramValue] of this._templateParams) {
             lines.push(`${childIndent}@${paramName} = ${paramValue};`);
@@ -273,6 +283,15 @@ export class UIBuilder {
 }
 export function group(props) {
     return new UIElement("Group", props);
+}
+class SlotElement extends UIElement {
+    constructor(id) {
+        super("", { id });
+        this._isSlot = true;
+    }
+}
+export function slot(id) {
+    return new SlotElement(id);
 }
 export function label(props) {
     return new UIElement("Label", props);

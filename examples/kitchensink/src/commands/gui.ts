@@ -1,5 +1,5 @@
 import type { Player, PlayerRef, Ref, Store, EntityStore, UICommandBuilder, UIEventBuilder, ScriptCustomUIPage } from "@hytalejs.com/core";
-import { UIBuilder, group, label, textButton } from "@hytalejs.com/core";
+import { UIBuilder, group, label, slot } from "@hytalejs.com/core";
 
 const EXAMPLE_PAGE_UI = new UIBuilder()
   .import("C", "../Common.ui")
@@ -13,8 +13,8 @@ const EXAMPLE_PAGE_UI = new UIBuilder()
           .template("$C.@DecoratedContainer")
           .anchor({ width: 400 })
           .children(
-            group({ id: "Title" }).children(group().template("$C.@Title").param("Text", '"Example Page"')),
-            group({ id: "Content" })
+            slot("Title").children(group().template("$C.@Title").param("Text", '"Example Page"')),
+            slot("Content")
               .padding({ vertical: 32, horizontal: 45 })
               .children(
                 label({ id: "title" }).style({ renderBold: true, textColor: "#FFFFFF" }).text("Default Title"),
@@ -22,7 +22,7 @@ const EXAMPLE_PAGE_UI = new UIBuilder()
                 group()
                   .layoutMode("Center")
                   .anchor({ top: 30 })
-                  .children(textButton({ id: "CloseButton", text: "Close" }).template("$C.@TextButton").param("Sounds", "$Sounds.@ButtonsCancel").flexWeight(1)),
+                  .children(group({ id: "CloseButton" }).template("$C.@TextButton").param("Sounds", "$Sounds.@ButtonsCancel").text("Close").flexWeight(1)),
               ),
           ),
       ),

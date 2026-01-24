@@ -55,6 +55,7 @@ export declare class UIElement {
     protected _elementType: string;
     protected _id?: string;
     protected _template?: string;
+    protected _isSlot: boolean;
     protected _text?: string;
     protected _placeholder?: string;
     protected _texturePath?: string;
@@ -95,6 +96,7 @@ export declare class UIBuilder {
     build(): string;
 }
 export declare function group(props?: ElementProps): UIElement;
+export declare function slot(id: string): UIElement;
 export declare function label(props?: ElementProps): UIElement;
 export declare function textButton(props?: ElementProps): UIElement;
 export declare function button(props?: ElementProps): UIElement;
