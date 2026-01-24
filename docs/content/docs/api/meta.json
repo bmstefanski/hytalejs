@@ -1,22 +1,4 @@
 {
   "title": "API Reference",
-  "pages": [
-    "events",
-    "entities",
-    "world",
-    "universe",
-    "inventory",
-    "math",
-    "utilities",
-    "blocks",
-    "sounds",
-    "particles",
-    "lighting",
-    "server",
-    "physics",
-    "effects",
-    "damage",
-    "components",
-    "interactions"
-  ]
+  "pages": []
 }
