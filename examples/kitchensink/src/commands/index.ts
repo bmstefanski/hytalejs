@@ -18,4 +18,4 @@ export { registerPyramidCommand } from "./pyramid";
 export { registerWallCommand } from "./wall";
 export { registerSquareCommand } from "./square";
 export { registerLongTaskCommand } from "./longtask";
-export { registerGuiCommand, registerSimpleGuiCommand, registerUpdatingGuiCommand, registerGuiAssets } from "./gui";
+export { registerGuiCommand, registerUpdatingGuiCommand, registerGuiAssets } from "./gui";

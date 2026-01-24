@@ -17,6 +17,8 @@
   ],
   "scripts": {
     "build": "rm -rf dist && tsc && cp -r dist/** ../../docs/types",
+    "test": "vitest",
+    "test:run": "vitest run",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
@@ -36,6 +38,7 @@
     "directory": "packages/core"
   },
   "devDependencies": {
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vitest": "^4.0.18"
   }
 }

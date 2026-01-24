@@ -1,50 +1,34 @@
 import type { Player, PlayerRef, Ref, Store, EntityStore, UICommandBuilder, UIEventBuilder, ScriptCustomUIPage } from "@hytalejs.com/core";
+import { UIBuilder, group, label, textButton } from "@hytalejs.com/core";
 
-const EXAMPLE_PAGE_UI = `$C = "../Common.ui";
-$Sounds = "../Sounds.ui";
-
-$C.@PageOverlay {
-  LayoutMode: Middle;
-
-  $C.@DecoratedContainer {
-    Anchor: (Width: 400);
-
-    #Title {
-      $C.@Title {
-        @Text = "Example Page";
-      }
-    }
-
-    #Content {
-      Padding: (Vertical: 32, Horizontal: 45);
-
-      Label #title {
-        Style: (RenderBold: true, TextColor: #FFFFFF);
-        Text: "Default Title";
-      }
-
-      Label #message {
-        Anchor: (Top: 20);
-        Style: (TextColor: #94a7bb);
-        Text: "Default Message";
-      }
-
-      Group {
-        LayoutMode: Center;
-        Anchor: (Top: 30);
-
-        $C.@TextButton #CloseButton {
-          @Sounds = $Sounds.@ButtonsCancel;
-          Text: "Close";
-          FlexWeight: 1;
-        }
-      }
-    }
-  }
-}
-
-$C.@BackButton {}
-`;
+const EXAMPLE_PAGE_UI = new UIBuilder()
+  .import("C", "../Common.ui")
+  .import("Sounds", "../Sounds.ui")
+  .roots(
+    group()
+      .template("$C.@PageOverlay")
+      .layoutMode("Middle")
+      .children(
+        group()
+          .template("$C.@DecoratedContainer")
+          .anchor({ width: 400 })
+          .children(
+            group({ id: "Title" }).children(group().template("$C.@Title").param("Text", '"Example Page"')),
+            group({ id: "Content" })
+              .padding({ vertical: 32, horizontal: 45 })
+              .children(
+                label({ id: "title" }).style({ renderBold: true, textColor: "#FFFFFF" }).text("Default Title"),
+                label({ id: "message" }).anchor({ top: 20 }).style({ textColor: "#94a7bb" }).text("Default Message"),
+                group()
+                  .layoutMode("Center")
+                  .anchor({ top: 30 })
+                  .children(textButton({ id: "CloseButton", text: "Close" }).template("$C.@TextButton").param("Sounds", "$Sounds.@ButtonsCancel").flexWeight(1)),
+              ),
+          ),
+      ),
+    group().template("$C.@BackButton"),
+  )
+  .build();
 
 let assetsRegistered = false;
 
@@ -109,35 +93,6 @@ export function registerGuiCommand(): void {
       ctx.sendMessage("Opening custom GUI...");
     } else {
       ctx.sendMessage("Failed to open GUI - player reference not found!");
-    }
-  });
-}
-
-export function registerSimpleGuiCommand(): void {
-  commands.register("simplegui", "Opens a simple non-interactive GUI", (ctx) => {
-    const player = ctx.getPlayer();
-    if (!player) {
-      ctx.sendMessage("This command can only be used by players!");
-      return;
-    }
-
-    const playerRef: PlayerRef = player.getPlayerRef();
-
-    const page = new ScriptCustomUIPage(
-      playerRef,
-      CustomPageLifetime.CanDismiss,
-      (ref: Ref<EntityStore>, cmd: UICommandBuilder, events: UIEventBuilder, store: Store<EntityStore>) => {
-        cmd.append("Pages/ExamplePage.ui");
-        cmd.set("#title.Text", "Information");
-        cmd.set("#message.Text", "This is a simple informational GUI.");
-      },
-    );
-
-    const pageManager = player.getPageManager();
-    const ref = playerRef.getReference();
-
-    if (ref) {
-      pageManager.openCustomPage(ref, ref.getStore(), page);
     }
   });
 }

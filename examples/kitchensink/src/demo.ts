@@ -22,12 +22,12 @@ import {
   registerSquareCommand,
   registerLongTaskCommand,
   registerGuiCommand,
-  registerSimpleGuiCommand,
   registerUpdatingGuiCommand,
   registerGuiAssets,
 } from "./commands";
 
 import { startAutoMessages } from "./schedulers/auto-messages";
+import { registerScoreboardAssets } from "./hud/scoreboard";
 
 new PlayerConnectHandler();
 new PlayerDisconnectHandler();
@@ -58,7 +58,7 @@ registerSquareCommand();
 registerLongTaskCommand();
 registerGuiAssets();
 registerGuiCommand();
-registerSimpleGuiCommand();
 registerUpdatingGuiCommand();
+registerScoreboardAssets();
 
 startAutoMessages();
