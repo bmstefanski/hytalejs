@@ -18,6 +18,10 @@ export function registerGiveItemCommand(): void {
 
     const senderName = ctx.getSenderName();
     const world = Universe.get().getDefaultWorld();
+    if (!world) {
+      ctx.sendMessage("No default world configured");
+      return;
+    }
     const players = world.getPlayers();
 
     let foundPlayer = null;

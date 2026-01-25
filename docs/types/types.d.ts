@@ -50,8 +50,8 @@ export interface PlayerInteractEvent {
     getActionType(): InteractionType;
     getItemInHand(): ItemStack;
     getTargetBlock(): Vector3i;
-    getTargetRef(): Ref;
-    getPlayerRef(): Ref;
+    getTargetRef(): Ref<EntityStore>;
+    getPlayerRef(): Ref<EntityStore>;
     getPlayer(): Player;
 }
 export interface PlayerCraftEvent {
@@ -474,6 +474,8 @@ export interface World {
     setBlock(arg0: number, arg1: number, arg2: number, arg3: string, arg4: number): void;
     setBlock(arg0: number, arg1: number, arg2: number, arg3: string): void;
     breakBlock(arg0: number, arg1: number, arg2: number, arg3: number): boolean;
+    getEntityStore(): EntityStoreWrapper;
+    execute(task: () => void): void;
 }
 export interface Universe {
     get(): Universe;
@@ -578,8 +580,10 @@ export interface BlockState {
     getBlockY(): number;
     getBlockZ(): number;
 }
-export interface Holder {
-    getComponent(arg0: ComponentType): unknown;
+export interface Holder<T = unknown> {
+    getComponent<C>(arg0: ComponentType<T, C>): C | null;
+    addComponent<C>(componentType: ComponentType<T, C>, component: C): void;
+    ensureComponent<C>(componentType: ComponentType<T, C>): void;
 }
 export interface Ref<T = unknown> {
     isValid(): boolean;
@@ -727,9 +731,10 @@ export interface ItemStackTransaction {
 }
 export interface ItemStackSlotTransaction {
 }
-export interface ComponentType {
+export interface ComponentType<S = unknown, C = unknown> {
 }
-export interface ComponentAccessor {
+export interface ComponentAccessor<S = unknown> {
+    getComponent<C>(ref: Ref<S>, componentType: ComponentType<S, C>): C | null;
 }
 export interface DisconnectReason {
 }
@@ -768,7 +773,7 @@ export interface DefaultAssetMap {
 export interface AssetStore {
     getAssetMap(): DefaultAssetMap;
 }
-export type EventType = "BootEvent" | "ShutdownEvent" | "PrepareUniverseEvent" | "PlayerConnectEvent" | "PlayerDisconnectEvent" | "PlayerChatEvent" | "PlayerReadyEvent" | "PlayerInteractEvent" | "PlayerCraftEvent" | "PlayerMouseButtonEvent" | "PlayerMouseMotionEvent" | "PlayerSetupConnectEvent" | "PlayerSetupDisconnectEvent" | "AddPlayerToWorldEvent" | "DrainPlayerFromWorldEvent" | "PlayerRefEvent" | "PlayerEvent" | "EntityEvent" | "EntityRemoveEvent" | "LivingEntityInventoryChangeEvent" | "LivingEntityUseBlockEvent" | "BreakBlockEvent" | "PlaceBlockEvent" | "DamageBlockEvent" | "UseBlockEvent" | "DropItemEvent" | "InteractivelyPickupItemEvent" | "ChangeGameModeEvent" | "CraftRecipeEvent" | "DiscoverZoneEvent" | "SwitchActiveSlotEvent" | "PlayerPermissionChangeEvent" | "GroupPermissionChangeEvent" | "PlayerGroupEvent";
+export type EventType = "BootEvent" | "ShutdownEvent" | "PrepareUniverseEvent" | "PlayerConnectEvent" | "PlayerDisconnectEvent" | "PlayerChatEvent" | "PlayerReadyEvent" | "PlayerInteractEvent" | "PlayerCraftEvent" | "PlayerMouseButtonEvent" | "PlayerMouseMotionEvent" | "PlayerSetupConnectEvent" | "PlayerSetupDisconnectEvent" | "AddPlayerToWorldEvent" | "DrainPlayerFromWorldEvent" | "PlayerRefEvent" | "PlayerEvent" | "EntityEvent" | "EntityRemoveEvent" | "LivingEntityInventoryChangeEvent" | "LivingEntityUseBlockEvent" | "BreakBlockEvent" | "PlaceBlockEvent" | "DamageBlockEvent" | "UseBlockEvent" | "DropItemEvent" | "InteractivelyPickupItemEvent" | "ChangeGameModeEvent" | "CraftRecipeEvent" | "DiscoverZoneEvent" | "SwitchActiveSlotEvent" | "PlayerPermissionChangeEvent" | "GroupPermissionChangeEvent" | "PlayerGroupEvent" | "NPCSpawnEvent" | "NPCDespawnEvent" | "NPCRoleChangeEvent" | "NPCDamageEvent" | "NPCDeathEvent";
 export type HexColor = `#${string}`;
 export declare const Colors: {
     readonly RED: HexColor;
@@ -1009,7 +1014,7 @@ export interface PlayerRef {
     getTransform(): Transform;
     getWorldUuid(): {
         toString(): string;
-    };
+    } | null;
     getHeadRotation(): Vector3f;
     updatePosition(world: World, transform: Transform, headRotation: Vector3f): void;
     getPacketHandler(): PacketHandler;
@@ -1136,7 +1141,8 @@ export interface DisplayNameComponent {
 }
 export interface TransformComponent {
     new (): TransformComponent;
-    getComponentType(): ComponentType;
+    new (position: Vector3d, rotation: Vector3f): TransformComponent;
+    getComponentType(): ComponentType<EntityStore, TransformComponent>;
     getPosition(): Vector3d;
     setPosition(position: Vector3d): void;
     teleportPosition(position: Vector3d): void;
@@ -4816,13 +4822,49 @@ export interface EntityStore {
 export interface Store<T> {
     getExternalData(): T;
     getEntityCount(): number;
-    getComponent<C>(ref: Ref<T>, componentType: ComponentType): C | null;
-    ensureAndGetComponent<C>(ref: Ref<T>, componentType: ComponentType): C;
-    addComponent<C>(ref: Ref<T>, componentType: ComponentType): C;
-    addComponent<C>(ref: Ref<T>, componentType: ComponentType, component: C): void;
-    putComponent<C>(ref: Ref<T>, componentType: ComponentType, component: C): void;
-    removeComponent<C>(ref: Ref<T>, componentType: ComponentType): void;
+    getComponent<C>(ref: Ref<T>, componentType: ComponentType<T, C>): C | null;
+    ensureAndGetComponent<C>(ref: Ref<T>, componentType: ComponentType<T, C>): C;
+    addComponent<C>(ref: Ref<T>, componentType: ComponentType<T, C>): C;
+    addComponent<C>(ref: Ref<T>, componentType: ComponentType<T, C>, component: C): void;
+    putComponent<C>(ref: Ref<T>, componentType: ComponentType<T, C>, component: C): void;
+    removeComponent<C>(ref: Ref<T>, componentType: ComponentType<T, C>): void;
     getArchetype(ref: Ref<T>): unknown;
+    addEntity(holder: Holder<T>, addReason: AddReason): Ref<T> | null;
+    removeEntity(ref: Ref<T>, removeReason: RemoveReason): void;
+    forEachChunk<C>(componentType: ComponentType<T, C>, callback: (archetypeChunk: ArchetypeChunk<T>, commandBuffer: CommandBuffer<T>) => void): void;
+    forEachEntityParallel<C>(componentType: ComponentType<T, C>, callback: (index: number, archetypeChunk: ArchetypeChunk<T>, commandBuffer: CommandBuffer<T>) => void): void;
+    getResource<R>(resourceType: ResourceType<T, R>): R;
+}
+export interface EntityStoreWrapper {
+    getStore(): Store<EntityStore>;
+}
+export interface ArchetypeChunk<T> {
+    size(): number;
+    getComponent<C>(index: number, componentType: ComponentType<T, C>): C | null;
+    getReferenceTo(index: number): Ref<T>;
+}
+export interface CommandBuffer<T> {
+    getComponent<C>(ref: Ref<T>, componentType: ComponentType<T, C>): C | null;
+    putComponent<C>(ref: Ref<T>, componentType: ComponentType<T, C>, component: C): void;
+    removeComponent<C>(ref: Ref<T>, componentType: ComponentType<T, C>): void;
+    addComponent<C>(ref: Ref<T>, componentType: ComponentType<T, C>, component: C): void;
+}
+export interface AddReason {
+    name(): string;
+}
+export interface AddReasonEnum {
+    SPAWN: AddReason;
+    LOAD: AddReason;
+    EXTERNAL: AddReason;
+    WORLDGEN: AddReason;
+}
+export interface RemoveReason {
+    name(): string;
+}
+export interface RemoveReasonEnum {
+    DESPAWN: RemoveReason;
+    UNLOAD: RemoveReason;
+    EXTERNAL: RemoveReason;
 }
 export interface Area {
     x: number;
@@ -5120,6 +5162,334 @@ export interface CommonAssetModule {
 }
 export interface CommonAssetModuleStatic {
     get(): CommonAssetModule;
+}
+export interface NPCEntity extends LivingEntity {
+    getRole(): Role | null;
+    getRoleIndex(): number;
+    getRoleName(): string | null;
+    setRoleName(roleName: string): void;
+    setRoleIndex(roleIndex: number): void;
+    getLeashPoint(): Vector3d;
+    setLeashPoint(leashPoint: Vector3d): void;
+    getLeashHeading(): number;
+    getLeashPitch(): number;
+    saveLeashInformation(position: Vector3d, rotation: Vector3f): void;
+    getAlarmStore(): AlarmStore;
+    getDamageData(): DamageData;
+    clearDamageData(): void;
+    setToDespawn(): void;
+    setDespawnTime(time: number): void;
+    getDespawnTime(): number;
+    setDespawning(despawning: boolean): void;
+    setPlayingDespawnAnim(playingDespawnAnim: boolean): void;
+    setDespawnRemainingSeconds(seconds: number): void;
+    setDespawnCheckRemainingSeconds(seconds: number): void;
+    setDespawnAnimationRemainingSeconds(seconds: number): void;
+    setInitialModelScale(scale: number): void;
+    getOldPosition(): Vector3d;
+    playAnimation(ref: Ref<EntityStore>, animationSlot: AnimationSlot, animationId: string | null, componentAccessor: ComponentAccessor<EntityStore>): void;
+    onFlockSetState(ref: Ref<EntityStore>, state: string, subState: string | null, componentAccessor: ComponentAccessor<EntityStore>): void;
+    onFlockSetTarget(targetSlot: string, target: Ref<EntityStore>): void;
+    getSpawnInstant(): unknown;
+    setSpawnInstant(instant: unknown): void;
+    getEnvironmentIndex(): number;
+    getSpawnConfigurationIndex(): number;
+    isSpawnTracked(): boolean;
+    setSpawnTracked(tracked: boolean): void;
+}
+export interface NPCEntityStatic {
+    getComponentType(): ComponentType<EntityStore, NPCEntity> | null;
+    CODEC: unknown;
+}
+export interface LivingEntity extends Entity {
+    getInventory(): Inventory;
+    setInventory(inventory: Inventory): Inventory;
+    getStatMap(): EntityStatMap | null;
+}
+export interface Role {
+    getRoleIndex(): number;
+    getRoleName(): string;
+    getCombatSupport(): CombatSupport;
+    getStateSupport(): StateSupport;
+    getMarkedEntitySupport(): MarkedEntitySupport;
+    getWorldSupport(): WorldSupport;
+    getEntitySupport(): EntitySupport;
+    getPositionCache(): PositionCache;
+    getDebugSupport(): DebugSupport;
+    isActivated(): boolean;
+    isRoleChangeRequested(): boolean;
+    canBreathe(breathingMaterial: unknown, fluidId: number): boolean;
+    requiresLeashPosition(): boolean;
+    setMarkedTarget(targetSlot: string, target: Ref<EntityStore>): void;
+    getAppearance(): string;
+    getInitialMaxHealth(): number;
+    getCollisionRadius(): number;
+    isInvulnerable(): boolean;
+    getDeathAnimationTime(): number;
+    getDespawnAnimationTime(): number;
+    getDropListId(): string;
+    getDeathInteraction(): string | null;
+    getInventorySlots(): number;
+    getHotbarSlots(): number;
+    getOffHandSlots(): number;
+    getFlockSpawnTypes(): string[] | null;
+    getFlockAllowedRoles(): string[];
+    canLeadFlock(): boolean;
+    isCorpseStaysInFlock(): boolean;
+    getInertia(): number;
+    getKnockbackScale(): number;
+    isBreathesInAir(): boolean;
+    isBreathesInWater(): boolean;
+    isPickupDropOnDeath(): boolean;
+    getBalanceAsset(): string | null;
+    getSpawnLockTime(): number;
+    getNameTranslationKey(): string;
+}
+export interface CombatSupport {
+    getCanCauseDamage(attackerRef: Ref<EntityStore>, componentAccessor: ComponentAccessor<EntityStore>): boolean;
+}
+export interface StateSupport {
+    setState(ref: Ref<EntityStore>, state: string, subState: string | null, componentAccessor: ComponentAccessor<EntityStore>): void;
+    getState(): string | null;
+    getSubState(): string | null;
+    addInteraction(ref: Ref<EntityStore>, interactionRef: Ref<EntityStore>, componentAccessor: ComponentAccessor<EntityStore>): void;
+    willInteractWith(ref: Ref<EntityStore>): boolean;
+}
+export interface MarkedEntitySupport {
+    getMarkedTarget(targetSlot: string): Ref<EntityStore> | null;
+    setMarkedTarget(targetSlot: string, target: Ref<EntityStore>): void;
+    clearMarkedTarget(targetSlot: string): void;
+    hasMarkedTarget(targetSlot: string): boolean;
+}
+export interface WorldSupport {
+    getWorld(): World;
+}
+export interface EntitySupport {
+    getDisplayName(): string | null;
+    setDisplayName(ref: Ref<EntityStore>, displayName: string, componentAccessor: ComponentAccessor<EntityStore>): void;
+}
+export interface PositionCache {
+    getPosition(): Vector3d;
+    getRotation(): Vector3f;
+}
+export interface DebugSupport {
+    isDebugEnabled(): boolean;
+    setDebugEnabled(enabled: boolean): void;
+}
+export interface AlarmStore {
+    getAlarm(alarmId: string): number;
+    setAlarm(alarmId: string, time: number): void;
+    removeAlarm(alarmId: string): void;
+    hasAlarm(alarmId: string): boolean;
+}
+export interface DamageData {
+    reset(): void;
+    getLastDamageSource(): Ref<EntityStore> | null;
+    getLastDamageAmount(): number;
+    getLastDamageTime(): number;
+    getTotalDamageReceived(): number;
+}
+export interface AnimationSlot {
+    ordinal(): number;
+    name(): string;
+}
+export interface AnimationSlotEnum {
+    Action: AnimationSlot;
+    Base: AnimationSlot;
+    Emote: AnimationSlot;
+    values(): AnimationSlot[];
+    valueOf(name: string): AnimationSlot;
+}
+export interface NPCPlugin {
+    get(): NPCPlugin;
+    getIndex(builderName: string): number;
+    getName(builderIndex: number): string | null;
+    hasRoleName(roleName: string): boolean;
+    validateSpawnableRole(roleName: string): void;
+    getRoleTemplateNames(spawnableOnly: boolean): string[];
+    tryGetCachedValidRole(roleIndex: number): Builder<Role> | null;
+    getRoleBuilderInfo(roleIndex: number): BuilderInfo | null;
+    spawnNPC(store: Store<EntityStore>, npcType: string, groupType: string | null, position: Vector3d, rotation: Vector3f): JavaPair<Ref<EntityStore>, INonPlayerCharacter> | null;
+    spawnEntity(store: Store<EntityStore>, roleIndex: number, position: Vector3d, rotation: Vector3f | null, spawnModel: Model | null, postSpawn: TriConsumer<NPCEntity, Ref<EntityStore>, Store<EntityStore>> | null): JavaPair<Ref<EntityStore>, NPCEntity> | null;
+    getBlackboardResourceType(): ResourceType<EntityStore, Blackboard>;
+    getNpcSpatialResource(): SpatialResource<EntityStore>;
+    getAttitudeMap(): AttitudeMap;
+    getItemAttitudeMap(): ItemAttitudeMap;
+    getBuilderManager(): BuilderManager;
+    getBeaconSupportComponentType(): ComponentType<EntityStore, BeaconSupport>;
+    getNpcBlockEventSupportComponentType(): ComponentType<EntityStore, NPCBlockEventSupport>;
+    getNpcEntityEventSupportComponentType(): ComponentType<EntityStore, NPCEntityEventSupport>;
+    getTimersComponentType(): ComponentType<EntityStore, Timers>;
+    getStateEvaluatorComponentType(): ComponentType<EntityStore, StateEvaluator>;
+    getValueStoreComponentType(): ComponentType<EntityStore, ValueStore>;
+}
+export interface NPCPluginStatic {
+    get(): NPCPlugin;
+    reloadNPCsWithRole(roleIndex: number): void;
+    buildRole(roleBuilder: Builder<Role>, builderInfo: BuilderInfo, builderSupport: BuilderSupport, roleIndex: number): Role;
+}
+export interface INonPlayerCharacter {
+    getRole(): Role | null;
+    getRoleIndex(): number;
+}
+export interface Builder<T> {
+    build2(builderSupport: BuilderSupport): T;
+    getBuilderParameters(): unknown;
+    category(): unknown;
+    isSpawnable(): boolean;
+}
+export interface BuilderInfo {
+    getKeyName(): string;
+    getBuilder(): Builder<unknown>;
+    isValid(): boolean;
+    isValidated(): boolean;
+    setNeedsReload(): void;
+}
+export interface BuilderSupport {
+    setScope(scope: unknown): void;
+    setGlobalScope(scope: unknown): void;
+}
+export interface BuilderManager {
+    getIndex(builderName: string): number;
+    lookupName(builderIndex: number): string | null;
+    tryGetCachedValidRole(roleIndex: number): Builder<Role> | null;
+    tryGetBuilderInfo(builderIndex: number): BuilderInfo | null;
+    getCachedBuilderInfo(roleIndex: number, category: unknown): BuilderInfo;
+    validateBuilder(builderInfo: BuilderInfo): boolean;
+    forceValidation(builderIndex: number): void;
+}
+export interface Blackboard {
+    getValue(key: string): unknown;
+    setValue(key: string, value: unknown): void;
+    hasValue(key: string): boolean;
+    removeValue(key: string): void;
+}
+export interface AttitudeMap {
+    getAttitude(groupIndex: number, targetGroupIndex: number): number;
+    getAttitudeGroupCount(): number;
+}
+export interface ItemAttitudeMap {
+    getAttitude(groupIndex: number, itemIndex: number): number;
+    getAttitudeGroupCount(): number;
+}
+export interface BeaconSupport {
+}
+export interface NPCBlockEventSupport {
+}
+export interface NPCEntityEventSupport {
+}
+export interface Timers {
+}
+export interface StateEvaluator {
+}
+export interface ValueStore {
+    getValue(key: string): unknown;
+    setValue(key: string, value: unknown): void;
+    hasValue(key: string): boolean;
+    removeValue(key: string): void;
+}
+export interface Model {
+    getId(): string;
+    getModelAssetId(): string;
+    getScale(): number;
+    getRandomAttachmentIds(): string[] | null;
+    toReference(): unknown;
+}
+export interface ModelStatic {
+    createScaledModel(modelAsset: ModelAsset, scale: number, randomAttachmentIds: string[] | null): Model;
+}
+export interface ModelAsset {
+    getId(): string;
+}
+export interface JavaPair<F, S> {
+    first(): F;
+    second(): S;
+}
+export interface JavaPairStatic {
+    of<F, S>(first: F, second: S): JavaPair<F, S>;
+}
+export type TriConsumer<A, B, C> = (a: A, b: B, c: C) => void;
+export interface ResourceType<S, R> {
+}
+export interface SpatialResource<S> {
+}
+export interface SpawningPlugin {
+    get(): SpawningPlugin;
+}
+export interface SpawningPluginStatic {
+    get(): SpawningPlugin;
+}
+export interface FlockPlugin {
+    get(): FlockPlugin;
+    trySpawnFlock(npcRef: Ref<EntityStore>, npcComponent: NPCEntity, store: Store<EntityStore>, roleIndex: number, position: Vector3d, rotation: Vector3f, flockDefinition: FlockAsset | null, postSpawn: TriConsumer<NPCEntity, Ref<EntityStore>, Store<EntityStore>> | null): void;
+}
+export interface FlockPluginStatic {
+    get(): FlockPlugin;
+    trySpawnFlock(npcRef: Ref<EntityStore>, npcComponent: NPCEntity, store: Store<EntityStore>, roleIndex: number, position: Vector3d, rotation: Vector3f, flockDefinition: FlockAsset | null, postSpawn: TriConsumer<NPCEntity, Ref<EntityStore>, Store<EntityStore>> | null): void;
+}
+export interface FlockAsset {
+    getId(): string;
+}
+export interface FlockAssetStatic {
+    getAssetMap(): IndexedLookupTableAssetMap<string, FlockAsset>;
+}
+export interface IndexedLookupTableAssetMap<K, V> {
+    getIndex(key: K): number;
+    getAsset(key: K): V | null;
+    getAssetOrDefault(index: number, defaultValue: V | null): V | null;
+}
+export interface UseNPCInteraction {
+    DEFAULT_ID: string;
+    DEFAULT_ROOT: unknown;
+}
+export interface SpawnNPCInteraction {
+}
+export interface ContextualUseNPCInteraction {
+}
+export interface NPCSpawnEvent {
+    toString(): string;
+    getNpcRef(): Ref<EntityStore>;
+    getNpcEntity(): NPCEntity;
+    getStore(): Store<EntityStore>;
+    getRoleIndex(): number;
+    getRoleName(): string;
+    getPosition(): Vector3d;
+    getRotation(): Vector3f;
+    isCancelled(): boolean;
+    setCancelled(cancelled: boolean): void;
+}
+export interface NPCDespawnEvent {
+    toString(): string;
+    getNpcRef(): Ref<EntityStore>;
+    getNpcEntity(): NPCEntity;
+    getStore(): Store<EntityStore>;
+    getRoleIndex(): number;
+    getRoleName(): string;
+}
+export interface NPCRoleChangeEvent {
+    toString(): string;
+    getNpcRef(): Ref<EntityStore>;
+    getNpcEntity(): NPCEntity;
+    getOldRoleIndex(): number;
+    getNewRoleIndex(): number;
+    getOldRoleName(): string;
+    getNewRoleName(): string;
+}
+export interface NPCDamageEvent {
+    toString(): string;
+    getNpcRef(): Ref<EntityStore>;
+    getNpcEntity(): NPCEntity;
+    getDamageSource(): Ref<EntityStore> | null;
+    getDamageAmount(): number;
+    isCancelled(): boolean;
+    setCancelled(cancelled: boolean): void;
+    setDamageAmount(amount: number): void;
+}
+export interface NPCDeathEvent {
+    toString(): string;
+    getNpcRef(): Ref<EntityStore>;
+    getNpcEntity(): NPCEntity;
+    getKillerRef(): Ref<EntityStore> | null;
 }
 declare global {
     const Java: JavaInterop;
@@ -5697,5 +6067,15 @@ declare global {
     const WhitelistListCommand: WhitelistListCommand;
     const WhitelistRemoveCommand: WhitelistRemoveCommand;
     const WhitelistStatusCommand: WhitelistStatusCommand;
+    const NPCPlugin: NPCPluginStatic;
+    const NPCEntity: NPCEntityStatic;
+    const FlockPlugin: FlockPluginStatic;
+    const FlockAsset: FlockAssetStatic;
+    const SpawningPlugin: SpawningPluginStatic;
+    const AnimationSlot: AnimationSlotEnum;
+    const Model: ModelStatic;
+    const Pair: JavaPairStatic;
+    const AddReason: AddReasonEnum;
+    const RemoveReason: RemoveReasonEnum;
 }
 //# sourceMappingURL=types.d.ts.map

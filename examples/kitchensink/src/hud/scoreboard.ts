@@ -81,7 +81,8 @@ export function showScoreboardHud(player: Player): ScriptCustomUIHud {
   const uuid = player.getUuid().toString();
   const username = playerRef.getUsername();
   const playersOnline = Universe.get().getPlayerCount();
-  const tps = Universe.get().getDefaultWorld().getTps();
+  const defaultWorld = Universe.get().getDefaultWorld();
+  const tps = defaultWorld ? defaultWorld.getTps() : 0;
 
   const existingData = playerHuds.get(uuid);
   if (existingData) {
@@ -123,7 +124,8 @@ function refreshHud(hud: ScriptCustomUIHud, player: Player): void {
   const playerRef = player.getPlayerRef();
   const username = playerRef.getUsername();
   const playersOnline = Universe.get().getPlayerCount();
-  const tps = Universe.get().getDefaultWorld().getTps();
+  const defaultWorld = Universe.get().getDefaultWorld();
+  const tps = defaultWorld ? defaultWorld.getTps() : 0;
 
   const cmd = new UICommandBuilder();
   cmd.set("#PlayerValue.Text", username);

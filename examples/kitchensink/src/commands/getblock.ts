@@ -18,6 +18,10 @@ export function registerGetBlockCommand(): void {
     }
 
     const world = Universe.get().getDefaultWorld();
+    if (!world) {
+      ctx.sendMessage("No default world configured");
+      return;
+    }
     const blockType = world.getBlockType(x, y, z);
 
     if (blockType) {

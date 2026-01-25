@@ -19,3 +19,4 @@ export { registerWallCommand } from "./wall";
 export { registerSquareCommand } from "./square";
 export { registerLongTaskCommand } from "./longtask";
 export { registerGuiCommand, registerUpdatingGuiCommand, registerGuiAssets } from "./gui";
+export { registerNpcSpawnCommand, registerNpcRolesCommand, registerNpcDespawnCommand } from "./npcspawn";

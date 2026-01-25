@@ -25,6 +25,10 @@ export function registerSetBlockCommand(): void {
     }
 
     const world = Universe.get().getDefaultWorld();
+    if (!world) {
+      ctx.sendMessage("No default world configured");
+      return;
+    }
     world.setBlock(x, y, z, blockId, rotation);
 
     ctx.sendMessage("Set block " + blockId + " at " + x + ", " + y + ", " + z);

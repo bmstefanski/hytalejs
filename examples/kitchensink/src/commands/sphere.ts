@@ -40,6 +40,10 @@ export function registerSphereCommand(): void {
     const centerZ = Math.floor(pos.getZ());
 
     const world = universe.getDefaultWorld();
+    if (!world) {
+      ctx.sendMessage("No default world configured");
+      return;
+    }
     let count = 0;
 
     for (let x = -radius; x <= radius; x++) {

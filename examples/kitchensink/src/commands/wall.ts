@@ -54,6 +54,10 @@ export function registerWallCommand(): void {
     const dirZ = Math.round(Math.cos(radians));
 
     const world = universe.getDefaultWorld();
+    if (!world) {
+      ctx.sendMessage("No default world configured");
+      return;
+    }
     let count = 0;
 
     for (let i = 0; i < length; i++) {

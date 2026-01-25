@@ -1,4 +1,4 @@
-import { PlayerConnectHandler, PlayerDisconnectHandler, PlayerChatHandler, BreakBlockHandler, PlaceBlockHandler, DamageBlockHandler } from "./events";
+import { PlayerConnectHandler, PlayerDisconnectHandler, PlayerChatHandler, BreakBlockHandler, PlaceBlockHandler, DamageBlockHandler, NPCInteractHandler } from "./events";
 
 import {
   registerHelloCommand,
@@ -24,6 +24,9 @@ import {
   registerGuiCommand,
   registerUpdatingGuiCommand,
   registerGuiAssets,
+  registerNpcSpawnCommand,
+  registerNpcRolesCommand,
+  registerNpcDespawnCommand,
 } from "./commands";
 
 import { startAutoMessages } from "./schedulers/auto-messages";
@@ -35,6 +38,7 @@ new PlayerChatHandler();
 new BreakBlockHandler();
 new PlaceBlockHandler();
 new DamageBlockHandler();
+new NPCInteractHandler();
 
 registerHelloCommand();
 registerPingCommand();
@@ -60,5 +64,8 @@ registerGuiAssets();
 registerGuiCommand();
 registerUpdatingGuiCommand();
 registerScoreboardAssets();
+registerNpcSpawnCommand();
+registerNpcRolesCommand();
+registerNpcDespawnCommand();
 
 startAutoMessages();

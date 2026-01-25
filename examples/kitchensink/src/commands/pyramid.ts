@@ -40,6 +40,10 @@ export function registerPyramidCommand(): void {
     const baseZ = Math.floor(pos.getZ());
 
     const world = universe.getDefaultWorld();
+    if (!world) {
+      ctx.sendMessage("No default world configured");
+      return;
+    }
     let count = 0;
 
     for (let layer = 0; layer < size; layer++) {

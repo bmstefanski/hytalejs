@@ -588,6 +588,24 @@ public final class ScriptBindings {
     // HytaleJS Custom UI Helpers
     new JavaTypeBinding("ScriptCustomUIPage", "com.bmstefanski.hytalejs.ScriptCustomUIPage"),
     new JavaTypeBinding("ScriptCustomUIHud", "com.bmstefanski.hytalejs.ScriptCustomUIHud"),
+
+    // NPC System
+    new JavaTypeBinding("NPCPlugin", "com.hypixel.hytale.server.npc.NPCPlugin"),
+    new JavaTypeBinding("NPCEntity", "com.hypixel.hytale.server.npc.entities.NPCEntity"),
+    new JavaTypeBinding("Role", "com.hypixel.hytale.server.npc.role.Role"),
+    new JavaTypeBinding("FlockPlugin", "com.hypixel.hytale.server.flock.FlockPlugin"),
+    new JavaTypeBinding("FlockAsset", "com.hypixel.hytale.server.flock.config.FlockAsset"),
+    new JavaTypeBinding("SpawningPlugin", "com.hypixel.hytale.server.spawning.SpawningPlugin"),
+    new JavaTypeBinding("AnimationSlot", "com.hypixel.hytale.protocol.AnimationSlot"),
+    new JavaTypeBinding("Model", "com.hypixel.hytale.server.core.asset.type.model.config.Model"),
+    new JavaTypeBinding("ModelAsset", "com.hypixel.hytale.server.core.asset.type.model.config.ModelAsset"),
+    new JavaTypeBinding("AddReason", "com.hypixel.hytale.component.AddReason"),
+    new JavaTypeBinding("RemoveReason", "com.hypixel.hytale.component.RemoveReason"),
+    new JavaTypeBinding("Pair", "com.hypixel.hytale.common.util.Pair"),
+    new JavaTypeBinding("HeadRotation", "com.hypixel.hytale.server.core.modules.entity.component.HeadRotation"),
+    new JavaTypeBinding("UUIDComponent", "com.hypixel.hytale.server.core.entity.UUIDComponent"),
+    new JavaTypeBinding("ModelComponent", "com.hypixel.hytale.server.core.modules.entity.component.ModelComponent"),
+    new JavaTypeBinding("PersistentModel", "com.hypixel.hytale.server.core.modules.entity.component.PersistentModel"),
   };
 
   private ScriptBindings() {}

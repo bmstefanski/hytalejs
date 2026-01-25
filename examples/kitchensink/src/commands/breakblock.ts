@@ -24,6 +24,10 @@ export function registerBreakBlockCommand(): void {
     }
 
     const world = Universe.get().getDefaultWorld();
+    if (!world) {
+      ctx.sendMessage("No default world configured");
+      return;
+    }
     const success = world.breakBlock(x, y, z, harvestLevel);
 
     if (success) {
